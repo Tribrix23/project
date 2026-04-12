@@ -1,8 +1,9 @@
+'use client'
 import React from 'react'
 
 const CartPage = () => {
   return (
-    <div>CartPage</div>
+    <div onClick={() => alert('clicked')}>CartPage</div>
   )
 }
 
