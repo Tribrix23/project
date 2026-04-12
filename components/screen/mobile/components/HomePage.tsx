@@ -33,7 +33,7 @@ const HomePage = () => {
       </div>
       <main className='w-full h-[80%] overflow-scroll pb-20'>
         <div className=' w-full h-[30%] mt-3 flex shrink-0 justify-center items-center flex-row select-none'>
-          <div className='bg-gray-500/30 w-[85%] h-full rounded-2xl flex flex-col pl-5 justify-center bg-cover bg-center' style={{backgroundImage: "url('/images/cardImage/2.png')"}}>
+          <div className='bg-gray-500/30 w-[85%] h-full rounded-2xl flex flex-col pl-5 justify-center bg-cover bg-center' style={{backgroundImage: "url('/images/cardImage/1.png')"}}>
             <p className={`${allura.className} text-white text-xl`} >Construco</p>
             <h1 className='text-black text-3xl font-bold'>Big Sale</h1>
             <h2 className='text-black text-lg '>Up to 50% off</h2>
