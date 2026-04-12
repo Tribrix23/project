@@ -36,7 +36,10 @@ const OptionTabs:React.FC<OTabs> = ({
             <IconBadge icon={icons} w={10} design={`${design}`} container='pb-1 pt-0' badge={badge} number={badgeNumber} size={size}/>
             <h1 className={`text-2xl font-bold ${textDesign}`}>{text}</h1>
             {showBadge && (
-                <div className='bg-orange-500  px-3 py-1 rounded-full text-white text-sm absolute right-6'>{number}</div>
+                <div className='bg-orange-500 px-3 py-1 rounded-full text-white text-sm absolute right-6'>{number}</div>
+            )}
+            {badge && badgeNumber !== undefined && !showBadge && (
+                <span className='ml-auto mr-8 px-2 py-0.5 bg-red-500 text-white text-xs font-medium rounded-full'>{badgeNumber}</span>
             )}
             <ChevronRight className={`absolute right-0 font-bold ${ChevronDesign}`}/>
         </div>

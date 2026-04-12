@@ -10,7 +10,7 @@ import CartPage from './components/CartPage'
 const MobileScreen = () => {
   const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(true)
-
+ 
   const shouldCollapse = active === 1 || active === 2
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const MobileScreen = () => {
 
   const getCircleColor = () => {
     if (active === 1) return 'bg-blue-500'
-    return 'bg-orange-500'
+    return 'bg-blue-500'
   }
 
   return (
@@ -79,7 +79,7 @@ const MobileScreen = () => {
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>
-        <div style={navStyle} className='w-full h-full absolute flex justify-center items-center pointer-events-none'>
+        <div style={navStyle} className=' w-full h-full absolute flex justify-center items-center pointer-events-none'>
           <div className="w-[85%] h-full rounded-full bg-linear-to-b from-white/40 to-white/10 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden pointer-events-auto">
             <div className="absolute inset-0 bg-linear-to-t from-transparent via-white/20 to-white/40 opacity-40 flex flex-row items-center justify-evenly"/>
             <div
