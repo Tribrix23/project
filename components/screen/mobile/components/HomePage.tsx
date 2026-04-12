@@ -12,7 +12,11 @@ const allura = Allura({
     weight: ['400'],
 });
 
-const HomePage = () => {
+type SearchNumber = {
+    SearchNum: (value: number) => void
+};
+
+const HomePage = ({ SearchNum } : SearchNumber) => {
   return (
     <>
     <div className='w-full h-[16%] flex flex-col shrink-0 select-none'>
@@ -27,7 +31,7 @@ const HomePage = () => {
               </div>
           </header>
           <div className='w-full flex justify-center h-[45%] items-center flex-row relative px-4 bg-white'>
-            <input type="text" placeholder='Search products...' className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'/>
+            <input type="text" onClick={() => SearchNum(5)} placeholder='Search products...' className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'/>
             <SearchIcon className='absolute left-10 text-gray-400' size={20}/>
             <button type="button" className='absolute right-10 font-semibold text-orange-500 text-sm'>Search</button>
           </div>
