@@ -1,10 +1,19 @@
 'use client'
 import ProductCard from '@/components/ui/ProductCard'
-import { SearchIcon, X, Clock, TrendingUp } from 'lucide-react'
-import React, { useState } from 'react'
+import { SearchIcon, X, Clock, TrendingUp, ArrowLeft } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
 
-const SearchTab = () => {
+type SearchTabProps = {
+  goBack: () => void
+}
+
+const SearchTab = ({ goBack }: SearchTabProps) => {
   const [searchQuery, setSearchQuery] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
   
   const recentSearches = ['Power Drill', 'Cement', 'Hammer', 'Safety Helmet', 'Screwdriver']
   const popularSearches = ['Building Materials', 'Hand Tools', 'Power Tools', 'Fasteners']
@@ -12,9 +21,13 @@ const SearchTab = () => {
 
   return (
     <div className='w-full h-full flex flex-col bg-white'>
-      <div className='w-full px-4 py-3 bg-white'>
-        <div className='relative'>
+      <div className='w-full px-4 py-3 bg-white flex items-center gap-3'>
+        <button onClick={goBack} className='p-2 hover:bg-gray-100 rounded-full'>
+          <ArrowLeft size={20} className='text-gray-700'/>
+        </button>
+        <div className='flex-1 relative'>
           <input 
+            ref={inputRef}
             type="text" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

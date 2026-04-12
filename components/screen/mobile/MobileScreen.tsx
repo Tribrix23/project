@@ -9,7 +9,7 @@ import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
 
 const MobileScreen = () => {
-  const [active, setActive] = useState(5)
+  const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(true)
 
   const SearchNumGet = (value: number) => {
@@ -82,7 +82,7 @@ const MobileScreen = () => {
         {active === 1 && <OrdersPage/>}
         {active === 2 && <CartPage/>}
         {active === 3 && <ProfilePage/>}
-        {active === 5 && <SearchTab/>}
+        {active === 5 && <SearchTab goBack={() => setActive(0)}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>
