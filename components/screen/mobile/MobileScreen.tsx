@@ -9,7 +9,7 @@ import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
 
 const MobileScreen = () => {
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState(5)
   const [expanded, setExpanded] = useState(true)
 
   const SearchNumGet = (value: number) => {
@@ -53,6 +53,7 @@ const MobileScreen = () => {
     opacity: shouldCollapse && !expanded ? 0 : 1,
     transformOrigin: 'right center',
     pointerEvents: shouldCollapse && !expanded ? 'none' : 'auto',
+    display: active !== 5 ? 'flex' : 'none'
   }
 
   const circleStyle: React.CSSProperties = {
