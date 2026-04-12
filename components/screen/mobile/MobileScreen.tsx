@@ -9,7 +9,7 @@ import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
 
 const MobileScreen = () => {
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState(1)
   const [expanded, setExpanded] = useState(true)
 
   const SearchNumGet = (value: number) => {
