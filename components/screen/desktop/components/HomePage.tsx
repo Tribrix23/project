@@ -77,7 +77,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 </nav>
             </div>
             
-            <div className='flex items-center gap-3 bg-[#f6f3e7] rounded-2xl px-5 py-3 w-[420px]'>
+            <div className='flex items-center gap-3 bg-[#f6f3e7] rounded-2xl px-5 py-3 w-105'>
                 <SearchIcon size={20} className='text-gray-400'/>
                 <input 
                     type="text" 
@@ -126,12 +126,12 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
       <main className='flex-1 overflow-y-auto'>
         <div className='px-8 py-8'>
             <div className='grid grid-cols-12 gap-6 mb-8'>
-                <div className='col-span-9 h-[420px] rounded-3xl overflow-hidden relative group'>
+                <div className='col-span-9 h-105 rounded-3xl overflow-hidden relative group'>
                     <div 
                         className='w-full h-full bg-cover bg-center relative' 
                         style={{backgroundImage: "url('/images/cardImage/1.png')"}}
                     >
-                        <div className='absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent'/>
+                        <div className='absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent'/>
                         <div className='absolute inset-0 flex items-center pl-16'>
                             <div className='max-w-xl'>
                                 <span className={`${allura.className} text-white/90 text-2xl`}>Welcome to</span>
@@ -147,7 +147,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 </div>
                 
                 <div className='col-span-3 flex flex-col gap-5'>
-                    <div className='bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white flex-1'>
+                    <div className='bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white flex-1'>
                         <p className={`${allura.className} text-3xl`}>New Arrivals</p>
                         <p className='text-lg mt-3 font-medium'>Discover the latest tools for your projects</p>
                         <button className='mt-6 bg-white/20 backdrop-blur text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-white/30 transition-colors flex items-center gap-2'>
@@ -210,7 +210,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 <div className='grid grid-cols-4 gap-6'>
                     {products.map(product => (
                         <div key={product.id} className='bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer group overflow-hidden'>
-                            <div className='h-56 bg-gradient-to-b from-gray-50 to-gray-100 relative'>
+                            <div className='h-56 bg-linear-to-b from-gray-50 to-gray-100 relative'>
                                 <span className='absolute top-4 left-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full'>Sale</span>
                                 <button className='absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-orange-50'>
                                     <HeartIcon size={18} className='text-gray-400 hover:text-orange-500'/>
@@ -244,7 +244,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
             
             <div className='grid grid-cols-2 gap-6 mb-10'>
                 <div className='bg-gray-900 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
-                    <div className='absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-orange-500/20 to-transparent'/>
+                    <div className='absolute right-0 top-0 w-64 h-full bg-linear-to-l from-orange-500/20 to-transparent'/>
                     <div className='relative z-10'>
                         <span className={`${allura.className} text-orange-500 text-3xl`}>Flash Sale</span>
                         <h3 className='text-4xl font-bold text-white mt-3'>Up to 70% Off</h3>
@@ -265,7 +265,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                         <div className='text-orange-500 font-bold text-lg mt-2'>OFF</div>
                     </div>
                 </div>
-                <div className='bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
+                <div className='bg-linear-to-br from-orange-500 to-orange-600 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
                     <div className='absolute -left-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full'/>
                     <div className='relative z-10'>
                         <p className='text-white/80 text-xl font-medium'>Become a Seller</p>
