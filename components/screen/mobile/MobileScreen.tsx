@@ -12,9 +12,15 @@ import Details from './components/Details'
 const MobileScreen = () => {
   const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(true)
+  const [prevActive, setPrevActive] = useState(0)
 
   const SearchNumGet = (value: number) => {
+      setPrevActive(active)
       setActive(value)
+  };
+
+  const goBackToPrev = () => {
+      setActive(prevActive)
   };
  
   const shouldCollapse = active === 1 || active === 2
@@ -83,8 +89,8 @@ const MobileScreen = () => {
         {active === 1 && <OrdersPage/>}
         {active === 2 && <CartPage/>}
         {active === 3 && <ProfilePage/>}
-        {active === 5 && <SearchTab goBack={() => setActive(0)} showDetails={() => setActive(7)}/>}
-        {active === 7 && <Details goBack={() => setActive(5)}/>}
+        {active === 5 && <SearchTab goBack={() => setActive(0)} showDetails={() => SearchNumGet(7)}/>}
+        {active === 7 && <Details goBack={goBackToPrev}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>

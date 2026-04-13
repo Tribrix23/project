@@ -74,12 +74,12 @@ const HomePage = ({ SearchNum } : SearchNumber) => {
                 <button className='text-orange-500 text-sm font-medium'>See All</button>
             </div>
             <div className='grid grid-cols-2 gap-3'>
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
+                <ProductCard onC={() => SearchNum(7)}/>
+                <ProductCard onC={() => SearchNum(7)}/>
+                <ProductCard onC={() => SearchNum(7)}/>
+                <ProductCard onC={() => SearchNum(7)}/>
+                <ProductCard onC={() => SearchNum(7)}/>
+                <ProductCard onC={() => SearchNum(7)}/>
             </div>
         </div>
       </main>
