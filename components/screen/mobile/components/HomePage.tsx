@@ -19,7 +19,7 @@ type SearchNumber = {
 const HomePage = ({ SearchNum } : SearchNumber) => {
   return (
     <>
-    <div className='w-full h-[16%] flex flex-col shrink-0 select-none'>
+    <div className='w-full h-[16%] flex flex-col shrink-0 select-none bg-gray-50'>
           <header className='w-full h-[50%] flex flex-row justify-between px-4 bg-white'>
               <div className='h-full flex flex-row items-center'>
                 <Image src='/favicon.png' width={36} height={36} alt=''/>
@@ -36,7 +36,7 @@ const HomePage = ({ SearchNum } : SearchNumber) => {
             <button type="button" className='absolute right-10 font-semibold text-orange-500 text-sm'>Search</button>
           </div>
       </div>
-      <main className='w-full h-[80%] overflow-scroll pb-20'>
+      <main className='w-full h-[80%] overflow-scroll pb-20 bg-gray-50'>
         <div className=' w-full h-[30%] mt-3 flex shrink-0 justify-center items-center flex-row select-none'>
           <div className='bg-gray-500/30 w-[85%] h-full rounded-2xl flex flex-col pl-5 justify-center bg-cover bg-center' style={{backgroundImage: "url('/images/cardImage/1.png')"}}>
             <p className={`${allura.className} text-white text-xl`} >Construco</p>
