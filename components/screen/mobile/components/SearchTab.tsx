@@ -1,6 +1,7 @@
 'use client'
 import ProductCard from '@/components/ui/ProductCard'
 import { SearchIcon, X, Clock, TrendingUp, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import React, { useState, useRef, useEffect } from 'react'
 
 type SearchTabProps = {
@@ -10,6 +11,7 @@ type SearchTabProps = {
 const SearchTab = ({ goBack }: SearchTabProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -18,6 +20,17 @@ const SearchTab = ({ goBack }: SearchTabProps) => {
   const recentSearches = ['Power Drill', 'Cement', 'Hammer', 'Safety Helmet', 'Screwdriver']
   const popularSearches = ['Building Materials', 'Hand Tools', 'Power Tools', 'Fasteners']
   const categories = ['All', 'Tools', 'Materials', 'Hardware', 'Safety', 'Electrical']
+
+  const Search = (query : string) => {
+    router.push(`/${query}`)
+  }
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      Search(searchQuery)
+    }
+  }
+
 
   return (
     <div className='w-full h-full flex flex-col bg-white'>
@@ -31,19 +44,12 @@ const SearchTab = ({ goBack }: SearchTabProps) => {
             type="text" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKey}
             placeholder='Search products...' 
             className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'
           />
           <SearchIcon className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' size={20}/>
-          {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery('')}
-              className='absolute right-14 top-1/2 -translate-y-1/2'
-            >
-              <X size={18} className='text-gray-400'/>
-            </button>
-          )}
-          <button type="button" className='absolute right-3 top-1/2 -translate-y-1/2 font-semibold text-orange-500 text-sm'>Search</button>
+          <button type="button" className='absolute right-3 top-1/2 -translate-y-1/2 font-semibold text-orange-500 text-sm' onClick={() => Search(searchQuery)}>Search</button>
         </div>
       </div>
 
