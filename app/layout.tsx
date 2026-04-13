@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Construco",
@@ -21,7 +22,7 @@ export default function RootLayout({
       lang="en"
       className={` h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children} <SpeedInsights /></body>
+      <body className="min-h-full flex flex-col">{children} <SpeedInsights /> <Analytics/></body>
     </html>
   );
 }
