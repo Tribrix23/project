@@ -10,7 +10,8 @@ type ProductCardProps = {
   rating?: number
   reviewCount?: number
   sold?: number
-  showRating?: boolean
+  showRating?: boolean,
+  onC?: () => void
 }
 
 const ProductCard = ({ 
@@ -21,10 +22,11 @@ const ProductCard = ({
   rating = 0,
   reviewCount = 0,
   sold = 0,
-  showRating = false
+  showRating = false,
+  onC
 }: ProductCardProps) => {
   return (
-    <div className='bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1'>
+    <div className='bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1' onClick={onC}>
       <div className='h-32 bg-gray-100 relative'>
         {image ? (
           <img src={image} alt={name} className='w-full h-full object-cover' />

@@ -11,7 +11,11 @@ type Product = {
   image?: string
   rating?: number
   reviewCount?: number
-  sold?: number
+  sold?: number,
+}
+
+type DisplayProductsProps = {
+  setS?: () => void
 }
 
 const mockProducts: Product[] = [
@@ -25,7 +29,7 @@ const mockProducts: Product[] = [
   { id: 8, name: 'Measuring Tape', category: 'Tools', price: '₱150', rating: 4.4, reviewCount: 167, sold: 3210 },
 ]
 
-const DisplayProducts = () => {
+const DisplayProducts = ( { setS } : DisplayProductsProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
 
@@ -94,6 +98,7 @@ const DisplayProducts = () => {
                 reviewCount={product.reviewCount}
                 sold={product.sold}
                 showRating
+                onC={setS}
               />
             ))
           ) : (
