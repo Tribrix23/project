@@ -8,11 +8,55 @@ import OrdersPage from './components/OrdersPage'
 import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
 import Details from './components/Details'
+import { createClient } from '@/lib/supabase/client'
+
+type UserData = {
+  name: string
+  email: string
+  memberSince: string
+  level: string
+}
 
 const MobileScreen = () => {
   const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(true)
   const [prevActive, setPrevActive] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userData, setUserData] = useState<UserData>({
+    name: 'Guest User',
+    email: 'guest@example.com',
+    memberSince: '2025',
+    level: 'Bronze'
+  })
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const userId = session.user.id
+        
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, middle_name, last_name')
+          .eq('id', userId)
+          .single()
+        
+        const fname = profile?.first_name || ''
+        const mname = profile?.middle_name?.[0] ? profile.middle_name[0].toUpperCase() + '.' : ''
+        const lname = profile?.last_name || ''
+        
+        const fullName = [fname, mname, lname].filter(Boolean).join(' ')
+        
+        setIsLoggedIn(true)
+        setUserData({
+          name: fullName || session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || '',
+          memberSince: new Date().getFullYear().toString(),
+          level: 'Bronze'
+        })
+      }
+    })
+  }, [supabase])
 
   const SearchNumGet = (value: number) => {
       setPrevActive(active)
@@ -52,6 +96,17 @@ const MobileScreen = () => {
     setExpanded(true)
   }
 
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    setUserData({
+      name: 'Guest User',
+      email: 'guest@example.com',
+      memberSince: '2025',
+      level: 'Bronze'
+    })
+    setActive(0)
+  }
+
   const navStyle: React.CSSProperties = {
     transition: 'all 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
     transform: shouldCollapse && !expanded 
@@ -86,11 +141,11 @@ const MobileScreen = () => {
         onClick={handleContentClick}
       >
         {active === 0 && <HomePage SearchNum={SearchNumGet}/>}
-        {active === 1 && <OrdersPage/>}
-        {active === 2 && <CartPage/>}
-        {active === 3 && <ProfilePage/>}
+        {active === 1 && <OrdersPage isLoggedIn={isLoggedIn} user={userData}/>}
+        {active === 2 && <CartPage isLoggedIn={isLoggedIn} user={userData}/>}
+        {active === 3 && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout}/>}
         {active === 5 && <SearchTab goBack={() => setActive(0)} showDetails={() => SearchNumGet(7)}/>}
-        {active === 7 && <Details goBack={goBackToPrev}/>}
+        {active === 7 && <Details goBack={goBackToPrev} isLoggedIn={isLoggedIn} user={userData}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>

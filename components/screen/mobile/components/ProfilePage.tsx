@@ -7,15 +7,30 @@ import {
   Shield, Star, Camera, ShoppingBag, FileText, LogIn
 } from 'lucide-react'
 import React from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
-const ProfilePage = () => {
-    const isLoggedIn = false
-    
-    const user = {
-      name: 'Guest User',
-      email: 'guest@example.com',
-      memberSince: '2025',
-      level: 'Bronze'
+type UserData = {
+  name: string
+  email: string
+  memberSince: string
+  level: string
+}
+
+type ProfilePageProps = {
+  isLoggedIn: boolean
+  user: UserData
+  onLogout?: () => void
+}
+
+const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
+    const router = useRouter()
+    const supabase = createClient()
+
+    const handleLogout = async () => {
+      await supabase.auth.signOut()
+      onLogout?.()
+      router.push('/')
     }
 
   return (
@@ -112,9 +127,9 @@ const ProfilePage = () => {
             <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} />
             <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
             {isLoggedIn ? (
-              <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} />
+              <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
             ) : (
-              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} />
+              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} onClick={() => router.push('/auth')} />
             )}
           </div>
         </div>

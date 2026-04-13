@@ -28,14 +28,24 @@ type Return = {
   reason: string
 }
 
+type UserData = {
+  name: string
+  email: string
+  memberSince: string
+  level: string
+}
+
+type OrdersPageProps = {
+  isLoggedIn: boolean
+  user: UserData
+}
+
 const filterOptions = ['All', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
 
-const OrdersPage = () => {
+const OrdersPage = ({ isLoggedIn, user }: OrdersPageProps) => {
     const [isOrder, setIsOrder] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [activeFilter, setActiveFilter] = useState('All')
-    
-    const isLoggedIn = false
     
     const orders: Order[] = []
     const returns: Return[] = []

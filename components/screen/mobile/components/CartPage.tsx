@@ -12,10 +12,20 @@ type CartItem = {
   image: string
 }
 
-const CartPage = () => {
+type UserData = {
+  name: string
+  email: string
+  memberSince: string
+  level: string
+}
+
+type CartPageProps = {
+  isLoggedIn: boolean
+  user: UserData
+}
+
+const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
-  
-  const isLoggedIn = false
 
   const handleIncrease = (id: number) => {
     setCartItems(items => items.map(item => 

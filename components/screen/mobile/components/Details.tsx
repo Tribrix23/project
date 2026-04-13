@@ -1,8 +1,9 @@
 'use client'
 import IconBadge from '@/components/ui/IconBadge'
-import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw } from 'lucide-react'
+import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { BsHeart, BsHeartFill } from 'react-icons/bs'
+import { useRouter } from 'next/navigation'
 
 type ProductDetails = {
   id: number
@@ -45,14 +46,33 @@ const mockReviews = [
   { id: 3, user: 'Sarah L.', rating: 4, comment: 'Good product, shipping was fast.', date: '1 month ago' },
 ]
 
-type DetailsProps = {
-  goBack?: () => void
+type UserData = {
+  name: string
+  email: string
+  memberSince: string
+  level: string
 }
 
-const Details = ({ goBack }: DetailsProps) => {
+type DetailsProps = {
+  goBack?: () => void
+  isLoggedIn?: boolean
+  user?: UserData
+}
+
+const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [quantity, setQuantity] = useState(1)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const product = mockProduct
+  const router = useRouter()
+
+  const handleRequireLogin = () => {
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true)
+      return false
+    }
+    return true
+  }
 
   return (
     <div className='h-full flex flex-col bg-white pb-5'>
@@ -74,7 +94,7 @@ const Details = ({ goBack }: DetailsProps) => {
             <ArrowLeft size={20} className='text-gray-700'/>
           </button>
           <button 
-            onClick={() => setIsWishlisted(!isWishlisted)}
+            onClick={() => { if (handleRequireLogin()) setIsWishlisted(!isWishlisted) }}
             className={`absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all hover:scale-110 ${isWishlisted ? 'text-red-500' : 'text-gray-400'}`}
           >
             <HeartIcon size={20} className={isWishlisted ? 'fill-red-500' : ''}/>
@@ -193,15 +213,49 @@ const Details = ({ goBack }: DetailsProps) => {
 
       <div className='absolute bottom-13 left-0 right-0 bg-white border-t border-gray-200 p-3 flex items-center gap-2'>
         
-        <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white font-semibold rounded-full hover:bg-gray-700 transition-colors'>
+        <button 
+          onClick={() => { if (handleRequireLogin()) { /* add to cart logic */ } }}
+          className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white font-semibold rounded-full hover:bg-gray-700 transition-colors'
+        >
           <ShoppingCart size={18}/>
           Add Cart
         </button>
         
-        <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'>
+        <button 
+          onClick={() => { if (handleRequireLogin()) { /* buy now logic */ } }}
+          className='flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'
+        >
           Buy Now
         </button>
       </div>
+
+      {showLoginPrompt && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50' onClick={() => setShowLoginPrompt(false)}>
+          <div className='bg-white rounded-2xl p-6 w-[80%] max-w-sm relative' onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setShowLoginPrompt(false)}
+              className='absolute top-4 right-4 p-1'
+            >
+              <X size={20} className='text-gray-400'/>
+            </button>
+            <div className='text-center'>
+              <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <HeartIcon size={32} className='text-orange-500'/>
+              </div>
+              <h3 className='text-lg font-bold text-gray-800 mb-2'>Login Required</h3>
+              <p className='text-sm text-gray-500 mb-6'>
+                To use this feature you must login first
+              </p>
+              <button 
+                onClick={() => { router.push('/auth') }}
+                className='w-full py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
