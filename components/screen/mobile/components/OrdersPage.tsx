@@ -52,7 +52,7 @@ const OrdersPage = () => {
       <header className='w-full h-16 bg-white flex items-center justify-between px-4 shadow-sm shrink-0 z-20'>
         <h1 className='text-xl font-bold text-gray-800'>Orders</h1>
         <div className='relative'>
-          <IconBadge icon={BellIcon} size={6} w={7} badge number={3} design="text-gray-600" color='red'/>
+          <IconBadge icon={BellIcon} size={6} w={7}  design="text-gray-600" color='red'/>
         </div>
       </header>
 
