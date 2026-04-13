@@ -1,6 +1,8 @@
 'use client'
+import IconBadge from '@/components/ui/IconBadge'
 import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw } from 'lucide-react'
 import React, { useState } from 'react'
+import { BsHeart, BsHeartFill } from 'react-icons/bs'
 
 type ProductDetails = {
   id: number
@@ -53,8 +55,8 @@ const Details = ({ goBack }: DetailsProps) => {
   const product = mockProduct
 
   return (
-    <div className='h-full flex flex-col bg-white'>
-      <div className='flex-1 overflow-scroll pb-24'>
+    <div className='h-full flex flex-col bg-white pb-5'>
+      <div className='flex-1 overflow-scroll pb-28'>
         <div className='relative'>
           <div className='h-72 bg-gray-100'>
             {product.image ? (
@@ -189,25 +191,15 @@ const Details = ({ goBack }: DetailsProps) => {
         </div>
       </div>
 
-      <div className='absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex items-center gap-3'>
-        <div className='flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-full'>
-          <button 
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className='w-8 h-8 flex items-center justify-center bg-white rounded-full text-gray-600 font-bold hover:bg-gray-200'
-          >
-            -
-          </button>
-          <span className='text-sm font-medium text-gray-800 w-6 text-center'>{quantity}</span>
-          <button 
-            onClick={() => setQuantity(quantity + 1)}
-            className='w-8 h-8 flex items-center justify-center bg-white rounded-full text-gray-600 font-bold hover:bg-gray-200'
-          >
-            +
-          </button>
-        </div>
+      <div className='absolute bottom-13 left-0 right-0 bg-white border-t border-gray-200 p-3 flex items-center gap-2'>
+        
         <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white font-semibold rounded-full hover:bg-gray-700 transition-colors'>
-          <ShoppingCart size={20}/>
-          Add to Cart
+          <ShoppingCart size={18}/>
+          Add Cart
+        </button>
+        
+        <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'>
+          Buy Now
         </button>
       </div>
     </div>

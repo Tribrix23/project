@@ -1,10 +1,11 @@
 'use client'
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
+import { IconType } from 'react-icons'
 
 interface Icons {
     design?: string
-    icon: LucideIcon,
+    icon: LucideIcon | IconType,
     badge?: boolean,
     number?: number,
     oC?: () => void,
