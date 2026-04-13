@@ -32,18 +32,21 @@ const mockProducts: Product[] = [
 ]
 
 const DisplayProducts = ({ setS }: DisplayProductsProps) => {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [inputValue, setInputValue] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const searchParams = useSearchParams();
   const search = searchParams.get('q')
   const router = useRouter()
 
   useEffect(() => {
-    setSearchQuery(search ?? '')
-  }, [])
+    setInputValue(search ?? '')
+    setSearchTerm(search ?? '')
+  }, [search])
 
   const handleSearch = () => {
-    router.push(`?q=${searchQuery}`)
+    setSearchTerm(inputValue)
+    router.push(`?q=${inputValue}`)
   }
 
   const onEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -55,8 +58,8 @@ const DisplayProducts = ({ setS }: DisplayProductsProps) => {
   const categories = ['All', 'Tools', 'Materials', 'Safety', 'Hardware', 'Electrical']
 
   const filteredProducts = mockProducts.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
     return matchesSearch && matchesCategory
   })
@@ -70,8 +73,8 @@ const DisplayProducts = ({ setS }: DisplayProductsProps) => {
         <div className='flex-1 relative'>
           <input 
             type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={onEnter}
             placeholder='Search products...' 
             className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'
