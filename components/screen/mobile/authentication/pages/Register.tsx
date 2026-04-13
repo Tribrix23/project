@@ -13,7 +13,9 @@ type RegisterProps = {
 
 const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgreed = false }: RegisterProps) => {
   const [formData, setFormData] = useState({
+    username: '',
     firstName: '',
+    middleName: '',
     lastName: '',
     email: '',
     phone: '',
@@ -38,6 +40,9 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required'
+    }
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required'
     }
@@ -97,6 +102,31 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
+          <div className='space-y-1.5'>
+            <label className='text-sm font-semibold text-gray-700'>Username</label>
+            <div className='relative'>
+              <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
+                errors.username ? 'text-red-400' : formData.username ? 'text-orange-500' : 'text-gray-400'
+              }`}>
+                <User size={20}/>
+              </div>
+              <input 
+                type="text"
+                value={formData.username}
+                onChange={(e) => handleChange('username', e.target.value)}
+                placeholder='Username'
+                className={`w-full h-14 pl-12 pr-4 bg-gray-50 border-2 rounded-2xl text-gray-800 text-base outline-none transition-all ${
+                  errors.username 
+                    ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                    : 'border-transparent focus:border-orange-500 focus:ring-4 focus:ring-orange-100 bg-gray-50'
+                }`}
+              />
+            </div>
+            {errors.username && (
+              <p className='text-red-500 text-sm ml-1'>{errors.username}</p>
+            )}
+          </div>
+
           <div className='grid grid-cols-2 gap-3'>
             <div className='space-y-1.5'>
               <label className='text-sm font-semibold text-gray-700'>First Name</label>
@@ -147,6 +177,24 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
               {errors.lastName && (
                 <p className='text-red-500 text-sm ml-1'>{errors.lastName}</p>
               )}
+            </div>
+          </div>
+
+          <div className='space-y-1.5'>
+            <label className='text-sm font-semibold text-gray-700'>Middle Name</label>
+            <div className='relative'>
+              <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
+                formData.middleName ? 'text-orange-500' : 'text-gray-400'
+              }`}>
+                <User size={20}/>
+              </div>
+              <input 
+                type="text"
+                value={formData.middleName}
+                onChange={(e) => handleChange('middleName', e.target.value)}
+                placeholder='Middle name (optional)'
+                className='w-full h-14 pl-12 pr-4 bg-gray-50 border-2 border-transparent rounded-2xl text-gray-800 text-base outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100'
+              />
             </div>
           </div>
 
