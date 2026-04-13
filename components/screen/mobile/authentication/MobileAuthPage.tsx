@@ -10,9 +10,30 @@ type MobileAuthPageProps = {
   onAuthenticated?: () => void
 }
 
+type FormData = {
+  username: string
+  firstName: string
+  middleName: string
+  lastName: string
+  email: string
+  phone: string
+  password: string
+  confirmPassword: string
+}
+
 const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
-  const [path, setPath] = useState<number>(0)
+  const [path, setPath] = useState<number>(2)
   const [termsAgreed, setTermsAgreed] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
+    username: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  })
 
   const handleTermsAgree = () => {
     setTermsAgreed(true)
@@ -50,6 +71,8 @@ const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
               termsAndServices={() => setPath(10)}
               isTermsAgreed={termsAgreed}
               onLogin={() => setPath(1)}
+              formData={formData}
+              setFormData={setFormData}
             />
         )}
         {path === 6  && (

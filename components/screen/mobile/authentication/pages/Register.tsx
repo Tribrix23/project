@@ -4,33 +4,37 @@ import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check, User, Phone } from 'lucide-r
 import { FaFacebookF, FaGoogle } from 'react-icons/fa'
 import { createClient } from '@/lib/supabase/client'
 
+type FormData = {
+  username: string
+  firstName: string
+  middleName: string
+  lastName: string
+  email: string
+  phone: string
+  password: string
+  confirmPassword: string
+}
+
 type RegisterProps = {
   onRegister?: () => void
   onGoBack?: () => void
   onLogin?: () => void
   termsAndServices?: () => void
   isTermsAgreed?: boolean
+  formData: FormData
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>
 }
 
-const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgreed = false }: RegisterProps) => {
+const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgreed = false, formData, setFormData }: RegisterProps) => {
   const supabase = createClient()
-  const [formData, setFormData] = useState({
-    username: '',
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  })
   const [showPassword, setShowPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const firstNameRef = useRef<HTMLInputElement>(null)
+  const usernameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    firstNameRef.current?.focus()
+    usernameRef.current?.focus()
   }, [])
 
   useEffect(() => {
@@ -159,6 +163,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
                 <User size={20}/>
               </div>
               <input 
+                ref={usernameRef}
                 type="text"
                 value={formData.username}
                 onChange={(e) => handleChange('username', e.target.value)}
