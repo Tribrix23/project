@@ -35,9 +35,6 @@ const ProductCard = ({
             <span className='text-gray-300 text-3xl'>📦</span>
           </div>
         )}
-        <button className='absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-gray-50 hover:scale-110 transition-all'>
-            <HeartIcon size={14} className='text-gray-400 hover:text-red-500 transition-colors'/>
-        </button>
       </div>
       <div className='p-3'>
         <p className='text-xs text-gray-500 truncate'>{category}</p>
