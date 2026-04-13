@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check } from 'lucide-react'
 import { FaFacebookF, FaGoogle } from 'react-icons/fa'
+import { createClient } from '@/lib/supabase/client'
 
 type LoginProps = {
   onLogin?: () => void
@@ -17,7 +18,10 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
   const [rememberMe, setRememberMe] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState('')
   const emailRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
 
   useEffect(() => {
     emailRef.current?.focus()
@@ -49,10 +53,24 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
     return isValid
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setAuthError('')
+    
     if (validateForm()) {
-      onLogin?.()
+      setIsLoading(true)
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        setAuthError(error.message)
+        setIsLoading(false)
+      } else {
+        onLogin?.()
+      }
     }
   }
 
@@ -159,11 +177,16 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
             </button>
           </div>
 
+          {authError && (
+            <p className='text-red-500 text-sm ml-1'>{authError}</p>
+          )}
+
           <button 
             type='submit'
-            className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98]'
+            disabled={isLoading}
+            className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed'
           >
-            Sign In
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 

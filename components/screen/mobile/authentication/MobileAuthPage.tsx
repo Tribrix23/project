@@ -1,14 +1,13 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Infos from './components/Infos'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import TermsPolicy from './pages/TermsPolicy'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
-type MobileAuthPageProps = {
-  onAuthenticated?: () => void
-}
 
 type FormData = {
   firstName: string
@@ -20,7 +19,7 @@ type FormData = {
   confirmPassword: string
 }
 
-const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
+const MobileAuthPage = () => {
   const [path, setPath] = useState<number>(0)
   const [termsAgreed, setTermsAgreed] = useState(false)
   const [formData, setFormData] = useState<FormData>({
@@ -32,6 +31,16 @@ const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
     password: '',
     confirmPassword: ''
   })
+  const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data : { session }}) => {
+      if (session) {
+        router.push('/')
+      }
+    })
+  }, [router])
 
   const handleTermsAgree = () => {
     setTermsAgreed(true)
@@ -58,6 +67,7 @@ const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
                 setPath(0)
               }}
               onRegister={() => setPath(2)}
+              onLogin={() => router.push('/')}
             />
         )}
         {path === 2  && (
