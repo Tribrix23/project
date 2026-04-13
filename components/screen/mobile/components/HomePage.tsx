@@ -26,8 +26,8 @@ const HomePage = ({ SearchNum } : SearchNumber) => {
                 <h1 className='font-bold text-black text-xl ml-2'>Constructo</h1>
               </div>
               <div className='flex items-center gap-3 pr-2'>
-                <IconBadge icon={HeartIcon} size={6} w={7} badge={true} number={2} color="orange"/>
-                <IconBadge icon={BellIcon} size={6} w={7} badge={true} number={3} color="red"/>
+                <IconBadge icon={HeartIcon} size={6} w={7} color="orange"/>
+                <IconBadge icon={BellIcon} size={6} w={7} color="red"/>
               </div>
           </header>
           <div className='w-full flex justify-center h-[45%] items-center flex-row relative px-4 bg-white'>

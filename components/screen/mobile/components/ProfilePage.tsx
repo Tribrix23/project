@@ -4,12 +4,13 @@ import Image from 'next/image'
 import { 
   Coins, LogOutIcon, MapPin, MessageSquareTextIcon, SettingsIcon, 
   StoreIcon, Ticket, User, Wallet, BellIcon, HeartIcon, HelpCircle, 
-  Shield, Star, Camera, ShoppingBag, FileText
+  Shield, Star, Camera, ShoppingBag, FileText, LogIn
 } from 'lucide-react'
 import React from 'react'
 
 const ProfilePage = () => {
-    const coins = 2
+    const isLoggedIn = false
+    
     const user = {
       name: 'Guest User',
       email: 'guest@example.com',
@@ -59,18 +60,18 @@ const ProfilePage = () => {
               <div className='flex-1 bg-orange-50 rounded-xl p-3 text-center'>
                 <div className='flex items-center justify-center gap-1 mb-1'>
                   <Coins className='text-yellow-500' size={18} />
-                  <span className='text-xl font-bold text-gray-800'>{coins}</span>
+                  <span className='text-xl font-bold text-gray-800'>0</span>
                 </div>
                 <p className='text-xs text-gray-500'>Coins</p>
               </div>
               <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
                 <HeartIcon className='text-red-400 mx-auto mb-1' size={18} />
-                <span className='text-xl font-bold text-gray-800'>12</span>
+                <span className='text-xl font-bold text-gray-800'>0</span>
                 <p className='text-xs text-gray-500'>Wishlist</p>
               </div>
               <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
                 <Ticket className='text-purple-500 mx-auto mb-1' size={18} />
-                <span className='text-xl font-bold text-gray-800'>5</span>
+                <span className='text-xl font-bold text-gray-800'>0</span>
                 <p className='text-xs text-gray-500'>Coupons</p>
               </div>
             </div>
@@ -90,7 +91,7 @@ const ProfilePage = () => {
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Shopping</p>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={ShoppingBag} text='My Orders' borderDown={true} showBadge={true} number={3} />
+            <OptionTabs icons={ShoppingBag} text='My Orders' borderDown={true} />
             <OptionTabs icons={HeartIcon} text='Wishlist' borderDown={true} />
             <OptionTabs icons={Ticket} text='Coupons' borderDown={true} />
             <OptionTabs icons={Star} text='Reviews' borderDown={false} />
@@ -109,8 +110,12 @@ const ProfilePage = () => {
         <div className='py-2 space-y-1'>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
             <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} />
-            <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true} badge={true} badgeNumber={2} />
-            <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} />
+            <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
+            {isLoggedIn ? (
+              <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} />
+            ) : (
+              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} />
+            )}
           </div>
         </div>
 

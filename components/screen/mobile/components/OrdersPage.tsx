@@ -2,7 +2,7 @@
 import IconBadge from '@/components/ui/IconBadge'
 import OrderCard, { OrderItem } from '@/components/ui/OrderCard'
 import ReturnCard from '@/components/ui/ReturnCard'
-import { BellIcon, Package, Clock, Search, X, RotateCcw } from 'lucide-react'
+import { BellIcon, Package, Clock, Search, X, RotateCcw, LogIn } from 'lucide-react'
 import React, {useState} from 'react'
 
 type Order = {
@@ -28,71 +28,17 @@ type Return = {
   reason: string
 }
 
-const orders: Order[] = [
-  { 
-    id: 'ORD-001', 
-    date: 'Apr 10, 2026', 
-    status: 'Delivered', 
-    total: 400, 
-    items: [
-      { name: 'Professional Hammer', price: 3500, image: '/images/hammer.png' },
-      { name: 'Safety Helmet', price: 2000, image: '/images/hat.png' }
-    ],
-    shippingAddress: '123 Main St, Manila',
-    paymentMethod: 'GCash'
-  },
-  { 
-    id: 'ORD-002', 
-    date: 'Apr 8, 2026', 
-    status: 'Shipped', 
-    total: 3200, 
-    progress: 66,
-    trackingNumber: 'TRK-2026-002',
-    estimatedDelivery: 'Apr 14, 2026',
-    items: [
-      { name: 'Cordless Drill Set', price: 3200, image: '/images/drill.png' }
-    ],
-    shippingAddress: '456 Oak Ave, Quezon City',
-    paymentMethod: 'Credit Card'
-  },
-  { 
-    id: 'ORD-003', 
-    date: 'Apr 5, 2026', 
-    status: 'Processing', 
-    total: 1250, 
-    progress: 25,
-    items: [
-      { name: 'Screwdriver Set', price: 450, image: '/images/screw.png' },
-      { name: 'Tape Measure', price: 400, image: '/images/hammer.png' },
-      { name: 'Level Tool', price: 400, image: '/images/hammer.png' }
-    ],
-    shippingAddress: '789 Pine Rd, Makati',
-    paymentMethod: 'Cash on Delivery'
-  },
-  { 
-    id: 'ORD-004', 
-    date: 'Apr 2, 2026', 
-    status: 'Delivered', 
-    total: 8900, 
-    items: [
-      { name: 'Power Drill', price: 8900, image: '/images/drill.png' }
-    ],
-    shippingAddress: '321 Elm St, Tagaytay',
-    paymentMethod: 'GCash'
-  },
-]
-
-const returns: Return[] = [
-  { id: 'RET-001', date: 'Apr 9, 2026', status: 'Pending', item: 'Cordless Drill', amount: 3200, image: '/images/drill.png', reason: 'Defective product' },
-  { id: 'RET-002', date: 'Apr 1, 2026', status: 'Approved', item: 'Safety Helmet', amount: 450, image: '/images/hat.png', reason: 'Wrong item delivered' },
-]
-
 const filterOptions = ['All', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
 
 const OrdersPage = () => {
     const [isOrder, setIsOrder] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [activeFilter, setActiveFilter] = useState('All')
+    
+    const isLoggedIn = false
+    
+    const orders: Order[] = []
+    const returns: Return[] = []
     
     const filteredOrders = orders.filter(o => {
       const matchesSearch = o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -158,7 +104,15 @@ const OrdersPage = () => {
       )}
 
       <main className='flex-1 overflow-scroll px-4 pb-44'>
-        {isOrder ? (
+        {!isLoggedIn ? (
+          <div className='flex flex-col items-center justify-center py-16 text-center'>
+            <div className='w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+              <LogIn size={40} className='text-gray-300' />
+            </div>
+            <p className='text-gray-500 font-medium text-base'>Login to view your orders</p>
+            <p className='text-gray-400 text-sm mt-1'>Please login first to order something</p>
+          </div>
+        ) : isOrder ? (
           <div className='space-y-3 pt-3'>
             {filteredOrders.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-16 text-center'>

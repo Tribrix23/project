@@ -1,6 +1,6 @@
 'use client'
 import CartCard from '@/components/ui/CartCard'
-import { ShoppingBag } from 'lucide-react'
+import { ShoppingBag, LogIn } from 'lucide-react'
 import React, { useState } from 'react'
 
 type CartItem = {
@@ -12,14 +12,10 @@ type CartItem = {
   image: string
 }
 
-const initialCartItems: CartItem[] = [
-  { id: 1, name: 'Professional Hammer', category: 'Tools', price: 5500, quantity: 1, image: '/images/hammer.png' },
-  { id: 2, name: 'Cordless Drill Set', category: 'Power Tools', price: 3200, quantity: 2, image: '/images/drill.png' },
-  { id: 3, name: 'Safety Helmet', category: 'Safety', price: 450, quantity: 3, image: '/images/hat.png' },
-]
-
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  
+  const isLoggedIn = true
 
   const handleIncrease = (id: number) => {
     setCartItems(items => items.map(item => 
@@ -51,7 +47,15 @@ const CartPage = () => {
       </header>
 
       <main className='flex-1 overflow-scroll p-4 pb-32'>
-        {cartItems.length === 0 ? (
+        {!isLoggedIn ? (
+          <div className='flex flex-col items-center justify-center py-16 text-center'>
+            <div className='w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+              <LogIn size={40} className='text-gray-300' />
+            </div>
+            <p className='text-gray-500 font-medium text-base'>Login to view your cart</p>
+            <p className='text-gray-400 text-sm mt-1'>Please login first to add items</p>
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-16 text-center'>
             <div className='w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
               <ShoppingBag size={40} className='text-gray-300' />
