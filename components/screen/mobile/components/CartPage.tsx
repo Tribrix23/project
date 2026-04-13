@@ -15,7 +15,7 @@ type CartItem = {
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   
-  const isLoggedIn = true
+  const isLoggedIn = false
 
   const handleIncrease = (id: number) => {
     setCartItems(items => items.map(item => 
