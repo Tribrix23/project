@@ -95,41 +95,25 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
     phone
   } = formData
 
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        first_name: firstName,
+        middle_name: middleName,
+        last_name: lastName,
+        phone: phone,
+      }
+    }
   })
 
   if (error) {
     alert(error.message)
     return
   }
-  console.log("SIGNUP TRIGGERED")
 
-  const user = data.user
-
-  if (!user) {
-    alert('Check your email to confirm account')
-    return
-  }
-
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: user.id,
-    first_name: firstName,
-    middle_name: middleName,
-    last_name: lastName,
-    phone,
-  })
-
-  if (profileError) {
-    console.log(profileError)
-    alert('Profile save failed')
-    return
-  }
-
-  alert('Account created successfully!')
-
-  onRegister?.()
+  alert('Check your email to confirm your account')
 }
 
   return (
