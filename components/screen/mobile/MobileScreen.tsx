@@ -10,7 +10,7 @@ import SearchTab from './components/SearchTab'
 import Details from './components/Details'
 
 const MobileScreen = () => {
-  const [active, setActive] = useState(5)
+  const [active, setActive] = useState(0)
   const [expanded, setExpanded] = useState(true)
 
   const SearchNumGet = (value: number) => {
