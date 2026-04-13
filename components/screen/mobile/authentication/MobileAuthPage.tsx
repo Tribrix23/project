@@ -38,6 +38,7 @@ const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
                 setTermsAgreed(false)
                 setPath(0)
               }}
+              onRegister={() => setPath(2)}
             />
         )}
         {path === 2  && (
@@ -48,6 +49,7 @@ const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
               }} 
               termsAndServices={() => setPath(10)}
               isTermsAgreed={termsAgreed}
+              onLogin={() => setPath(1)}
             />
         )}
         {path === 6  && (

@@ -83,7 +83,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   }
 
   return (
-    <div className='w-full h-full flex flex-col bg-white'>
+    <div className='w-full h-full flex flex-col bg-white pb-13'>
       <div className='w-full px-4 pt-4 pb-2'>
         <button onClick={onGoBack} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
           <ArrowLeft size={24} className='text-gray-700'/>
@@ -328,7 +328,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
         </div>
       </div>
 
-      <div className='w-full px-6 py-6 bg-gray-50 border-t border-gray-100'>
+      <div className='w-full px-6 py-6 bg-white border-t border-gray-100'>
         <p className='text-center text-gray-600'>
           Already have an account?{' '}
           <button 

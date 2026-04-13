@@ -184,7 +184,7 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
         </div>
       </div>
 
-      <div className='w-full px-6 py-6 bg-gray-50 border-t border-gray-100'>
+      <div className='w-full px-6 py-6 bg-white border-t border-gray-100 pb-40'>
         <p className='text-center text-gray-600'>
           Don't have an account?{' '}
           <button 
