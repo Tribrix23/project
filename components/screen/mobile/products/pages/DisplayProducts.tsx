@@ -1,7 +1,9 @@
 'use client'
 import ProductCard from '@/components/ui/ProductCard'
-import { SearchIcon, X } from 'lucide-react'
-import React, { useState } from 'react'
+import { ArrowLeft, SearchIcon, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 type Product = {
   id: number
@@ -15,7 +17,7 @@ type Product = {
 }
 
 type DisplayProductsProps = {
-  setS?: () => void
+  setS?: () => void,
 }
 
 const mockProducts: Product[] = [
@@ -29,9 +31,26 @@ const mockProducts: Product[] = [
   { id: 8, name: 'Measuring Tape', category: 'Tools', price: '₱150', rating: 4.4, reviewCount: 167, sold: 3210 },
 ]
 
-const DisplayProducts = ( { setS } : DisplayProductsProps) => {
+const DisplayProducts = ({ setS }: DisplayProductsProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const searchParams = useSearchParams();
+  const search = searchParams.get('q')
+  const router = useRouter()
+
+  useEffect(() => {
+    setSearchQuery(search ?? '')
+  }, [])
+
+  const handleSearch = () => {
+    router.push(`?q=${searchQuery}`)
+  }
+
+  const onEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if(e.key === 'Enter') {
+      handleSearch()
+    }
+  }
 
   const categories = ['All', 'Tools', 'Materials', 'Safety', 'Hardware', 'Electrical']
 
@@ -45,24 +64,20 @@ const DisplayProducts = ( { setS } : DisplayProductsProps) => {
   return (
     <div className='w-full h-full flex flex-col bg-white'>
       <div className='w-full px-4 py-3 bg-white flex items-center gap-3 sticky top-0 z-10'>
+        <button onClick={() => router.push('/')} className='p-2 hover:bg-gray-100 rounded-full'>
+          <ArrowLeft size={20} className='text-gray-700'/>
+        </button>
         <div className='flex-1 relative'>
           <input 
             type="text" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={onEnter}
             placeholder='Search products...' 
             className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'
           />
           <SearchIcon className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' size={20}/>
-          {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery('')}
-              className='absolute right-14 top-1/2 -translate-y-1/2'
-            >
-              <X size={18} className='text-gray-400'/>
-            </button>
-          )}
-          <button type="button" className='absolute right-3 top-1/2 -translate-y-1/2 font-semibold text-orange-500 text-sm'>Search</button>
+          <button type="button" className='absolute right-3 top-1/2 -translate-y-1/2 font-semibold text-orange-500 text-sm' onClick={handleSearch}>Search</button>
         </div>
       </div>
 

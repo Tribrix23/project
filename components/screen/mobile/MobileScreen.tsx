@@ -7,6 +7,7 @@ import ProfilePage from './components/ProfilePage'
 import OrdersPage from './components/OrdersPage'
 import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
+import Details from './components/Details'
 
 const MobileScreen = () => {
   const [active, setActive] = useState(5)
@@ -53,7 +54,7 @@ const MobileScreen = () => {
     opacity: shouldCollapse && !expanded ? 0 : 1,
     transformOrigin: 'right center',
     pointerEvents: shouldCollapse && !expanded ? 'none' : 'auto',
-    display: active !== 5 ? 'flex' : 'none'
+    display: [5, 7].includes(active) ? 'none' : 'flex'
   }
 
   const circleStyle: React.CSSProperties = {
@@ -82,7 +83,8 @@ const MobileScreen = () => {
         {active === 1 && <OrdersPage/>}
         {active === 2 && <CartPage/>}
         {active === 3 && <ProfilePage/>}
-        {active === 5 && <SearchTab goBack={() => setActive(0)}/>}
+        {active === 5 && <SearchTab goBack={() => setActive(0)} showDetails={() => setActive(7)}/>}
+        {active === 7 && <Details goBack={() => setActive(5)}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>

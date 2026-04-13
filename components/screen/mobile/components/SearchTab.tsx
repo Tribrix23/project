@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import React, { useState, useRef, useEffect } from 'react'
 
 type SearchTabProps = {
-  goBack: () => void
+  goBack: () => void,
+  showDetails: () => void
 }
 
-const SearchTab = ({ goBack }: SearchTabProps) => {
+const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -22,7 +23,7 @@ const SearchTab = ({ goBack }: SearchTabProps) => {
   const categories = ['All', 'Tools', 'Materials', 'Hardware', 'Safety', 'Electrical']
 
   const Search = (query : string) => {
-    router.push(`/${query}`)
+    router.push(`/search?q=${query}`)
   }
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -110,10 +111,10 @@ const SearchTab = ({ goBack }: SearchTabProps) => {
         <div className='mb-3'>
           <h3 className='text-base font-bold text-gray-800 mb-3'>Popular Products</h3>
           <div className='grid grid-cols-2 gap-3'>
-            <ProductCard/>
-            <ProductCard/>
-            <ProductCard/>
-            <ProductCard/>
+            <ProductCard onC={showDetails}/>
+            <ProductCard onC={showDetails}/>
+            <ProductCard onC={showDetails}/>
+            <ProductCard onC={showDetails}/>
           </div>
         </div>
       </div>
