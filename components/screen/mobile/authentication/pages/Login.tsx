@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, User, Lock, Eye, EyeOff, Check } from 'lucide-react'
+import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check } from 'lucide-react'
 import { FaFacebookF, FaGoogle } from 'react-icons/fa'
 
 type LoginProps = {
@@ -11,26 +11,29 @@ type LoginProps = {
 }
 
 const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) => {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [usernameError, setUsernameError] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
-  const usernameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    usernameRef.current?.focus()
+    emailRef.current?.focus()
   }, [])
 
   const validateForm = () => {
     let isValid = true
     
-    if (!username.trim()) {
-      setUsernameError('Username is required')
+    if (!email.trim()) {
+      setEmailError('Email is required')
+      isValid = false
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Please enter a valid email')
       isValid = false
     } else {
-      setUsernameError('')
+      setEmailError('')
     }
 
     if (!password.trim()) {
@@ -69,31 +72,31 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
 
         <form onSubmit={handleSubmit} className='space-y-5'>
           <div className='space-y-1.5'>
-            <label className='text-sm font-semibold text-gray-700'>Username</label>
+            <label className='text-sm font-semibold text-gray-700'>Email Address</label>
             <div className='relative'>
               <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
-                usernameError ? 'text-red-400' : username ? 'text-orange-500' : 'text-gray-400'
+                emailError ? 'text-red-400' : email ? 'text-orange-500' : 'text-gray-400'
               }`}>
-                <User size={20}/>
+                <Mail size={20}/>
               </div>
               <input 
-                ref={usernameRef}
+                ref={emailRef}
                 type="text"
-                value={username}
+                value={email}
                 onChange={(e) => {
-                  setUsername(e.target.value)
-                  if (usernameError) setUsernameError('')
+                  setEmail(e.target.value)
+                  if (emailError) setEmailError('')
                 }}
-                placeholder='Username'
+                placeholder='name@example.com'
                 className={`w-full h-14 pl-12 pr-4 bg-gray-50 border-2 rounded-2xl text-gray-800 text-base outline-none transition-all ${
-                  usernameError 
+                  emailError 
                     ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
                     : 'border-transparent focus:border-orange-500 focus:ring-4 focus:ring-orange-100 bg-gray-50'
                 }`}
               />
             </div>
-            {usernameError && (
-              <p className='text-red-500 text-sm ml-1'>{usernameError}</p>
+            {emailError && (
+              <p className='text-red-500 text-sm ml-1'>{emailError}</p>
             )}
           </div>
 

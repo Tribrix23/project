@@ -11,7 +11,6 @@ type MobileAuthPageProps = {
 }
 
 type FormData = {
-  username: string
   firstName: string
   middleName: string
   lastName: string
@@ -22,10 +21,9 @@ type FormData = {
 }
 
 const MobileAuthPage = ({ onAuthenticated }: MobileAuthPageProps) => {
-  const [path, setPath] = useState<number>(2)
+  const [path, setPath] = useState<number>(0)
   const [termsAgreed, setTermsAgreed] = useState(false)
   const [formData, setFormData] = useState<FormData>({
-    username: '',
     firstName: '',
     middleName: '',
     lastName: '',

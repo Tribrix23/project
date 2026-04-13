@@ -5,7 +5,6 @@ import { FaFacebookF, FaGoogle } from 'react-icons/fa'
 import { createClient } from '@/lib/supabase/client'
 
 type FormData = {
-  username: string
   firstName: string
   middleName: string
   lastName: string
@@ -31,10 +30,9 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const firstNameRef = useRef<HTMLInputElement>(null)
-  const usernameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    usernameRef.current?.focus()
+    firstNameRef.current?.focus()
   }, [])
 
   useEffect(() => {
@@ -46,9 +44,6 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
-    if (!formData.username.trim()) {
-      newErrors.username = 'Username is required'
-    }
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required'
     }
@@ -94,7 +89,6 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   const {
     email,
     password,
-    username,
     firstName,
     middleName,
     lastName,
@@ -121,7 +115,6 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
 
   const { error: profileError } = await supabase.from('profiles').insert({
     id: user.id,
-    username,
     first_name: firstName,
     middle_name: middleName,
     last_name: lastName,
@@ -154,32 +147,6 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='space-y-1.5'>
-            <label className='text-sm font-semibold text-gray-700'>Username</label>
-            <div className='relative'>
-              <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
-                errors.username ? 'text-red-400' : formData.username ? 'text-orange-500' : 'text-gray-400'
-              }`}>
-                <User size={20}/>
-              </div>
-              <input 
-                ref={usernameRef}
-                type="text"
-                value={formData.username}
-                onChange={(e) => handleChange('username', e.target.value)}
-                placeholder='Username'
-                className={`w-full h-14 pl-12 pr-4 bg-gray-50 border-2 rounded-2xl text-gray-800 text-base outline-none transition-all ${
-                  errors.username 
-                    ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
-                    : 'border-transparent focus:border-orange-500 focus:ring-4 focus:ring-orange-100 bg-gray-50'
-                }`}
-              />
-            </div>
-            {errors.username && (
-              <p className='text-red-500 text-sm ml-1'>{errors.username}</p>
-            )}
-          </div>
-
           <div className='grid grid-cols-2 gap-3'>
             <div className='space-y-1.5'>
               <label className='text-sm font-semibold text-gray-700'>First Name</label>
