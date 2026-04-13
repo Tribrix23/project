@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check, User, Phone } from 'lucide-react'
 import { FaFacebookF, FaGoogle } from 'react-icons/fa'
+import { createClient } from '@/lib/supabase/client'
 
 type RegisterProps = {
   onRegister?: () => void
@@ -12,6 +13,7 @@ type RegisterProps = {
 }
 
 const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgreed = false }: RegisterProps) => {
+  const supabase = createClient()
   const [formData, setFormData] = useState({
     username: '',
     firstName: '',
@@ -80,12 +82,58 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (validateForm()) {
-      onRegister?.()
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  if (!validateForm()) return
+
+  const {
+    email,
+    password,
+    username,
+    firstName,
+    middleName,
+    lastName,
+    phone
+  } = formData
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (error) {
+    alert(error.message)
+    return
   }
+  console.log("SIGNUP TRIGGERED")
+
+  const user = data.user
+
+  if (!user) {
+    alert('Check your email to confirm account')
+    return
+  }
+
+  const { error: profileError } = await supabase.from('profiles').insert({
+    id: user.id,
+    username,
+    first_name: firstName,
+    middle_name: middleName,
+    last_name: lastName,
+    phone,
+  })
+
+  if (profileError) {
+    console.log(profileError)
+    alert('Profile save failed')
+    return
+  }
+
+  alert('Account created successfully!')
+
+  onRegister?.()
+}
 
   return (
     <div className='w-full h-full flex flex-col bg-white pb-13'>
