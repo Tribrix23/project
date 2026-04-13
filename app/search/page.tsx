@@ -1,6 +1,7 @@
 import MobileProductScreen from '@/components/screen/mobile/products/MobileProductScreen'
 import Image from 'next/image'
 import React, { Suspense } from 'react'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const LoadingFallback = () => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-orange-500 gap-3">
