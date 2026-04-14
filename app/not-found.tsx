@@ -6,7 +6,7 @@ import { HomeIcon, ArrowLeftIcon } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-linear-to-br from-orange-400 via-orange-500 to-orange-600 text-white">
       <div className="relative z-10 flex flex-col items-center text-center px-6">
         <div className="relative mb-8">
           <Image
