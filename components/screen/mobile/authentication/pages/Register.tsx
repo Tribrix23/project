@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check, User, Phone } from 'lucide-react'
+import { ArrowLeft, Mail, Lock, Eye, EyeOff, Check, User, Phone, X, CheckCircle, AlertCircle } from 'lucide-react'
 import { FaFacebookF, FaGoogle } from 'react-icons/fa'
 import { createClient } from '@/lib/supabase/client'
 
@@ -29,6 +29,8 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   const [showPassword, setShowPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [popup, setPopup] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const firstNameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -82,39 +84,63 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  if (!validateForm()) return
+    if (!validateForm()) return
 
-  const {
-    email,
-    password,
-    firstName,
-    middleName,
-    lastName,
-    phone
-  } = formData
+    setIsLoading(true)
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
-        phone: phone,
+    const {
+      email,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      phone
+    } = formData
+
+    try {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'dummy_password_to_check_if_user_exists_123456'
+      })
+
+      if (signInData?.user) {
+        setIsLoading(false)
+        setPopup({ type: 'error', message: 'An account with this email already exists' })
+        return
       }
+
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
+            phone: phone,
+          }
+        }
+      })
+
+      setIsLoading(false)
+
+      if (signUpError) {
+        setPopup({ type: 'error', message: signUpError.message })
+        return
+      }
+
+      if (data?.user) {
+        setPopup({ type: 'success', message: 'Check your email to confirm your account' })
+      } else {
+        setPopup({ type: 'error', message: 'An account with this email already exists' })
+      }
+    } catch (err: any) {
+      setIsLoading(false)
+      setPopup({ type: 'error', message: err.message || 'An error occurred' })
     }
-  })
-
-  if (error) {
-    alert(error.message)
-    return
   }
-
-  alert('Check your email to confirm your account')
-}
 
   return (
     <div className='w-full h-full flex flex-col bg-white pb-13'>
@@ -357,9 +383,10 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
 
           <button 
             type='submit'
-            className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98]'
+            disabled={isLoading}
+            className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed'
           >
-            Create Account
+            {isLoading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
@@ -391,6 +418,36 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
           </button>
         </p>
       </div>
+
+      {isLoading && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-6 flex flex-col items-center gap-4 mx-8'>
+            <div className='w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin'/>
+            <p className='text-gray-700 font-medium'>Please wait...</p>
+          </div>
+        </div>
+      )}
+
+      {popup && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-6 flex flex-col items-center gap-4 mx-8 max-w-sm'>
+            {popup.type === 'success' ? (
+              <CheckCircle size={48} className='text-green-500'/>
+            ) : (
+              <AlertCircle size={48} className='text-red-500'/>
+            )}
+            <p className={`text-gray-700 font-medium text-center ${popup.type === 'error' ? 'text-red-500' : ''}`}>
+              {popup.message}
+            </p>
+            <button 
+              onClick={() => setPopup(null)}
+              className='w-full h-12 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors'
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
