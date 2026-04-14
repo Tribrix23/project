@@ -100,12 +100,11 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
     } = formData
 
     try {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'dummy_password_to_check_if_user_exists_123456'
+      const { data: exists } = await supabase.rpc("email_exists", {
+        check_email: email,
       })
 
-      if (signInData?.user) {
+      if (exists) {
         setIsLoading(false)
         setPopup({ type: 'error', message: 'An account with this email already exists' })
         return
