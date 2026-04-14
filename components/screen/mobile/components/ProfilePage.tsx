@@ -93,6 +93,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           </div>
         </div>
 
+        {isLoggedIn && (
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Account</p>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
@@ -102,7 +103,9 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
             <OptionTabs icons={BellIcon} text='Notifications' borderDown={false} />
           </div>
         </div>
+        )}
 
+        {isLoggedIn && (
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Shopping</p>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
@@ -112,6 +115,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
             <OptionTabs icons={Star} text='Reviews' borderDown={false} />
           </div>
         </div>
+        )}
 
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Support</p>
@@ -122,17 +126,23 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           </div>
         </div>
 
-        <div className='py-2 space-y-1'>
-          <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} />
-            <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
-            {isLoggedIn ? (
+        {isLoggedIn && (
+          <div className='py-2 space-y-1'>
+            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+              <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} />
+              <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
               <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
-            ) : (
-              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} onClick={() => router.push('/auth')} />
-            )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {!isLoggedIn && (
+          <div className='py-2 space-y-1'>
+            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} onClick={() => router.push('/auth')} />
+            </div>
+          </div>
+        )}
 
         <div className='py-6 text-center'>
           <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
