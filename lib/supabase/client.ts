@@ -17,10 +17,13 @@ export const createClient = () => {
         },
         setAll(cookiesToSet) {
           if (typeof document === 'undefined') return
+          const isProduction = process.env.NODE_ENV === 'production'
+          const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
           cookiesToSet.forEach(({ name, value, options }) => {
             const maxAge = options?.maxAge || COOKIE_MAX_AGE
             const expires = new Date(Date.now() + maxAge * 1000).toUTCString()
-            document.cookie = `${name}=${encodeURIComponent(value)}; path=${options?.path || '/'}; max-age=${maxAge}; expires=${expires}; sameSite=${options?.sameSite || 'lax'}${options?.secure ? '; secure' : ''}`
+            const domainStr = hostname && !hostname.includes('localhost') ? `; domain=${hostname}` : ''
+            document.cookie = `${name}=${encodeURIComponent(value)}; path=${options?.path || '/'}; max-age=${maxAge}; expires=${expires}; sameSite=${isProduction ? 'none' : 'lax'}${isProduction ? '; secure' : ''}${domainStr}`
           })
         },
       },

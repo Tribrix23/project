@@ -27,15 +27,22 @@ export async function proxy(req: NextRequest) {
     return new NextResponse('Too many requests', { status: 429 })
   }
 
-  const supabase = createServerClient(
+  const COOKIE_MAX_AGE = 60 * 60 * 24 * 100 // 100 days
+
+const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => req.cookies.getAll(),
         setAll: (cookies) => {
-          cookies.forEach(({ name, value }) => {
-            res.cookies.set(name, value)
+          cookies.forEach(({ name, value, options }) => {
+            const maxAge = options?.maxAge || COOKIE_MAX_AGE
+            res.cookies.set(name, value, {
+              ...options,
+              maxAge,
+              path: options?.path || '/',
+            })
           })
         },
       },
