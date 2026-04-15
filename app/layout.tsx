@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Construco",
-  description: "",
+  description: "Your one-stop shop for construction materials and supplies. Browse products, place orders, and manage your purchases easily.",
   icons: {
     icon: '/favicon.png',
   },
