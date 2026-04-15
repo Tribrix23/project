@@ -9,6 +9,7 @@ import CartPage from './components/CartPage'
 import SearchTab from './components/SearchTab'
 import Details from './components/Details'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type UserData = {
   name: string
@@ -17,10 +18,20 @@ type UserData = {
   level: string
 }
 
+const pageRoutes: Record<string, number> = {
+  home: 0,
+  orders: 1,
+  cart: 2,
+  profile: 3,
+  search: 5,
+  details: 7,
+}
+
 const MobileScreen = () => {
-  const [active, setActive] = useState(0)
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [expanded, setExpanded] = useState(true)
-  const [prevActive, setPrevActive] = useState(0)
+  const [prevPage, setPrevPage] = useState('home')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userData, setUserData] = useState<UserData>({
     name: 'Guest User',
@@ -29,6 +40,9 @@ const MobileScreen = () => {
     level: 'Bronze'
   })
   const supabase = createClient()
+
+  const currentPage = searchParams.get('page') || 'home'
+  const active = pageRoutes[currentPage] ?? 0
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -58,14 +72,14 @@ const MobileScreen = () => {
     })
   }, [supabase])
 
-  const SearchNumGet = (value: number) => {
-      setPrevActive(active)
-      setActive(value)
-  };
+  const navigateTo = (page: string) => {
+    setPrevPage(currentPage)
+    router.push(`?page=${page}`)
+  }
 
-  const goBackToPrev = () => {
-      setActive(prevActive)
-  };
+  const goBack = () => {
+    navigateTo(prevPage)
+  }
  
   const shouldCollapse = active === 1 || active === 2
 
@@ -77,13 +91,13 @@ const MobileScreen = () => {
     }
   }, [active])
 
-  const handleTabPress = (index: number) => {
-    if (index === 1 || index === 2) {
+  const handleTabPress = (page: string) => {
+    if (page === 'orders' || page === 'cart') {
       setExpanded(false)
     } else {
       setExpanded(true)
     }
-    setActive(index)
+    navigateTo(page)
   }
 
   const handleContentClick = () => {
@@ -104,7 +118,7 @@ const MobileScreen = () => {
       memberSince: '2025',
       level: 'Bronze'
     })
-    setActive(0)
+    navigateTo('home')
   }
 
   const navStyle: React.CSSProperties = {
@@ -115,7 +129,7 @@ const MobileScreen = () => {
     opacity: shouldCollapse && !expanded ? 0 : 1,
     transformOrigin: 'right center',
     pointerEvents: shouldCollapse && !expanded ? 'none' : 'auto',
-    display: [5, 7].includes(active) ? 'none' : 'flex'
+    display: currentPage === 'search' || currentPage === 'details' ? 'none' : 'flex'
   }
 
   const circleStyle: React.CSSProperties = {
@@ -140,12 +154,12 @@ const MobileScreen = () => {
         className='flex-1 overflow-hidden' 
         onClick={handleContentClick}
       >
-        {active === 0 && <HomePage SearchNum={SearchNumGet}/>}
-        {active === 1 && <OrdersPage isLoggedIn={isLoggedIn} user={userData}/>}
-        {active === 2 && <CartPage isLoggedIn={isLoggedIn} user={userData}/>}
-        {active === 3 && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout}/>}
-        {active === 5 && <SearchTab goBack={() => setActive(0)} showDetails={() => SearchNumGet(7)}/>}
-        {active === 7 && <Details goBack={goBackToPrev} isLoggedIn={isLoggedIn} user={userData}/>}
+        {currentPage === 'home' && <HomePage onNavigate={navigateTo}/>}
+        {currentPage === 'orders' && <OrdersPage isLoggedIn={isLoggedIn} user={userData}/>}
+        {currentPage === 'cart' && <CartPage isLoggedIn={isLoggedIn} user={userData}/>}
+        {currentPage === 'profile' && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout}/>}
+        {currentPage === 'search' && <SearchTab goBack={() => navigateTo('home')} showDetails={() => navigateTo('details')}/>}
+        {currentPage === 'details' && <Details goBack={goBack} isLoggedIn={isLoggedIn} user={userData}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>
@@ -157,10 +171,10 @@ const MobileScreen = () => {
               style={{ left: `calc(${active * 25}% + 6px)` }}
             />
             <div className="w-full h-full flex items-center justify-evenly relative z-10">
-              <IconBadge icon={HomeIcon} text='Home' textDesign={`${active === 0 ? 'text-orange-500' : 'text-black'}`} design={`${active === 0 ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress(0)}/>
-              <IconBadge icon={ReceiptIcon} text='Orders' textDesign={`${active === 1 ? 'text-orange-500' : 'text-black'}`} design={`${active === 1 ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress(1)}/>
-              <IconBadge icon={ShoppingCartIcon} text='Cart' textDesign={`${active === 2 ? 'text-orange-500' : 'text-black'}`} design={`${active === 2 ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress(2)}/>
-              <IconBadge icon={UserIcon} text='Profile' textDesign={`${active === 3 ? 'text-orange-500' : 'text-black'}`} design={`${active === 3 ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress(3)}/>
+              <IconBadge icon={HomeIcon} text='Home' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
+              <IconBadge icon={ReceiptIcon} text='Orders' textDesign={`${currentPage === 'orders' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'orders' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('orders')}/>
+              <IconBadge icon={ShoppingCartIcon} text='Cart' textDesign={`${currentPage === 'cart' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'cart' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('cart')}/>
+              <IconBadge icon={UserIcon} text='Profile' textDesign={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('profile')}/>
             </div>
           </div>
         </div>
