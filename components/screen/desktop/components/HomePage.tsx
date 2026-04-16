@@ -131,23 +131,33 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                         className='w-full h-full bg-cover bg-center relative' 
                         style={{backgroundImage: "url('/images/cardImage/1.png')"}}
                     >
-                        <div className='absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent'/>
+                        <div className='absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/60 to-transparent'/>
                         <div className='absolute inset-0 flex items-center pl-16'>
                             <div className='max-w-xl'>
-                                <span className={`${allura.className} text-white/90 text-2xl`}>Welcome to</span>
+                                <span className={`${allura.className} text-orange-400 text-2xl`}>Welcome to</span>
                                 <h1 className='text-6xl font-bold text-white mt-1 leading-tight'>Construco</h1>
                                 <h2 className='text-3xl text-orange-400 font-semibold mt-3'>Big Sale Up to 50% Off</h2>
-                                <p className='text-white/80 mt-4 text-lg'>Premium construction tools and materials at unbeatable prices</p>
-                                <button className='mt-8 bg-orange-500 text-white px-10 py-4 rounded-full font-semibold hover:bg-orange-600 hover:scale-105 transition-all shadow-lg shadow-orange-500/30 flex items-center gap-2'>
+                                <p className='text-gray-300 mt-4 text-lg'>Premium construction tools and materials at unbeatable prices</p>
+                                <button className='mt-8 bg-orange-500 text-white px-10 py-4 rounded-full font-semibold hover:bg-orange-600 hover:scale-105 transition-all shadow-lg shadow-orange-500/30 flex items-center gap-2 group-hover:shadow-orange-500/50'>
                                     Shop Now <ArrowRightIcon size={18}/>
                                 </button>
                             </div>
+                        </div>
+                        <div className='absolute bottom-6 right-6 flex gap-2'>
+                            <button className='w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white hover:text-gray-900 transition-all'>
+                                <ArrowRightIcon size={18} className='rotate-180'/>
+                            </button>
+                            <button className='w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-900 hover:bg-orange-500 hover:text-white transition-all'>
+                                <ArrowRightIcon size={18}/>
+                            </button>
                         </div>
                     </div>
                 </div>
                 
                 <div className='col-span-3 flex flex-col gap-5'>
-                    <div className='bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white flex-1'>
+                    <div className='bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white flex-1 relative overflow-hidden'>
+                        <div className='absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2'/>
+                        <div className='absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full'/>
                         <p className={`${allura.className} text-3xl`}>New Arrivals</p>
                         <p className='text-lg mt-3 font-medium'>Discover the latest tools for your projects</p>
                         <button className='mt-6 bg-white/20 backdrop-blur text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-white/30 transition-colors flex items-center gap-2'>
@@ -155,7 +165,7 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                         </button>
                         <div className='mt-6 flex gap-2'>
                             {[1,2,3].map(i => (
-                                <div key={i} className='w-12 h-12 bg-white/20 rounded-lg'/>
+                                <div key={i} className='w-12 h-12 bg-white/20 rounded-lg hover:scale-110 transition-transform'/>
                             ))}
                         </div>
                     </div>
@@ -166,10 +176,10 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                         </div>
                         <div className='space-y-4'>
                             {topRated.map((item, i) => (
-                                <div key={i} className='flex items-center gap-3 p-2 rounded-xl hover:bg-[#f6f3e7] transition-colors cursor-pointer'>
-                                    <div className='w-12 h-12 bg-gray-100 rounded-xl'/>
+                                <div key={i} className='flex items-center gap-3 p-2 rounded-xl hover:bg-[#f6f3e7] transition-colors cursor-pointer group'>
+                                    <div className='w-12 h-12 bg-gray-100 rounded-xl group-hover:bg-orange-100 transition-colors'/>
                                     <div className='flex-1'>
-                                        <p className='text-sm font-semibold text-gray-800'>{item.name}</p>
+                                        <p className='text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors'>{item.name}</p>
                                         <p className='text-sm text-orange-600 font-bold'>${item.price}</p>
                                     </div>
                                 </div>
@@ -189,11 +199,12 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 </div>
                 <div className='grid grid-cols-6 gap-4'>
                     {categories.map((cat, i) => (
-                        <div key={cat.name} className='bg-white rounded-2xl p-5 border border-gray-100 hover:border-orange-300 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group text-center'>
-                            <div className='w-16 h-16 bg-[#f6f3e7] rounded-2xl mb-4 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform'>
+                        <div key={cat.name} className='bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-300 hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer group text-center relative overflow-hidden'>
+                            <div className='absolute top-0 right-0 w-20 h-20 bg-orange-400/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500'/>
+                            <div className='w-16 h-16 bg-gradient-to-br from-[#f6f3e7] to-gray-100 rounded-2xl mb-4 flex items-center justify-center text-3xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300'>
                                 {cat.icon}
                             </div>
-                            <p className='text-sm font-semibold text-gray-800'>{cat.name}</p>
+                            <p className='text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors'>{cat.name}</p>
                         </div>
                     ))}
                 </div>
@@ -209,30 +220,31 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 </div>
                 <div className='grid grid-cols-4 gap-6'>
                     {products.map(product => (
-                        <div key={product.id} className='bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer group overflow-hidden'>
-                            <div className='h-56 bg-linear-to-b from-gray-50 to-gray-100 relative'>
-                                <span className='absolute top-4 left-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full'>Sale</span>
-                                <button className='absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-orange-50'>
+                        <div key={product.id} className='bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer group overflow-hidden relative'>
+                            <div className='absolute top-4 left-4 z-10 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full'>Sale</div>
+                            <div className='h-56 bg-gradient-to-b from-gray-50 to-gray-100 relative flex items-center justify-center overflow-hidden'>
+                                <div className='absolute inset-0 bg-gradient-to-t from-orange-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'/>
+                                <button className='absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-orange-50 z-10'>
                                     <HeartIcon size={18} className='text-gray-400 hover:text-orange-500'/>
                                 </button>
-                                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-32 bg-white rounded-full shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform'>
-                                    <div className='w-20 h-20 bg-gray-100 rounded-full'/>
+                                <div className='w-36 h-36 bg-white rounded-full shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300'>
+                                    <div className='w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full'/>
                                 </div>
                             </div>
                             <div className='p-5'>
-                                <p className='text-xs text-gray-500 font-medium'>{product.category}</p>
-                                <p className='font-bold text-gray-900 mt-1 text-lg line-clamp-1'>{product.name}</p>
+                                <p className='text-xs text-gray-500 font-medium uppercase tracking-wide'>{product.category}</p>
+                                <p className='font-bold text-gray-900 mt-1 text-lg line-clamp-1 group-hover:text-orange-600 transition-colors'>{product.name}</p>
                                 <div className='flex items-center gap-2 mt-3'>
                                     <div className='flex items-center gap-0.5'>
                                         {[1,2,3,4,5].map(s => (
-                                            <StarIcon key={s} size={14} className={s <= Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}/>
+                                            <StarIcon key={s} size={14} className={s <= Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}/>
                                         ))}
                                     </div>
-                                    <span className='text-xs text-gray-500'>({product.reviews})</span>
+                                    <span className='text-xs text-gray-400'>({product.reviews})</span>
                                 </div>
                                 <div className='flex items-center justify-between mt-4'>
-                                    <p className='text-xl font-bold text-orange-600'>${product.price}</p>
-                                    <button className='bg-[#f6f3e7] p-2.5 rounded-xl hover:bg-orange-500 hover:text-white transition-all'>
+                                    <p className='text-xl font-bold text-gray-900'>${product.price}</p>
+                                    <button className='bg-[#f6f3e7] p-2.5 rounded-xl hover:bg-orange-500 hover:text-white transition-all group/btn'>
                                         <ShoppingCartIcon size={18}/>
                                     </button>
                                 </div>
@@ -244,40 +256,48 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
             
             <div className='grid grid-cols-2 gap-6 mb-10'>
                 <div className='bg-gray-900 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
-                    <div className='absolute right-0 top-0 w-64 h-full bg-linear-to-l from-orange-500/20 to-transparent'/>
+                    <div className='absolute right-0 top-0 w-2/3 h-full bg-gradient-to-l from-orange-500/20 via-orange-500/10 to-transparent'/>
+                    <div className='absolute top-10 right-20 w-40 h-40 border-4 border-orange-500/20 rounded-full'/>
+                    <div className='absolute bottom-10 right-40 w-24 h-24 border-2 border-orange-500/10 rounded-full'/>
                     <div className='relative z-10'>
                         <span className={`${allura.className} text-orange-500 text-3xl`}>Flash Sale</span>
                         <h3 className='text-4xl font-bold text-white mt-3'>Up to 70% Off</h3>
                         <p className='text-gray-400 mt-3 text-lg'>Limited time offers on selected items</p>
                         <div className='flex items-center gap-3 mt-6'>
-                            {['03', '45', '22'].map((t, i) => (
-                                <div key={i} className='bg-white/10 backdrop-blur px-4 py-2 rounded-xl'>
-                                    <span className='text-2xl font-bold text-white'>{t}</span>
+                            {[
+                                { value: '03', label: 'Days' },
+                                { value: '45', label: 'Hrs' },
+                                { value: '22', label: 'Mins' }
+                            ].map((t, i) => (
+                                <div key={i} className='bg-white/10 backdrop-blur border border-white/10 px-4 py-3 rounded-xl'>
+                                    <span className='text-2xl font-bold text-white block'>{t.value}</span>
+                                    <span className='text-xs text-gray-400'>{t.label}</span>
                                 </div>
                             ))}
                         </div>
-                        <button className='mt-8 bg-orange-500 text-white px-8 py-3 rounded-xl font-semibold hover:bg-orange-600 transition-all'>
+                        <button className='mt-8 bg-orange-500 text-white px-8 py-3 rounded-xl font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all'>
                             Shop Now
                         </button>
                     </div>
-                    <div className='relative z-10 text-right'>
-                        <div className='text-7xl font-bold text-white/10'>70%</div>
-                        <div className='text-orange-500 font-bold text-lg mt-2'>OFF</div>
+                    <div className='relative z-10 text-right flex flex-col items-end'>
+                        <div className='text-8xl font-bold text-orange-500'>70%</div>
+                        <div className='text-white font-bold text-xl tracking-widest'>OFF</div>
                     </div>
                 </div>
-                <div className='bg-linear-to-br from-orange-500 to-orange-600 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
-                    <div className='absolute -left-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full'/>
+                <div className='bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl p-10 flex items-center justify-between overflow-hidden relative'>
+                    <div className='absolute -left-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl'/>
+                    <div className='absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full'/>
                     <div className='relative z-10'>
                         <p className='text-white/80 text-xl font-medium'>Become a Seller</p>
                         <h3 className='text-4xl font-bold text-white mt-3'>Sell on Constructo</h3>
                         <p className='text-white/80 mt-3 text-lg'>Grow your business with us</p>
-                        <button className='mt-8 bg-white text-orange-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2'>
+                        <button className='mt-8 bg-white text-orange-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-white/20 transition-all flex items-center gap-2'>
                             Register Now <ArrowRightIcon size={18}/>
                         </button>
                     </div>
                     <div className='relative z-10'>
-                        <div className='w-32 h-32 bg-white/20 rounded-full flex items-center justify-center'>
-                            <div className='w-24 h-24 bg-white/10 rounded-full flex items-center justify-center'>
+                        <div className='w-36 h-36 bg-white/20 rounded-full flex items-center justify-center animate-pulse'>
+                            <div className='w-28 h-28 bg-white/10 rounded-full flex items-center justify-center'>
                                 <ShoppingCartIcon size={48} className='text-white'/>
                             </div>
                         </div>
@@ -285,16 +305,18 @@ const HomePage: React.FC<HomePageProps> = ({ active = 0, setActive }) => {
                 </div>
             </div>
 
-            <div className='bg-white rounded-3xl p-8 border border-gray-100 mb-10'>
-                <div className='grid grid-cols-4 gap-8'>
+            <div className='bg-white rounded-3xl p-8 border border-gray-100 mb-10 overflow-hidden relative'>
+                <div className='absolute top-0 left-0 w-32 h-32 bg-orange-100/50 rounded-full -translate-x-1/2 -translate-y-1/2'/>
+                <div className='absolute bottom-0 right-0 w-40 h-40 bg-orange-100/30 rounded-full translate-x-1/2 translate-y-1/2'/>
+                <div className='grid grid-cols-4 gap-8 relative z-10'>
                     {[
                         { icon: '🚚', title: 'Free Shipping', desc: 'On orders over $100' },
                         { icon: '🛡️', title: 'Secure Payment', desc: '100% protected transactions' },
                         { icon: '🔄', title: 'Easy Returns', desc: '30-day return policy' },
                         { icon: '💬', title: '24/7 Support', desc: 'Dedicated customer care' },
                     ].map((item, i) => (
-                        <div key={i} className='flex items-center gap-4'>
-                            <div className='w-14 h-14 bg-[#f6f3e7] rounded-2xl flex items-center justify-center text-2xl'>
+                        <div key={i} className='flex items-center gap-4 p-4 rounded-2xl hover:bg-[#f6f3e7] transition-colors cursor-default group'>
+                            <div className='w-14 h-14 bg-gradient-to-br from-[#f6f3e7] to-orange-100 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform'>
                                 {item.icon}
                             </div>
                             <div>
