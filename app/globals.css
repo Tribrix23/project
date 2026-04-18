@@ -16,3 +16,30 @@ body {
 ::-webkit-scrollbar{
   display: none;
 }
+
+@keyframes badge-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-badge-shine {
+  animation: badge-shine 2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes badge-shimmer {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
+.animate-badge-shimmer {
+  animation: badge-shimmer 2s infinite linear;
+}
