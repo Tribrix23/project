@@ -1,6 +1,10 @@
 import React from 'react'
 
-const Profile = () => {
+type ProfileProps = {
+  goBack?: () => void
+}
+
+const Profile = ({ goBack }: ProfileProps) => {
   return (
     <div>Profile</div>
   )

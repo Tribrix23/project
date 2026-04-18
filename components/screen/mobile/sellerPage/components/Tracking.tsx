@@ -1,6 +1,10 @@
 import React from 'react'
 
-const Tracking = () => {
+type TrackingProps = {
+  goBack?: () => void
+}
+
+const Tracking = ({ goBack }: TrackingProps) => {
   return (
     <div>Tracking</div>
   )

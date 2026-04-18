@@ -1,6 +1,10 @@
 import React from 'react'
 
-const Dashboard = () => {
+type DashboardProps = {
+  goBack?: () => void
+}
+
+const Dashboard = ({ goBack }: DashboardProps) => {
   return (
     <div>Dashboard</div>
   )
