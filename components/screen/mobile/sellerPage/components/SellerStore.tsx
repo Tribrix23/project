@@ -118,8 +118,8 @@ const SellerStore = ({ onNavigate }: SellerStoreProps) => {
       <div className='w-full px-4 py-3 shrink-0 bg-white border-b border-gray-100'>
         <div className='flex gap-3 justify-center'>
           <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all active:scale-95'>
-            <Edit size={16} />
-            Edit Store
+            <Plus size={16} />
+            Add Product
           </button>
           <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 transition-all active:scale-95'>
             <Share2 size={16} />
