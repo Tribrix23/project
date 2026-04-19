@@ -33,21 +33,33 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
 
     React.useEffect(() => {
         const fetchAvatar = async () => {
-            if (!isLoggedIn) return;
+            if (!isLoggedIn) {
+                setAvatarUrl(null);
+                return;
+            }
             setAvatarLoading(true);
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
+            const userId = session?.user?.id;
+            
+            if (!userId) {
+                setAvatarLoading(false);
+                return;
+            }
             
             try {
-                const res = await fetch("/api/avatar", {
+                const res = await fetch(`/api/avatar?userId=${userId}`, {
                     headers: token ? { "Authorization": `Bearer ${token}` } : {},
                 });
                 if (res.ok) {
                     const blob = await res.blob();
                     setAvatarUrl(URL.createObjectURL(blob));
+                } else {
+                    setAvatarUrl(null);
                 }
             } catch (e) {
                 console.error("Failed to load avatar", e);
+                setAvatarUrl(null);
             } finally {
                 setAvatarLoading(false);
             }

@@ -59,10 +59,13 @@ export async function GET(req: Request) {
     // 2. GET FILE KEY FROM DB
     // (latest upload as avatar)
     // --------------------
+    const userIdParam = new URL(req.url).searchParams.get("userId");
+    const targetUserId = userIdParam && userIdParam === user.id ? userIdParam : user.id;
+
     const { data, error } = await supabase
       .from("uploads")
       .select("file_key, mime_type")
-      .eq("user_id", user.id)
+      .eq("user_id", targetUserId)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -91,7 +94,7 @@ export async function GET(req: Request) {
     return new NextResponse(object.Body as any, {
       headers: {
         "Content-Type": data.mime_type,
-        "Cache-Control": "private, max-age=3600",
+        "Cache-Control": "public, max-age=2592000",
       },
     });
 
