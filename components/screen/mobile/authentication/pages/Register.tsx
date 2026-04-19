@@ -288,6 +288,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
               <input 
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
+                autoComplete="new-password"
                 onChange={(e) => handleChange('password', e.target.value)}
                 placeholder='••••••••'
                 className={`w-full h-14 pl-12 pr-14 bg-gray-50 border-2 rounded-2xl text-gray-800 text-base outline-none transition-all ${
@@ -320,6 +321,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
               <input 
                 type={showPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
+                autoComplete="new-password"
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 placeholder='••••••••'
                 className={`w-full h-14 pl-12 pr-14 bg-gray-50 border-2 rounded-2xl text-gray-800 text-base outline-none transition-all ${

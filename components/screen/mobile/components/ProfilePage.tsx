@@ -26,6 +26,56 @@ type ProfilePageProps = {
 const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
     const router = useRouter()
     const supabase = createClient()
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+    const [avatarLoading, setAvatarLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        const fetchAvatar = async () => {
+            if (!isLoggedIn) return;
+            setAvatarLoading(true);
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            
+            try {
+                const res = await fetch("/api/avatar", {
+                    headers: token ? { "Authorization": `Bearer ${token}` } : {},
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    setAvatarUrl(URL.createObjectURL(blob));
+                }
+            } catch (e) {
+                console.error("Failed to load avatar", e);
+            } finally {
+                setAvatarLoading(false);
+            }
+        };
+        fetchAvatar();
+    }, [isLoggedIn, supabase]);
+
+    const getFirstLetter = () => {
+        const name = user?.name || "";
+        return name.split(" ")[0]?.[0]?.toUpperCase() || "?";
+    };
+
+    const handleUpload = async (file: File) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      console.log("uploaded:", data);
+    };
 
 
     const handleLogout = async () => {
@@ -48,17 +98,45 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
         </div>
       </header>
 
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleUpload(file);
+        }}
+      />
+
       <main className='flex-1 overflow-scroll px-4 pb-44'>
         <div className='py-4'>
           <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
             <div className='flex items-center gap-4'>
               <div className='relative'>
-                <div className='w-20 h-20 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg'>
-                  <User className='text-white size-10'/>
-                </div>
-                <button className='absolute bottom-0 right-0 w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center border-2 border-white'>
-                  <Camera size={12} className='text-white' />
-                </button>
+                {avatarUrl ? (
+                    <Image
+                        src={avatarUrl}
+                        alt="avatar"
+                        width={80}
+                        height={80}
+                        className="rounded-full object-cover"
+                    />
+                ) : (
+                    <div className='w-20 h-20 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg'>
+                        <span className='text-white text-3xl font-bold'>
+                            {getFirstLetter()}
+                        </span>
+                    </div>
+                )}
+                {isLoggedIn && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className='absolute bottom-0 right-0 w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center border-2 border-white'
+                  >
+                    <Camera size={12} className='text-white' />
+                  </button>
+                )}
               </div>
               <div className='flex-1'>
                 <h2 className='text-lg font-bold text-gray-800'>{user.name}</h2>

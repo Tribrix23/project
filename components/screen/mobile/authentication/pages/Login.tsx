@@ -129,6 +129,7 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
               <input 
                 type={showPassword ? 'text' : 'password'}
                 value={password}
+                autoComplete="current-password"
                 onChange={(e) => {
                   setPassword(e.target.value)
                   if (passwordError) setPasswordError('')

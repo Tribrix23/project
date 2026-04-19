@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 // --------------------
 // R2 CLIENT
@@ -15,7 +16,7 @@ const r2 = new S3Client({
 });
 
 // --------------------
-// SUPABASE CLIENT (SIMPLE - NO SSR)
+// SUPABASE CLIENT (SERVER COMPONENT)
 // --------------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,12 +41,29 @@ export async function POST(req: Request) {
     // --------------------
     // 1. GET USER FROM AUTH
     // --------------------
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const authHeader = req.headers.get("Authorization");
+    let user = null;
 
-    if (authError || !user) {
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+      if (!authError && authUser) {
+        user = authUser;
+      }
+    }
+
+    if (!user) {
+      const cookieStore = await cookies();
+      const supabaseToken = cookieStore.get("sb-access-token")?.value;
+      if (supabaseToken) {
+        const { data: { user: cookieUser }, error: cookieError } = await supabase.auth.getUser(supabaseToken);
+        if (!cookieError && cookieUser) {
+          user = cookieUser;
+        }
+      }
+    }
+
+    if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
