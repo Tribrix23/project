@@ -73,14 +73,36 @@ export async function POST(req: Request) {
     const user_id = user.id;
 
     // --------------------
-    // 2. PREP FILE
+    // 2. CHECK EXISTING UPLOAD (1 WEEK LIMIT)
+    // --------------------
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const { data: existingUpload } = await supabase
+      .from("uploads")
+      .select("created_at")
+      .eq("user_id", user_id)
+      .gte("created_at", oneWeekAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existingUpload) {
+      return NextResponse.json(
+        { error: "Profile picture can only be changed once a week" },
+        { status: 429 }
+      );
+    }
+
+    // --------------------
+    // 3. PREP FILE
     // --------------------
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const fileKey = `uploads/${user_id}/${crypto.randomUUID()}-${file.name}`;
 
     // --------------------
-    // 3. UPLOAD TO R2
+    // 4. UPLOAD TO R2
     // --------------------
     await r2.send(
       new PutObjectCommand({

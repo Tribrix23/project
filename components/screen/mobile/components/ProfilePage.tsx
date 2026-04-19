@@ -29,6 +29,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
     const [avatarLoading, setAvatarLoading] = React.useState(false);
+    const [uploadError, setUploadError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         const fetchAvatar = async () => {
@@ -73,8 +74,15 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
       });
 
       const data = await res.json();
-
       console.log("uploaded:", data);
+
+      if (!res.ok) {
+        setUploadError(data.error || "Upload failed");
+        setTimeout(() => setUploadError(null), 5000);
+      } else {
+        const blob = URL.createObjectURL(file);
+        setAvatarUrl(blob);
+      }
     };
 
 
@@ -110,6 +118,11 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
       />
 
       <main className='flex-1 overflow-scroll px-4 pb-44'>
+        {uploadError && (
+          <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded-xl'>
+            <p className='text-sm text-red-600 text-center'>{uploadError}</p>
+          </div>
+        )}
         <div className='py-4'>
           <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
             <div className='flex items-center gap-4'>
