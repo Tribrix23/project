@@ -127,21 +127,22 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
             <div className='flex items-center gap-4'>
               <div className='relative'>
-                {avatarUrl ? (
-                    <Image
-                        src={avatarUrl}
-                        alt="avatar"
-                        width={80}
-                        height={80}
-                        className="rounded-full object-cover"
-                    />
-                ) : (
-                    <div className='w-20 h-20 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg'>
-                        <span className='text-white text-3xl font-bold'>
-                            {getFirstLetter()}
-                        </span>
-                    </div>
-                )}
+                <div className='relative w-20 h-20 rounded-full overflow-hidden'>
+                  {avatarUrl ? (
+                      <Image
+                          src={avatarUrl}
+                          alt="avatar"
+                          fill
+                          className="object-cover"
+                      />
+                  ) : (
+                      <div className='w-full h-full rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center'>
+                          <span className='text-white text-3xl font-bold'>
+                              {getFirstLetter()}
+                          </span>
+                      </div>
+                  )}
+                </div>
                 {isLoggedIn && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
