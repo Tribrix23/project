@@ -27,7 +27,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden bg-gray-50">
       {/* Main Header - Full Background */}
-      <div className="w-full shrink-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 z-20 relative">
+      <div className="w-full shrink-0 bg-linear-to-br from-slate-800 via-slate-700 to-slate-800 z-20 relative">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
           <div className="absolute -bottom-5 -left-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
@@ -74,7 +74,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
         <div className="w-full px-4 pt-4">
           <div className="grid grid-cols-4 gap-2">
             {/* Total Users */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg">
+            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                 <Users size={16} className="text-white" />
               </div>
@@ -83,7 +83,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             </div>
 
             {/* Active Sellers */}
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-3 text-white shadow-lg">
+            <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-3 text-white shadow-lg">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                 <Store size={16} className="text-white" />
               </div>
@@ -92,7 +92,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             </div>
 
             {/* Total Orders */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-3 text-white shadow-lg">
+            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-3 text-white shadow-lg">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                 <ShoppingBag size={16} className="text-white" />
               </div>
@@ -101,7 +101,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             </div>
 
             {/* Revenue */}
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-3 text-white shadow-lg">
+            <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-3 text-white shadow-lg">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                 <DollarSign size={16} className="text-white" />
               </div>
@@ -122,10 +122,10 @@ const Dashboard = ({ goBack }: DashboardProps) => {
               <div key={seller.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer">
                 {seller.id === 1 ? (
                   <div className="relative w-14 h-14 shrink-0">
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-400 via-amber-500 to-amber-600 p-[3px]">
-                      <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 rounded-lg"></div>
+                    <div className="absolute inset-0 rounded-xl bg-linear-to-br from-amber-300 via-yellow-400 to-amber-600 p-0.75">
+                      <div className="w-full h-full bg-linear-to-br from-amber-200 to-amber-400 rounded-lg"></div>
                     </div>
-                    <div className="absolute inset-[4px] bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
+                    <div className="absolute inset-1 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
                       <Store size={22} className="text-slate-600" />
                     </div>
                   </div>
@@ -138,7 +138,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
                     {seller.id === 1 && (
-                      <span className="inline-flex px-2 py-0.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 rounded-full border border-yellow-300 shadow-md shrink-0">
+                      <span className="inline-flex px-2 py-0.5 bg-linear-to-r from-amber-500 via-yellow-400 to-amber-500 rounded-full border border-yellow-300 shadow-md shrink-0">
                         <span className="text-[8px] font-bold text-amber-950 flex items-center gap-0.5 whitespace-nowrap">
                           <span>★</span> Top 1
                         </span>
