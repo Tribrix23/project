@@ -27,6 +27,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
     const router = useRouter()
     const supabase = createClient()
 
+
     const handleLogout = async () => {
       await supabase.auth.signOut()
       onLogout?.()
