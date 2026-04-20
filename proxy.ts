@@ -56,7 +56,19 @@ const supabase = createServerClient(
   const isDashboard = req.nextUrl.pathname.startsWith('/dashboard')
 
   if (isDashboard && !user) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  if (isDashboard && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('isAdmin')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.isAdmin) {
+      return NextResponse.redirect(new URL('/', req.url))
+    }
   }
 
   return res
