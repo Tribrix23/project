@@ -1,19 +1,21 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { 
   Users, Store, ShoppingBag, TrendingUp, TrendingDown,
   DollarSign, Star,
-  ArrowUpRight, 
+  ArrowUpRight, ArrowLeft,
   AlertTriangle, CheckCircle, XCircle, ChevronRight
 } from 'lucide-react'
+import TotalUsers from './TotalUsers'
 
 type DashboardProps = {
   goBack?: () => void
 }
 
 const Dashboard = ({ goBack }: DashboardProps) => {
+  const [showTotalUsers, setShowTotalUsers] = useState(false)
   const topSellers = [
     { id: 1, name: 'BuildPro Hardware', category: 'Construction', sales: 1245, rating: 4.9, revenue: '₱450,000', trend: 'up', image: '/images/store1.png' },
     { id: 2, name: 'Steel Masters', category: 'Steel Materials', sales: 987, rating: 4.8, revenue: '₱380,000', trend: 'up', image: '/images/store2.png' },
@@ -25,6 +27,23 @@ const Dashboard = ({ goBack }: DashboardProps) => {
   const displaySellers = topSellers.slice(0, 5)
 
   return (
+    showTotalUsers ? (
+    <div className="w-full h-full flex flex-col relative overflow-hidden bg-gray-50">
+      <div className="w-full shrink-0 bg-blue-600 z-20 relative">
+        <header className="w-full px-4 pt-4 pb-2 relative z-10">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowTotalUsers(false)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <ArrowLeft size={20} className="text-white" />
+            </button>
+            <h1 className="text-xl font-bold text-white tracking-wide">Total Users</h1>
+          </div>
+        </header>
+      </div>
+      <div className="flex-1 overflow-scroll">
+        <TotalUsers />
+      </div>
+    </div>
+  ) : (
     <div className="w-full h-full flex flex-col relative overflow-hidden bg-gray-50">
       {/* Main Header - Full Background */}
       <div className="w-full shrink-0 bg-linear-to-br from-slate-800 via-slate-700 to-slate-800 z-20 relative">
@@ -74,13 +93,13 @@ const Dashboard = ({ goBack }: DashboardProps) => {
         <div className="w-full px-4 pt-4">
           <div className="grid grid-cols-4 gap-2">
             {/* Total Users */}
-            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg">
+            <button onClick={() => setShowTotalUsers(true)} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                 <Users size={16} className="text-white" />
               </div>
               <p className="text-lg font-bold">12,847</p>
               <p className="text-[10px] text-blue-100">Total Users</p>
-            </div>
+            </button>
 
             {/* Active Sellers */}
             <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-3 text-white shadow-lg">
@@ -206,7 +225,6 @@ const Dashboard = ({ goBack }: DashboardProps) => {
         </div>
       </div>
     </div>
-  )
-}
+  ))}
 
 export default Dashboard
