@@ -119,6 +119,7 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
             middle_name: middleName,
             last_name: lastName,
             phone: phone,
+            role: 'user',
           }
         }
       })
@@ -135,9 +136,28 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
       } else {
         setPopup({ type: 'error', message: 'An account with this email already exists' })
       }
-    } catch (err: any) {
+
+      if(data.user) {
+        try {
+          const roleResponse = await fetch('/api/set-role', {
+            method: "POST",
+            headers: {
+              'Content-Type' : 'application/json',
+            },
+            body: JSON.stringify({userId: data.user.id})
+          })
+          if (!roleResponse.ok) {
+            console.error('Failed to set role:', roleResponse.statusText)
+          }
+        } catch (apiError) {
+          console.error('set-role API error:', apiError)
+        }
+      }
+
+    } catch (err: unknown) {
+      const error = err as Error;
       setIsLoading(false)
-      setPopup({ type: 'error', message: err.message || 'An error occurred' })
+      setPopup({ type: 'error', message: error.message || 'An error occurred' })
     }
   }
 
