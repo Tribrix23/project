@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { MoreVertical, Ban, Mail, User, Shield, Eye, Edit, Trash2 } from 'lucide-react'
 
@@ -19,18 +19,20 @@ interface UserData {
 }
 
 const TotalUsers = () => {
-  const [users, setUsers] = useState<UserData[]>([
-    { id: 1, avatar: '/favicon.png', fullName: 'Juan Dela Cruz', email: 'juan.delacruz@email.com', status: 'active', role: 'seller', joinedDate: '2024-01-15', phone: '+63 912 345 6789' },
-    { id: 2, avatar: '/favicon.png', fullName: 'Maria Santos', email: 'maria.santos@email.com', status: 'active', role: 'buyer', joinedDate: '2024-02-20', phone: '+63 918 987 6543' },
-    { id: 3, avatar: '/favicon.png', fullName: 'Pedro Reyes', email: 'pedro.reyes@email.com', status: 'inactive', role: 'seller', joinedDate: '2024-03-10', phone: '+63 921 456 7890' },
-    { id: 4, avatar: '/favicon.png', fullName: 'Ana Garcia', email: 'ana.garcia@email.com', status: 'active', role: 'buyer', joinedDate: '2024-04-05', phone: '+63 925 123 4567' },
-    { id: 5, avatar: '/favicon.png', fullName: 'Jose Martinez', email: 'jose.martinez@email.com', status: 'pending', role: 'seller', joinedDate: '2024-05-12', phone: '+63 928 234 5678' },
-    { id: 6, avatar: '/favicon.png', fullName: 'Lisa Tan', email: 'lisa.tan@email.com', status: 'active', role: 'seller', joinedDate: '2024-06-01', phone: '+63 930 345 6789' },
-    { id: 7, avatar: '/favicon.png', fullName: 'Mark Wong', email: 'mark.wong@email.com', status: 'active', role: 'buyer', joinedDate: '2024-06-15', phone: '+63 932 456 7890' },
-    { id: 8, avatar: '/favicon.png', fullName: 'Sarah Lim', email: 'sarah.lim@email.com', status: 'inactive', role: 'buyer', joinedDate: '2024-07-20', phone: '+63 934 567 8901' },
-  ])
+  const [users, setUsers] = useState<any[]>([]);
 
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await fetch ('/api/getUsers');
+      const data = await res.json();
+
+      setUsers(data);
+    }
+
+    load();
+  }, [])
 
   const handleDeactivate = (userId: number) => {
     setUsers(users.map(user => 
