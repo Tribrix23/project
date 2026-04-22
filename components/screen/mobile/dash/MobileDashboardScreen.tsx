@@ -22,7 +22,7 @@ const MobileDashboardScreen = () => {
               <button onClick={handleGoBack} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
                 <ArrowLeft size={20} className="text-white" />
               </button>
-              <h1 className="text-xl font-bold text-white tracking-wide">Total Users</h1>
+              <h1 className="text-xl font-bold text-white tracking-wide">Total User</h1>
             </div>
           </header>
         </div>
