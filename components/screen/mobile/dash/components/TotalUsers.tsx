@@ -105,9 +105,9 @@ const TotalUsers = () => {
             <div className="flex items-start gap-3">
               {/* Avatar */}
               <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                <Image 
-                  src={user.avatar} 
-                  alt={user.fullName}
+                <Image
+                  src={user.avatar || '/default-avatar.png'}
+                  alt={user.fullName || 'User avatar'}
                   width={48}
                   height={48}
                   className="w-full h-full object-cover"
@@ -135,7 +135,7 @@ const TotalUsers = () => {
                       user.status === 'active' ? 'bg-green-500' : 
                       user.status === 'inactive' ? 'bg-red-500' : 'bg-yellow-500'
                     }`}></span>
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                    {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Unknown'}
                   </span>
                 </div>
               </div>

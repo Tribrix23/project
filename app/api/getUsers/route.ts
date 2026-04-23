@@ -18,6 +18,9 @@ export async function GET() {
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
+  const {data: uploads, error: uploadError} = 
+  await supabaseServer.from('uploads').select("*");
+
   const merged = authUser.users.map(user => {
     const profile = profileMap.get(user.id);
 
