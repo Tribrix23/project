@@ -27,6 +27,7 @@ const TotalUsers = () => {
       const data = await res.json();
 
       setUsers(data);
+      console.log(data);
     }
 
     load();
@@ -65,7 +66,7 @@ const TotalUsers = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4 pb-20">
+    <div className="w-full min-h-screen bg-linear-to-b from-gray-50 to-gray-100 p-4 pb-20">
       {/* Search Header */}
       <div className="mb-5">
         <div className="relative">
@@ -104,7 +105,7 @@ const TotalUsers = () => {
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <h3 className="font-semibold text-gray-800 text-base truncate">{user.fullName}</h3>
+                  <h3 className="font-semibold text-gray-800 text-base truncate">{user.profile.first_name + " " + user.profile.middle_name + " " + user.profile.last_name}</h3>
                   {user.status === 'inactive' && (
                     <Ban size={14} className="text-red-500 shrink-0" />
                   )}
