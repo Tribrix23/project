@@ -25,7 +25,6 @@ export async function GET() {
       id: user.id,
       email: user.email,
       profile,
-      avatarUrl: `/api/avatar?userId=${user.id}`,
     };
   });
 
