@@ -27,7 +27,6 @@ const TotalUsers = () => {
       const data = await res.json();
 
       setUsers(data);
-      console.log(data);
     }
 
     load();
@@ -97,8 +96,8 @@ const TotalUsers = () => {
         </div>
       </div>
 
-      {/* Users List */}
-      <div className="space-y-3">
+      {/* Users List - Scrollable container */}
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
         {users.map((user) => (
           <div key={user.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
