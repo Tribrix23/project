@@ -60,7 +60,10 @@ export async function GET(req: Request) {
     // (latest upload as avatar)
     // --------------------
     const userIdParam = new URL(req.url).searchParams.get("userId");
-    const targetUserId = userIdParam && userIdParam === user.id ? userIdParam : user.id;
+    const isAdmin = user.app_metadata?.role === "superuser";
+    const targetUserId = isAdmin
+      ? (userIdParam || user.id)
+      : user.id;
 
     const { data, error } = await supabase
       .from("uploads")

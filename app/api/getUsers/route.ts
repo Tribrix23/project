@@ -18,9 +18,6 @@ export async function GET() {
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
-  const {data: uploads, error: uploadError} = 
-  await supabaseServer.from('uploads').select("*");
-
   const merged = authUser.users.map(user => {
     const profile = profileMap.get(user.id);
 
@@ -28,6 +25,7 @@ export async function GET() {
       id: user.id,
       email: user.email,
       profile,
+      avatarUrl: `/api/avatar?userId=${user.id}`,
     };
   });
 
