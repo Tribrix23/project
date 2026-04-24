@@ -43,7 +43,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold text-white tracking-wide">Dashboard</h1>
-              <span className="text-[10px] text-slate-300 uppercase tracking-widest">Platform Overview</span>
+              <span className="text-[10px] text-slate-300 uppercase tracking-widest">Welcome Admin</span>
             </div>
           </div>
         </header>
