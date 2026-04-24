@@ -145,12 +145,16 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                      <Store size={22} className="text-slate-400" />
                    </div>
                  )}
-                <div className="flex-1 min-w-0">
+                 <div className="flex-1 min-w-0">
                    <div className="flex items-center gap-2">
                      {seller.id === 1 ? (
-                       <p className="text-sm font-medium truncate gold-shimmer-text">{seller.name}</p>
+                       <span className="inline-block px-2 py-0.5 rounded-md gold-shimmer-bg">
+                         <p className="text-sm font-medium text-white truncate">{seller.name}</p>
+                       </span>
                      ) : seller.id === 2 ? (
-                       <p className="text-sm font-medium truncate silver-shimmer-text">{seller.name}</p>
+                       <span className="inline-block px-2 py-0.5 rounded-md silver-shimmer-bg">
+                         <p className="text-sm font-medium text-slate-800 truncate">{seller.name}</p>
+                       </span>
                      ) : (
                        <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
                      )}
