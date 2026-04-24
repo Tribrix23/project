@@ -65,3 +65,14 @@ body {
   background-size: 200% auto;
   animation: silver-shimmer 4s linear infinite;
 }
+
+@keyframes bronze-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.bronze-shimmer-bg {
+  background: linear-gradient(90deg, #cd7f32 0%, #e6ac7e 25%, #cd7f32 50%, #e6ac7e 75%, #cd7f32 100%);
+  background-size: 200% auto;
+  animation: bronze-shimmer 6s linear infinite;
+}

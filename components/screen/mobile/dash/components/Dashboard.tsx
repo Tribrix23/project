@@ -140,6 +140,15 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                        <Store size={22} className="text-slate-500" />
                      </div>
                    </div>
+                 ) : seller.id === 3 ? (
+                   <div className="relative w-14 h-14 shrink-0">
+                     <div className="absolute inset-0 rounded-xl bg-linear-to-br from-[#cd7f32] via-[#e6ac7e] to-[#cd7f32] p-0.75 border-2 border-[#cd7f32]">
+                       <div className="w-full h-full bg-linear-to-br from-[#b36b2a] to-[#cd7f32] rounded-lg"></div>
+                     </div>
+                     <div className="absolute inset-1 bg-white rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
+                       <Store size={22} className="text-[#cd7f32]" />
+                     </div>
+                   </div>
                  ) : (
                    <div className="w-14 h-14 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
                      <Store size={22} className="text-slate-400" />
@@ -147,17 +156,21 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                  )}
                  <div className="flex-1 min-w-0">
                    <div className="flex items-center gap-2">
-                     {seller.id === 1 ? (
-                       <span className="inline-block px-2 py-0.5 rounded-md gold-shimmer-bg">
-                         <p className="text-sm font-medium text-white truncate">{seller.name}</p>
-                       </span>
-                     ) : seller.id === 2 ? (
-                       <span className="inline-block px-2 py-0.5 rounded-md silver-shimmer-bg">
-                         <p className="text-sm font-medium text-slate-800 truncate">{seller.name}</p>
-                       </span>
-                     ) : (
-                       <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
-                     )}
+                      {seller.id === 1 ? (
+                        <span className="inline-block px-2 py-0.5 rounded-md gold-shimmer-bg">
+                          <p className="text-sm font-medium text-white truncate">{seller.name}</p>
+                        </span>
+                      ) : seller.id === 2 ? (
+                        <span className="inline-block px-2 py-0.5 rounded-md silver-shimmer-bg">
+                          <p className="text-sm font-medium text-slate-800 truncate">{seller.name}</p>
+                        </span>
+                      ) : seller.id === 3 ? (
+                        <span className="inline-block px-2 py-0.5 rounded-md bronze-shimmer-bg">
+                          <p className="text-sm font-medium text-white truncate">{seller.name}</p>
+                        </span>
+                      ) : (
+                        <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
+                      )}
                    </div>
                   <p className="text-xs text-gray-500">{seller.category} • {seller.sales} sales</p>
                 </div>
