@@ -122,31 +122,39 @@ const Dashboard = ({ goBack }: DashboardProps) => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
             {topSellers.slice(0, 5).map((seller) => (
               <div key={seller.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                {seller.id === 1 ? (
-                  <div className="relative w-14 h-14 shrink-0">
-                    <div className="absolute inset-0 rounded-xl bg-linear-to-br from-amber-300 via-yellow-400 to-amber-600 p-0.75">
-                      <div className="w-full h-full bg-linear-to-br from-amber-200 to-amber-400 rounded-lg"></div>
-                    </div>
-                    <div className="absolute inset-1 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
-                      <Store size={22} className="text-slate-600" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-14 h-14 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
-                    <Store size={22} className="text-slate-400" />
-                  </div>
-                )}
+                 {seller.id === 1 ? (
+                   <div className="relative w-14 h-14 shrink-0">
+                     <div className="absolute inset-0 rounded-xl bg-linear-to-br from-amber-300 via-yellow-400 to-amber-600 p-0.75">
+                       <div className="w-full h-full bg-linear-to-br from-amber-200 to-amber-400 rounded-lg"></div>
+                     </div>
+                     <div className="absolute inset-1 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
+                       <Store size={22} className="text-slate-600" />
+                     </div>
+                   </div>
+                 ) : seller.id === 2 ? (
+                   <div className="relative w-14 h-14 shrink-0">
+                     <div className="absolute inset-0 rounded-xl bg-linear-to-br from-slate-300 via-slate-400 to-slate-500 p-0.75 border-2 border-slate-300">
+                       <div className="w-full h-full bg-linear-to-br from-slate-200 to-slate-300 rounded-lg"></div>
+                     </div>
+                     <div className="absolute inset-1 bg-white rounded-lg overflow-hidden flex items-center justify-center shadow-inner">
+                       <Store size={22} className="text-slate-500" />
+                     </div>
+                   </div>
+                 ) : (
+                   <div className="w-14 h-14 bg-slate-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
+                     <Store size={22} className="text-slate-400" />
+                   </div>
+                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
-                    {seller.id === 1 && (
-                      <span className="inline-flex px-2 py-0.5 bg-linear-to-r from-amber-500 via-yellow-400 to-amber-500 rounded-full border border-yellow-300 shadow-md shrink-0">
-                        <span className="text-[8px] font-bold text-amber-950 flex items-center gap-0.5 whitespace-nowrap">
-                          <span>★</span> Top 1
-                        </span>
-                      </span>
-                    )}
-                  </div>
+                   <div className="flex items-center gap-2">
+                     {seller.id === 1 ? (
+                       <p className="text-sm font-medium truncate gold-shimmer-text">{seller.name}</p>
+                     ) : seller.id === 2 ? (
+                       <p className="text-sm font-medium truncate silver-shimmer-text">{seller.name}</p>
+                     ) : (
+                       <p className="text-sm font-medium text-gray-800 truncate">{seller.name}</p>
+                     )}
+                   </div>
                   <p className="text-xs text-gray-500">{seller.category} • {seller.sales} sales</p>
                 </div>
                 <div className="text-right">
