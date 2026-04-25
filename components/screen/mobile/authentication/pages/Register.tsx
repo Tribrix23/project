@@ -133,6 +133,18 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
 
       if (data?.user) {
         setPopup({ type: 'success', message: 'Check your email to confirm your account' })
+            setFormData({
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+        })
+
+        setAgreedToTerms(false)
+        
       } else {
         setPopup({ type: 'error', message: 'An account with this email already exists' })
       }
