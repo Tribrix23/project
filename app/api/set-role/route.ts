@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseServerAdmin as supabaseServer } from "@/lib/supabase/serverAdmin";
 
 export async function POST(req: Request) {
     try {
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     const newMeta = {
         ...meta,
         role,
+        is_active: true,
     }
 
     let updateResult;

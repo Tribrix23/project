@@ -59,18 +59,33 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
     
     if (validateForm()) {
       setIsLoading(true)
-      
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      
-      if (error) {
-        setAuthError(error.message)
-        setIsLoading(false)
-      } else {
-        onLogin?.()
+
+      try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({email , password})
+          })
+
+          const data = await res.json();
+
+        if (!res.ok) {
+          setAuthError(data.error)
+          return;
+        }
+
+        setAuthError("");
+
+      } catch (e) {
+        setAuthError("Something Went Wrong");
+      } finally {
+        setIsLoading(false);
       }
+
+        onLogin?.()
+
     }
   }
 

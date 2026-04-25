@@ -25,7 +25,7 @@ const TotalUsers = () => {
     const load = async () => {
       const res = await fetch ('/api/getUsers');
       const data = await res.json();
-
+      
       setUsers(data);
     }
 
