@@ -34,11 +34,11 @@ const Dashboard = ({ goBack }: DashboardProps) => {
     fetchTotalUsers()
   }, [])
   const topSellers = [
-    { id: 1, name: 'BuildPro Hardware', category: 'Construction', sales: 1245, rating: 4.9, revenue: '₱450,000', trend: 'up', image: '/images/store1.png' },
-    { id: 2, name: 'Steel Masters', category: 'Steel Materials', sales: 987, rating: 4.8, revenue: '₱380,000', trend: 'up', image: '/images/store2.png' },
-    { id: 3, name: 'Cement Depot', category: 'Cement', sales: 756, rating: 4.7, revenue: '₱290,000', trend: 'down', image: '/images/store3.png' },
-    { id: 4, name: 'Tools & More', category: 'Tools', sales: 634, rating: 4.6, revenue: '₱180,000', trend: 'up', image: '/images/store4.png' },
-    { id: 5, name: 'Paint World', category: 'Paints', sales: 523, rating: 4.5, revenue: '₱120,000', trend: 'up', image: '/images/store5.png' },
+    { id: 1, name: 'BuildPro Hardware', category: 'Construction', sales: 1245, rating: 4.9, trend: 'up', image: '/images/store1.png' },
+    { id: 2, name: 'Steel Masters', category: 'Steel Materials', sales: 987, rating: 4.8, trend: 'up', image: '/images/store2.png' },
+    { id: 3, name: 'Cement Depot', category: 'Cement', sales: 756, rating: 4.7, trend: 'down', image: '/images/store3.png' },
+    { id: 4, name: 'Tools & More', category: 'Tools', sales: 634, rating: 4.6, trend: 'up', image: '/images/store4.png' },
+    { id: 5, name: 'Paint World', category: 'Paints', sales: 523, rating: 4.5, trend: 'up', image: '/images/store5.png' },
   ]
 
   const displaySellers = topSellers.slice(0, 5)
@@ -185,7 +185,6 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                   <p className="text-xs text-gray-500">{seller.category} • {seller.sales} sales</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-gray-800">{seller.revenue}</p>
                   <div className="flex items-center justify-end gap-1">
                     {seller.trend === 'up' ? (
                       <TrendingUp size={12} className="text-emerald-500" />
