@@ -16,8 +16,18 @@ interface UserData {
   phone: string
 }
 
+type Counts = {
+  seller: number;
+  buyer: number;
+  pending: number;
+  active: number;
+  inactive: number;
+  total: number;
+};
+
 const TotalUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
+  const [count, setCounts] = useState<Counts | null>(null);
 
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
 
@@ -26,7 +36,8 @@ const TotalUsers = () => {
        const res = await fetch ('/api/getUsers');
        const data = await res.json();
        console.log(data)
-       setUsers(Array.isArray(data) ? data : data.users || data.data || []);
+       setUsers(data.users);
+       setCounts(data.counts);
      }
 
      load();
@@ -83,15 +94,15 @@ const TotalUsers = () => {
       {/* User Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-gray-800">{users.filter(u => u.isActive === 'true').length}</p>
+          <p className="text-xl font-bold text-gray-800">{count?.active}</p>
           <p className="text-xs text-gray-500 font-medium">Active</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-purple-600">{users.filter(u => u.profile.sellerStatus === 'SELLER').length}</p>
+          <p className="text-xl font-bold text-purple-600">{count?.seller}</p>
           <p className="text-xs text-gray-500 font-medium">Sellers</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-yellow-600">{users.filter(u => u.profile.sellerStatus === 'PENDING').length}</p>
+          <p className="text-xl font-bold text-yellow-600">{count?.pending}</p>
           <p className="text-xs text-gray-500 font-medium">Pending</p>
         </div>
       </div>

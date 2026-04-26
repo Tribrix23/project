@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin";
 import { supabaseServer } from "@/lib/supabase/server";
+
 export async function GET() {
   const supabase = await supabaseServer();
 
   const { data: { user } } = await supabase.auth.getUser();
-
- // if (!user) {
- //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  //}
 
   const { data: authUser, error: authError } =
     await Server.auth.admin.listUsers();
@@ -26,16 +23,40 @@ export async function GET() {
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
+  let seller = 0;
+  let pending = 0;
+  let active = 0;
+  let inactive = 0;
+
   const merged = authUser.users.map(user => {
     const profile = profileMap.get(user.id);
+
+    const isActive = Boolean(user.app_metadata?.is_active);
+    const status = profile?.sellerStatus;
+
+    if (isActive) active++;
+    else inactive++;
+
+    if (status === "SELLER") seller++;
+    else if (status === "PENDING") pending++;
 
     return {
       id: user.id,
       email: user.email,
-      isActive: String(user.app_metadata.is_active),
+      isActive,
+      sellerStatus: status,
       profile,
     };
   });
 
-  return NextResponse.json(merged);
+  return NextResponse.json({
+    users: merged,
+    counts: {
+      seller,
+      pending,
+      active,
+      inactive,
+      total: merged.length,
+    },
+  });
 }
