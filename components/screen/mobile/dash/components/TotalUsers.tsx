@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { MoreVertical, Ban, Mail, User, Shield, Eye, Edit, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type UserStatus = 'active' | 'inactive' | 'pending'
 type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
@@ -26,8 +27,9 @@ type Counts = {
 };
 
 const TotalUsers = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [count, setCounts] = useState<Counts | null>(null);
+  const router = useRouter()
+  const [users, setUsers] = useState<any[]>([])
+  const [count, setCounts] = useState<Counts | null>(null)
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -119,21 +121,23 @@ const TotalUsers = () => {
         </div>
       </div>
 
-      {/* User Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-gray-800">{count?.active}</p>
-          <p className="text-xs text-gray-500 font-medium">Active</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-purple-600">{count?.seller}</p>
-          <p className="text-xs text-gray-500 font-medium">Sellers</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-yellow-600">{count?.pending}</p>
-          <p className="text-xs text-gray-500 font-medium">Pending</p>
-        </div>
-      </div>
+        <div className="grid grid-cols-3 gap-3 mb-5">
+         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+           <p className="text-xl font-bold text-gray-800">{count?.active}</p>
+           <p className="text-xs text-gray-500 font-medium">Active</p>
+         </div>
+         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+           <p className="text-xl font-bold text-purple-600">{count?.seller}</p>
+           <p className="text-xs text-gray-500 font-medium">Sellers</p>
+         </div>
+         <div
+           onClick={() => router.push('/dash?page=users&f=pending')}
+           className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+         >
+           <p className="text-xl font-bold text-yellow-600">{count?.pending}</p>
+           <p className="text-xs text-gray-500 font-medium">Pending</p>
+         </div>
+       </div>
 
       {/* Users List - Scrollable container */}
       <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">

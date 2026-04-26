@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
   const search = searchParams.get('search') || '';
+  const statusFilter = searchParams.get('status') || '';
   const skip = (page - 1) * limit;
 
   const supabase = await supabaseServer();
@@ -67,6 +68,11 @@ export async function GET(request: Request) {
 
       return email.includes(query) || fullName.includes(query);
     });
+  }
+
+  // Apply status filter if provided
+  if (statusFilter.trim()) {
+    filtered = filtered.filter(user => user.sellerStatus === statusFilter.toUpperCase());
   }
 
   let filteredActive = 0;
