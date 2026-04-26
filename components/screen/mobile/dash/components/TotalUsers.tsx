@@ -21,16 +21,15 @@ const TotalUsers = () => {
 
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
 
-  useEffect(() => {
-    const load = async () => {
-      const res = await fetch ('/api/getUsers');
-      const data = await res.json();
-      
-      setUsers(data);
-    }
+   useEffect(() => {
+     const load = async () => {
+       const res = await fetch ('/api/getUsers');
+       const data = await res.json();
+       setUsers(Array.isArray(data) ? data : data.users || data.data || []);
+     }
 
-    load();
-  }, [])
+     load();
+   }, [])
 
   const handleDeactivate = (userId: number) => {
     setUsers(users.map(user => 
@@ -105,9 +104,9 @@ const TotalUsers = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
                   <h3 className="font-semibold text-gray-800 text-base truncate">{user.profile.first_name + " " + user.profile.middle_name + " " + user.profile.last_name}</h3>
-                  {user.status === 'inactive' && (
-                    <Ban size={14} className="text-red-500 shrink-0" />
-                  )}
+                   {String(user.isActive) === 'false' && (
+                     <Ban size={14} className="text-red-500 shrink-0" />
+                   )}
                 </div>
                 
                 <p className="text-xs text-gray-400 truncate mb-3">{user.email}</p>
@@ -117,13 +116,13 @@ const TotalUsers = () => {
                     {getRoleIcon(user.role)}
                     {user.role === 'seller' ? 'Seller' : 'Buyer'}
                   </span>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      user.status === 'active' ? 'bg-green-500' : 
-                      user.status === 'inactive' ? 'bg-red-500' : 'bg-yellow-500'
-                    }`}></span>
-                    {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Unknown'}
-                  </span>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        String(user.isActive) === 'true' ? 'bg-green-500' : 
+                        String(user.isActive) === 'false' ? 'bg-red-500' : 'bg-yellow-500'
+                      }`}></span>
+                      {String(user.isActive) === 'true' ? 'Active' : 'Deactive'}
+                    </span>
                 </div>
               </div>
 

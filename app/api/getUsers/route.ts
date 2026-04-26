@@ -6,9 +6,9 @@ export async function GET() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+ // if (!user) {
+ //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  //}
 
   const { data: authUser, error: authError } =
     await Server.auth.admin.listUsers();
@@ -32,7 +32,7 @@ export async function GET() {
     return {
       id: user.id,
       email: user.email,
-      isActive: user.app_metadata.is_active,
+      isActive: String(user.app_metadata.is_active),
       profile,
     };
   });
