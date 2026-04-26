@@ -204,7 +204,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
             <OptionTabs icons={User} text='Edit Profile' borderDown={true} />
             <OptionTabs icons={Wallet} text='Payment Methods' borderDown={true} />
-            <OptionTabs icons={MapPin} text='Addresses' borderDown={true} />
+            <OptionTabs icons={MapPin} text='Addresses' borderDown={true} onClick={() => router.push("/settings?c=addr")}/>
             <OptionTabs icons={BellIcon} text='Notifications' borderDown={false} />
           </div>
         </div>
@@ -234,7 +234,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
         {isLoggedIn && (
           <div className='py-2 space-y-1'>
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-              <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} />
+              <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
               <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
               <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
             </div>
