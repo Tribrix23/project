@@ -1,57 +1,42 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { MoreVertical, Ban, Mail, User, Shield, Eye, Edit, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { MoreVertical, User, Shield, Check, X, Eye } from 'lucide-react'
 
-type UserStatus = 'active' | 'inactive' | 'pending'
 type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
 
 interface UserData {
-  id: number
-  fullName: string
+  id: string
   email: string
-  status: UserStatus
-  role: UserRole
-  joinedDate: string
-  phone: string
+  first_name: string
+  middle_name: string
+  last_name: string
+  sellerStatus: UserRole
+  isActive: boolean
 }
 
-type Counts = {
-  seller: number;
-  buyer: number;
-  pending: number;
-  active: number;
-  inactive: number;
-  total: number;
-};
-
 const Pending = () => {
-  const router = useRouter()
-  const [users, setUsers] = useState<any[]>([])
-  const [count, setCounts] = useState<Counts | null>(null)
+  const [users, setUsers] = useState<UserData[]>([])
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
   const itemsPerPage = 10
 
-  const load = async (page: number, query: string = '') => {
+  const load = async (page: number) => {
     setIsLoading(true)
     const params = new URLSearchParams({
       page: page.toString(),
       limit: itemsPerPage.toString(),
-      status: 'PENDING'
+      status: 'PENDING',
     })
-    if (query.trim()) {
-      params.append('search', query.trim())
-    }
     const res = await fetch(`/api/getUsers?${params.toString()}`)
     const data = await res.json()
-    setUsers(data.users || [])
-    setCounts(data.counts)
+    setUsers((data.users || []).map((u: any) => ({
+      ...u,
+      id: u.id.toString(),
+    })))
     setTotalPages(data.pagination?.totalPages || 1)
     setCurrentPage(data.pagination?.page || 1)
     setIsLoading(false)
@@ -61,171 +46,158 @@ const Pending = () => {
     load(1)
   }, [])
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      load(1, searchQuery)
-      setCurrentPage(1)
-      setSelectedUser(null)
-    }
-  }
-
   const handlePageChange = (page: number) => {
-    load(page, searchQuery)
+    load(page)
     setSelectedUser(null)
   }
 
-  const handleDeactivate = (userId: number) => {
-    setUsers(users.map(user =>
-      user.id === userId
-        ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-        : user
-    ))
-    setSelectedUser(null)
-  }
-
-  const handleDelete = (userId: number) => {
-    setUsers(users.filter(user => user.id !== userId))
-    setSelectedUser(null)
-  }
-
-  const getStatusColor = (status: UserStatus) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700'
-      case 'inactive': return 'bg-red-100 text-red-700'
-      case 'pending': return 'bg-yellow-100 text-yellow-700'
-    }
+  const getGradient = (firstLetter: string) => {
+    const gradients = [
+      'from-blue-400 to-indigo-500',
+      'from-purple-400 to-pink-500',
+      'from-green-400 to-emerald-500',
+      'from-amber-400 to-yellow-500',
+      'from-cyan-400 to-blue-500',
+      'from-rose-400 to-red-500',
+      'from-orange-400 to-amber-500',
+      'from-teal-400 to-green-500',
+    ]
+    const index = firstLetter.toUpperCase().charCodeAt(0) % gradients.length
+    return gradients[index]
   }
 
   const getRoleIcon = (role: UserRole) => {
-    return role === 'SELLER' ? <Shield size={12} /> : <User size={12} />
+    return role === 'SELLER' || role === 'PENDING' ? (
+      <Shield size={12} />
+    ) : (
+      <User size={12} />
+    )
   }
 
-  const getRoleColor = (role: UserRole) => {
-    return role === 'SELLER'
-      ? 'bg-purple-100 text-purple-700'
-      : 'bg-blue-100 text-blue-700'
+  const handleApprove = (userId: string) => {
+    alert(`Approve user ${userId}`)
+    setSelectedUser(null)
+  }
+
+  const handleReject = (userId: string) => {
+    alert(`Reject user ${userId}`)
+    setSelectedUser(null)
+  }
+
+  const handleReview = (userId: string) => {
+    alert(`Review user ${userId}`)
+    setSelectedUser(null)
   }
 
   return (
     <div className="w-full min-h-screen bg-linear-to-b from-gray-50 to-gray-100 p-4 pb-20">
-      {/* Search Header */}
-      <div className="mb-5">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search pending users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            className="w-full px-4 py-3 pl-11 rounded-xl border-0 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:shadow-md transition-all"
-          />
-          <svg className="absolute left-3.5 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Pending Users List - Scrollable container */}
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+      {/* User Cards - Scrollable container */}
+      <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-2 mb-4">
         {isLoading ? (
           Array.from({ length: itemsPerPage }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="h-4 bg-gray-200 rounded w-32"></div>
-                  </div>
-                  <div className="h-3 bg-gray-200 rounded w-48 mb-3"></div>
-                  <div className="flex gap-2">
-                    <div className="h-6 bg-gray-200 rounded-full w-16"></div>
-                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+            <div
+              key={i}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-12 h-12 rounded-full bg-gray-200" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-48" />
+                    <div className="h-3 bg-gray-200 rounded w-64" />
                   </div>
                 </div>
-                <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded-lg" />
               </div>
             </div>
           ))
+        ) : users.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <User size={48} className="text-gray-300 mb-3" />
+            <p className="text-gray-500 text-sm">No pending users found</p>
+          </div>
         ) : (
-          users.map((user) =>
-            <div key={user.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
+          users.map((user) => (
+            <div
+              key={user.id}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center justify-between">
                 {/* User Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <h3 className="font-semibold text-gray-800 text-base truncate">{user.profile.first_name + " " + user.profile.middle_name + " " + user.profile.last_name}</h3>
-                    {String(user.isActive) === 'false' && (
-                      <Ban size={14} className="text-red-500 shrink-0" />
-                    )}
-                  </div>
-
-                  <p className="text-xs text-gray-400 truncate mb-3">{user.email}</p>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                      {getRoleIcon(user.role)}
-                      {user.role === 'BUYER' ? 'BUYER' : user.role === 'SELLER' ? 'SELLER' : 'PENDING'}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-12 h-12 rounded-full bg-linear-to-br ${getGradient(user.first_name?.[0] || user.email[0] || '?')} flex items-center justify-center shrink-0`}>
+                    <span className="text-white font-semibold text-lg">
+                      {user.first_name?.[0] || user.email[0]?.toUpperCase()}
                     </span>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        String(user.isActive) === 'true' ? 'bg-green-500' :
-                        String(user.isActive) === 'false' ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}></span>
-                      {String(user.isActive) === 'true' ? 'Active' : 'Deactive'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-800 text-base truncate">
+                      {user.first_name} {user.middle_name} {user.last_name}
+                    </h3>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 mt-1">
+                      <User size={10} />
+                      Pending
                     </span>
                   </div>
                 </div>
 
                 {/* Action Button */}
                 <button
-                  onClick={() => setSelectedUser(selectedUser?.id === user.id ? null : user)}
+                  onClick={() =>
+                    setSelectedUser(selectedUser?.id === user.id ? null : user)
+                  }
                   className="p-2 rounded-lg hover:bg-gray-100 shrink-0 transition-colors"
                 >
-                  <MoreVertical size={18} className="text-gray-400" />
+                  <MoreVertical size={20} className="text-gray-600" />
                 </button>
               </div>
 
               {/* Action Menu */}
               {selectedUser?.id === user.id && (
-                <div className="mt-3 pt-3 border-t border-gray-100 ">
-                  <div className="gap-2 flex flex-row justify-between">
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={() => handleDeactivate(user.id)}
-                      className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+                      onClick={() => handleApprove(user.id)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors"
                     >
-                      <Ban size={18} className={user.status === 'active' ? 'text-red-500' : 'text-green-500'} />
-                      <span className="text-xs text-gray-600">
-                        {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                      <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check size={20} className="text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-green-700">
+                        Approve
                       </span>
                     </button>
-                    <button className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Mail size={18} className="text-blue-500" />
-                      <span className="text-xs text-gray-600">Email</span>
+                    <button
+                      onClick={() => handleReject(user.id)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                        <X size={20} className="text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-red-700">Reject</span>
                     </button>
                     <button
-                      onClick={() => handleDelete(user.id)}
-                      className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-red-50 transition-colors"
+                      onClick={() => handleReview(user.id)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
                     >
-                      <Trash2 size={18} className="text-red-500" />
-                      <span className="text-xs text-red-600">Delete</span>
+                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <Eye size={20} className="text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-blue-700">
+                        Review
+                      </span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
           )
-        )}
+        ))}
       </div>
 
-      {/* Empty State */}
-      {users.length === 0 && !isLoading && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <User size={48} className="text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm">No pending users found</p>
-        </div>
-      )}
-
       {/* Pagination */}
-      {!isLoading && totalPages > 1 && (
+      {!isLoading && totalPages > 1 && users.length > 0 && (
         <div className="flex items-center justify-between mt-4 px-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
@@ -275,10 +247,12 @@ const Pending = () => {
       )}
 
       {/* Page Info */}
-      {count && (
+      {users.length > 0 && (
         <p className="text-center text-xs text-gray-400 mt-2">
-          Showing {users.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
-          {Math.min(currentPage * itemsPerPage, count.total)} of {count.total} pending users
+          Showing{' '}
+          {users.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+          {Math.min(currentPage * itemsPerPage, users.length)} of {users.length}{' '}
+          pending users
         </p>
       )}
     </div>

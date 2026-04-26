@@ -32,7 +32,7 @@ const MobileDashboardScreen = () => {
             </div>
           </header>
         </div>
-        <div className="flex-1 overflow-scroll">
+        <div className="flex-1 overflow-hidden">
           <Pending />
         </div>
       </div>
@@ -52,7 +52,7 @@ const MobileDashboardScreen = () => {
             </div>
           </header>
         </div>
-        <div className="flex-1 overflow-scroll">
+        <div className="flex-1 overflow-hidden">
           <TotalUsers />
         </div>
       </div>
