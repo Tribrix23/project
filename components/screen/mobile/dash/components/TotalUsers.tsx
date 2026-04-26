@@ -32,12 +32,17 @@ const TotalUsers = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const itemsPerPage = 10
 
-  const load = async (page: number) => {
+  const load = async (page: number, query: string = '') => {
     setIsLoading(true)
-    const res = await fetch(`/api/getUsers?page=${page}&limit=${itemsPerPage}`)
+    const params = new URLSearchParams({ page: page.toString(), limit: itemsPerPage.toString() })
+    if (query.trim()) {
+      params.append('search', query.trim())
+    }
+    const res = await fetch(`/api/getUsers?${params.toString()}`)
     const data = await res.json()
     setUsers(data.users || [])
     setCounts(data.counts)
@@ -50,12 +55,20 @@ const TotalUsers = () => {
     load(1)
   }, [])
 
-  const handlePageChange = (page: number) => {
-    load(page)
-    setSelectedUser(null)
-  }
+   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+     if (e.key === 'Enter') {
+       load(1, searchQuery)
+       setCurrentPage(1)
+       setSelectedUser(null)
+     }
+   }
 
-  const handleDeactivate = (userId: number) => {
+   const handlePageChange = (page: number) => {
+     load(page, searchQuery)
+     setSelectedUser(null)
+   }
+
+   const handleDeactivate = (userId: number) => {
     setUsers(users.map(user => 
       user.id === userId 
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
@@ -91,12 +104,15 @@ const TotalUsers = () => {
     <div className="w-full min-h-screen bg-linear-to-b from-gray-50 to-gray-100 p-4 pb-20">
       {/* Search Header */}
       <div className="mb-5">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search users..."
-            className="w-full px-4 py-3 pl-11 rounded-xl border-0 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:shadow-md transition-all"
-          />
+         <div className="relative">
+           <input
+             type="text"
+             placeholder="Search users..."
+             value={searchQuery}
+             onChange={(e) => setSearchQuery(e.target.value)}
+             onKeyDown={handleSearchKeyDown}
+             className="w-full px-4 py-3 pl-11 rounded-xl border-0 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:shadow-md transition-all"
+           />
           <svg className="absolute left-3.5 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>

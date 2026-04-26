@@ -9,6 +9,7 @@ import {
   ArrowUpRight, ArrowLeft,
   AlertTriangle, CheckCircle, XCircle, ChevronRight
 } from 'lucide-react'
+import userCounterRealtime from '@/hooks/userCounterRealtime'
 
 type DashboardProps = {
   goBack?: () => void
@@ -16,23 +17,8 @@ type DashboardProps = {
 
 const Dashboard = ({ goBack }: DashboardProps) => {
   const router = useRouter()
-  const [totalUsers, setTotalUsers] = useState<number>(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const {totalUsers, isLoading} = userCounterRealtime();
 
-  useEffect(() => {
-    const fetchTotalUsers = async () => {
-      try {
-        const res = await fetch('/api/getUsers?page=1&limit=1')
-        const data = await res.json()
-        setTotalUsers(data.counts?.total || 0)
-      } catch (error) {
-        console.error('Failed to fetch total users:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchTotalUsers()
-  }, [])
   const topSellers = [
     { id: 1, name: 'BuildPro Hardware', category: 'Construction', sales: 1245, rating: 4.9, trend: 'up', image: '/images/store1.png' },
     { id: 2, name: 'Steel Masters', category: 'Steel Materials', sales: 987, rating: 4.8, trend: 'up', image: '/images/store2.png' },
@@ -98,7 +84,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
                  <Users size={16} className="text-white" />
                </div>
                <p className="text-lg font-bold">
-                 {isLoading ? '-' : totalUsers.toLocaleString()}
+                {isLoading ? "..." : totalUsers}
                </p>
                <p className="text-[10px] text-blue-100">Total Users</p>
              </button>

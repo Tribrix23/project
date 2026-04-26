@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
+  const search = searchParams.get('search') || '';
   const skip = (page - 1) * limit;
 
   const supabase = await supabaseServer();
@@ -54,17 +55,43 @@ export async function GET(request: Request) {
     };
   });
 
-  const total = merged.length;
+  let filtered = merged;
+  if (search.trim()) {
+    const query = search.toLowerCase().trim();
+    filtered = merged.filter(user => {
+      const email = (user.email || '').toLowerCase();
+      const firstName = (user.profile?.first_name || '').toLowerCase();
+      const middleName = (user.profile?.middle_name || '').toLowerCase();
+      const lastName = (user.profile?.last_name || '').toLowerCase();
+      const fullName = `${firstName} ${middleName} ${lastName}`.trim();
+
+      return email.includes(query) || fullName.includes(query);
+    });
+  }
+
+  let filteredActive = 0;
+  let filteredInactive = 0;
+  let filteredSeller = 0;
+  let filteredPending = 0;
+
+  filtered.forEach(user => {
+    if (user.isActive) filteredActive++;
+    else filteredInactive++;
+    if (user.sellerStatus === "SELLER") filteredSeller++;
+    else if (user.sellerStatus === "PENDING") filteredPending++;
+  });
+
+  const total = filtered.length;
   const totalPages = Math.ceil(total / limit);
-  const paginatedUsers = merged.slice(skip, skip + limit);
+  const paginatedUsers = filtered.slice(skip, skip + limit);
 
   return NextResponse.json({
     users: paginatedUsers,
     counts: {
-      seller,
-      pending,
-      active,
-      inactive,
+      seller: filteredSeller,
+      pending: filteredPending,
+      active: filteredActive,
+      inactive: filteredInactive,
       total,
     },
     pagination: {
