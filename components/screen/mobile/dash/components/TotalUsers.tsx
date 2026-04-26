@@ -28,20 +28,32 @@ type Counts = {
 const TotalUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [count, setCounts] = useState<Counts | null>(null);
-
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
 
-   useEffect(() => {
-     const load = async () => {
-       const res = await fetch ('/api/getUsers');
-       const data = await res.json();
-       console.log(data)
-       setUsers(data.users);
-       setCounts(data.counts);
-     }
+  const itemsPerPage = 10
 
-     load();
-   }, [])
+  const load = async (page: number) => {
+    setIsLoading(true)
+    const res = await fetch(`/api/getUsers?page=${page}&limit=${itemsPerPage}`)
+    const data = await res.json()
+    setUsers(data.users || [])
+    setCounts(data.counts)
+    setTotalPages(data.pagination?.totalPages || 1)
+    setCurrentPage(data.pagination?.page || 1)
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    load(1)
+  }, [])
+
+  const handlePageChange = (page: number) => {
+    load(page)
+    setSelectedUser(null)
+  }
 
   const handleDeactivate = (userId: number) => {
     setUsers(users.map(user => 
@@ -109,7 +121,26 @@ const TotalUsers = () => {
 
       {/* Users List - Scrollable container */}
       <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-        {users.map((user) => (
+        {isLoading ? (
+          Array.from({ length: itemsPerPage }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded w-48 mb-3"></div>
+                  <div className="flex gap-2">
+                    <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                  </div>
+                </div>
+                <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
+              </div>
+            </div>
+          ))
+        ) : (
+          users.map((user) => (
           <div key={user.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               {/* User Info */}
@@ -175,16 +206,74 @@ const TotalUsers = () => {
               </div>
             )}
           </div>
-        ))}
+        )))}
       </div>
 
-      {/* Empty State */}
-      {users.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <User size={48} className="text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm">No users found</p>
-        </div>
-      )}
+       {/* Empty State */}
+       {users.length === 0 && !isLoading && (
+         <div className="flex flex-col items-center justify-center py-12">
+           <User size={48} className="text-gray-300 mb-3" />
+           <p className="text-gray-500 text-sm">No users found</p>
+         </div>
+       )}
+
+       {/* Pagination */}
+       {!isLoading && totalPages > 1 && (
+         <div className="flex items-center justify-between mt-4 px-2">
+           <button
+             onClick={() => handlePageChange(currentPage - 1)}
+             disabled={currentPage === 1}
+             className="px-4 py-2 text-sm font-medium text-gray-600 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+           >
+             Previous
+           </button>
+           
+           <div className="flex items-center gap-1">
+             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+               let pageNum: number
+               if (totalPages <= 5) {
+                 pageNum = i + 1
+               } else if (currentPage <= 3) {
+                 pageNum = i + 1
+               } else if (currentPage >= totalPages - 2) {
+                 pageNum = totalPages - 4 + i
+               } else {
+                 pageNum = currentPage - 2 + i
+               }
+               
+               return (
+                 <button
+                   key={pageNum}
+                   onClick={() => handlePageChange(pageNum)}
+                   className={`w-8 h-8 text-sm font-medium rounded-lg transition-colors ${
+                     pageNum === currentPage
+                       ? 'bg-blue-500 text-white'
+                       : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50'
+                   }`}
+                 >
+                   {pageNum}
+                 </button>
+               )
+             })}
+           </div>
+
+           <button
+             onClick={() => handlePageChange(currentPage + 1)}
+             disabled={currentPage === totalPages}
+             className="px-4 py-2 text-sm font-medium text-gray-600 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+           >
+             Next
+           </button>
+         </div>
+       )}
+
+       {/* Page Info */}
+       {count && (
+         <p className="text-center text-xs text-gray-400 mt-2">
+           Showing {users.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+           {Math.min(currentPage * itemsPerPage, count.total)} of {count.total} users
+         </p>
+       )}
     </div>
   )
 }

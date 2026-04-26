@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin";
 import { supabaseServer } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '10');
+  const skip = (page - 1) * limit;
+
   const supabase = await supabaseServer();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -49,14 +54,24 @@ export async function GET() {
     };
   });
 
+  const total = merged.length;
+  const totalPages = Math.ceil(total / limit);
+  const paginatedUsers = merged.slice(skip, skip + limit);
+
   return NextResponse.json({
-    users: merged,
+    users: paginatedUsers,
     counts: {
       seller,
       pending,
       active,
       inactive,
-      total: merged.length,
+      total,
+    },
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
     },
   });
 }
