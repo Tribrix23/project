@@ -74,7 +74,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
       <div className="flex-1 overflow-scroll pb-20">
         {/* Stats Cards - Redesigned */}
         <div className="w-full px-4 pt-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {/* Total Users */}
             <button onClick={() => router.push('/dash?page=users')} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
@@ -83,15 +83,6 @@ const Dashboard = ({ goBack }: DashboardProps) => {
               <p className="text-lg font-bold">12,847</p>
               <p className="text-[10px] text-blue-100">Total Users</p>
             </button>
-
-            {/* Active Sellers */}
-            <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-3 text-white shadow-lg">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                <Store size={16} className="text-white" />
-              </div>
-              <p className="text-lg font-bold">2,341</p>
-              <p className="text-[10px] text-emerald-100">Active Sellers</p>
-            </div>
 
             {/* Total Orders */}
             <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-3 text-white shadow-lg">

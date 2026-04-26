@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { MoreVertical, Ban, Mail, User, Shield, Eye, Edit, Trash2 } from 'lucide-react'
 
 type UserStatus = 'active' | 'inactive' | 'pending'
-type UserRole = 'buyer' | 'seller'
+type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
 
 interface UserData {
   id: number
@@ -25,6 +25,7 @@ const TotalUsers = () => {
      const load = async () => {
        const res = await fetch ('/api/getUsers');
        const data = await res.json();
+       console.log(data)
        setUsers(Array.isArray(data) ? data : data.users || data.data || []);
      }
 
@@ -54,11 +55,11 @@ const TotalUsers = () => {
   }
 
   const getRoleIcon = (role: UserRole) => {
-    return role === 'seller' ? <Shield size={12} /> : <User size={12} />
+    return role === 'SELLER' ? <Shield size={12} /> : <User size={12} />
   }
 
   const getRoleColor = (role: UserRole) => {
-    return role === 'seller' 
+    return role === 'SELLER' 
       ? 'bg-purple-100 text-purple-700' 
       : 'bg-blue-100 text-blue-700'
   }
@@ -82,15 +83,15 @@ const TotalUsers = () => {
       {/* User Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-gray-800">{users.filter(u => u.status === 'active').length}</p>
+          <p className="text-xl font-bold text-gray-800">{users.filter(u => u.isActive === 'true').length}</p>
           <p className="text-xs text-gray-500 font-medium">Active</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-purple-600">{users.filter(u => u.role === 'seller').length}</p>
+          <p className="text-xl font-bold text-purple-600">{users.filter(u => u.profile.sellerStatus === 'SELLER').length}</p>
           <p className="text-xs text-gray-500 font-medium">Sellers</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-          <p className="text-xl font-bold text-yellow-600">{users.filter(u => u.status === 'pending').length}</p>
+          <p className="text-xl font-bold text-yellow-600">{users.filter(u => u.profile.sellerStatus === 'PENDING').length}</p>
           <p className="text-xs text-gray-500 font-medium">Pending</p>
         </div>
       </div>
@@ -113,8 +114,8 @@ const TotalUsers = () => {
 
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                    {getRoleIcon(user.role)}
-                    {user.role === 'seller' ? 'Seller' : 'Buyer'}
+                    {getRoleIcon(user.profile.sellerStatus)}
+                    {user.profile.sellerStatus === 'BUYER' ? 'BUYER' : user.profile.sellerStatus === 'SELLER' ? 'SELLER' : 'PENDING'}
                   </span>
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${
@@ -137,8 +138,8 @@ const TotalUsers = () => {
 
             {/* Action Menu */}
             {selectedUser?.id === user.id && (
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <div className="grid grid-cols-4 gap-2">
+              <div className="mt-3 pt-3 border-t border-gray-100 ">
+                <div className="gap-2 flex flex-row justify-between">
                   <button 
                     onClick={() => handleDeactivate(user.id)}
                     className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
@@ -151,10 +152,6 @@ const TotalUsers = () => {
                   <button className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                     <Mail size={18} className="text-blue-500" />
                     <span className="text-xs text-gray-600">Email</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Eye size={18} className="text-purple-500" />
-                    <span className="text-xs text-gray-600">View</span>
                   </button>
                   <button 
                     onClick={() => handleDelete(user.id)}
