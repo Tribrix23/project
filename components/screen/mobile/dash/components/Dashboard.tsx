@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { 
@@ -16,6 +16,23 @@ type DashboardProps = {
 
 const Dashboard = ({ goBack }: DashboardProps) => {
   const router = useRouter()
+  const [totalUsers, setTotalUsers] = useState<number>(0)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      try {
+        const res = await fetch('/api/getUsers?page=1&limit=1')
+        const data = await res.json()
+        setTotalUsers(data.counts?.total || 0)
+      } catch (error) {
+        console.error('Failed to fetch total users:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchTotalUsers()
+  }, [])
   const topSellers = [
     { id: 1, name: 'BuildPro Hardware', category: 'Construction', sales: 1245, rating: 4.9, revenue: '₱450,000', trend: 'up', image: '/images/store1.png' },
     { id: 2, name: 'Steel Masters', category: 'Steel Materials', sales: 987, rating: 4.8, revenue: '₱380,000', trend: 'up', image: '/images/store2.png' },
@@ -75,14 +92,16 @@ const Dashboard = ({ goBack }: DashboardProps) => {
         {/* Stats Cards - Redesigned */}
         <div className="w-full px-4 pt-4">
           <div className="grid grid-cols-3 gap-2">
-            {/* Total Users */}
-            <button onClick={() => router.push('/dash?page=users')} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                <Users size={16} className="text-white" />
-              </div>
-              <p className="text-lg font-bold">12,847</p>
-              <p className="text-[10px] text-blue-100">Total Users</p>
-            </button>
+             {/* Total Users */}
+             <button onClick={() => router.push('/dash?page=users')} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
+               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
+                 <Users size={16} className="text-white" />
+               </div>
+               <p className="text-lg font-bold">
+                 {isLoading ? '-' : totalUsers.toLocaleString()}
+               </p>
+               <p className="text-[10px] text-blue-100">Total Users</p>
+             </button>
 
             {/* Total Orders */}
             <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-3 text-white shadow-lg">
