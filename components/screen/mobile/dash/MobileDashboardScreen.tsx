@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 import { useSearchParams } from 'next/navigation'
-import Dashboard from './components/Dashboard'
-import TotalUsers from './components/TotalUsers'
-import Pending from './components/Pending'
+import Dashboard from './views/Dashboard'
+import TotalUsers from './views/TotalUsers'
+import Pending from './views/Pending'
 import { ArrowLeft } from 'lucide-react'
 
 const MobileDashboardScreen = () => {

@@ -3,10 +3,10 @@
 import IconBadge from '@/components/ui/IconBadge'
 import { Store, MapPin, LayoutDashboard, UserIcon, Package, BarChart3 } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
-import SellerStore from './components/SellerStore'
-import Tracking from './components/Tracking'
-import Dashboard from './components/Dashboard'
-import Profile from './components/Profile'
+import SellerStore from './views/SellerStore'
+import Tracking from './views/Tracking'
+import Dashboard from './views/Dashboard'
+import Profile from './views/Profile'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 const pageRoutes: Record<string, number> = {

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import DisplayProducts from './pages/DisplayProducts'
-import Details from './pages/Details'
+import DisplayProducts from './views/DisplayProducts'
+import Details from './views/Details'
 import { createClient } from '@/lib/supabase/client'
 
 type UserData = {

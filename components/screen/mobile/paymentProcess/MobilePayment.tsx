@@ -1,6 +1,6 @@
 import React from 'react'
-import PaymentTab from './components/PaymentTab'
-import Confirmation from './components/Confirmation'
+import PaymentTab from './views/PaymentTab'
+import Confirmation from './views/Confirmation'
 
 const MobilePayment = () => {
   return (

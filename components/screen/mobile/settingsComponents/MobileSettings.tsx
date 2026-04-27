@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
-import SellerAplly from './components/SellerAplly'
-import Address from './components/Address'
+import SellerAplly from './views/SellerAplly'
+import Address from './views/Address'
 import { useSearchParams } from 'next/navigation'
 
 const MobileSettings = () => {
