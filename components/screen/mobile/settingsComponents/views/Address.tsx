@@ -2,8 +2,11 @@
 
 import PhilippinesMap from '@/components/ui/Map'
 import React, { useState, useEffect, useRef } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const Address = () => {
+  const router = useRouter()
   const [form, setForm] = useState({
     province: '',
     provinceCode: '',
@@ -122,6 +125,14 @@ const Address = () => {
   }
 
   // ======================
+  // SUBMIT HANDLER
+  // ======================
+  const handleSubmit = () => {
+    console.log('Submitting address:', form)
+    // TODO: implement API call
+  }
+
+  // ======================
   // FILTER HELPERS
   // ======================
   const filterList = (list: any[], value: string) =>
@@ -173,11 +184,14 @@ const Address = () => {
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
-      <header className="h-16 bg-white flex items-center px-4 border-b">
-        <h1 className="text-xl font-bold">Address</h1>
+      <header className="w-full h-16 bg-white flex items-center px-4 shadow-sm shrink-0">
+        <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+          <ArrowLeft size={20} className="text-gray-700" />
+        </button>
+        <h1 className="text-xl font-bold text-gray-800 ml-2">Address</h1>
       </header>
 
-      <main className="flex-1 overflow-scroll">
+      <main className="flex-1 overflow-scroll px-4 pb-4">
 
         {/* MAP */}
         <div className="p-4">
@@ -272,6 +286,17 @@ const Address = () => {
           />
 
         </div>
+
+        {/* SUBMIT BUTTON */}
+        <div className="mt-5">
+          <button
+            onClick={handleSubmit}
+            className="w-full py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors"
+          >
+            Save Address
+          </button>
+        </div>
+
       </main>
     </div>
   )
