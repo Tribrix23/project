@@ -1,160 +1,276 @@
+"use client"
+
 import PhilippinesMap from '@/components/ui/Map'
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const Address = () => {
   const [form, setForm] = useState({
     province: '',
+    provinceCode: '',
     city: '',
+    cityCode: '',
     barangay: '',
+    barangayCode: '',
     street: '',
     blkLot: '',
     zipcode: '',
   })
 
-  const mapRef = useRef<{
-    locateUser: (() => Promise<boolean>) | null
-  }>(null)
+  const [provinces, setProvinces] = useState<any[]>([])
+  const [cities, setCities] = useState<any[]>([])
+  const [barangays, setBarangays] = useState<any[]>([])
 
-  const handleFormChange = (field: keyof typeof form, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }))
-  }
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
-  const handleLocationChange = (data: {
-    province: string
-    city: string
-    barangay: string
-    street: string
-    zipcode: string
-    lat: number
-    lon: number
-  }) => {
+  const mapRef = useRef<any>(null)
+
+  // ======================
+  // LOAD PROVINCES
+  // ======================
+  useEffect(() => {
+    fetch("/api/psgc?type=provinces")
+      .then(res => res.json())
+      .then(setProvinces)
+  }, [])
+
+  // ======================
+  // LOAD CITIES
+  // ======================
+  useEffect(() => {
+    if (!form.provinceCode) return
+
+    fetch(`/api/psgc?type=cities&code=${form.provinceCode}`)
+      .then(res => res.json())
+      .then(setCities)
+
+    setForm(prev => ({
+      ...prev,
+      city: '',
+      cityCode: '',
+      barangay: '',
+      barangayCode: '',
+      zipcode: ''
+    }))
+
+    setBarangays([])
+  }, [form.provinceCode])
+
+  // ======================
+  // LOAD BARANGAYS
+  // ======================
+  useEffect(() => {
+    if (!form.cityCode) return
+
+    fetch(`/api/psgc?type=barangays&code=${form.cityCode}`)
+      .then(res => res.json())
+      .then(setBarangays)
+
+    setForm(prev => ({
+      ...prev,
+      barangay: '',
+      barangayCode: '',
+      zipcode: ''
+    }))
+  }, [form.cityCode])
+
+  // ======================
+  // MAP → FORM UPDATE
+  // ======================
+  const handleLocationChange = (data: any) => {
     setForm(prev => ({
       ...prev,
       province: data.province || prev.province,
       city: data.city || prev.city,
       barangay: data.barangay || prev.barangay,
-      street: data.street || '', // Leave street blank if from geocode
+      street: data.street || '',
       zipcode: data.zipcode || prev.zipcode,
     }))
   }
 
-  const handlePinPlace = (coords: [number, number]) => {
-    // Pin placed, coords available if needed
-  }
+  // ======================
+  // BARANGAY SELECT → ZOOM MAP
+  // ======================
+  const handleBarangaySelect = async (item: any) => {
+    setForm(prev => ({
+      ...prev,
+      barangay: item.name,
+      barangayCode: item.code,
+    }))
 
-  const handleLocateClick = async () => {
-    if (mapRef.current?.locateUser) {
-      await mapRef.current.locateUser()
+    const query = `${item.name}, ${form.city}, ${form.province}, Philippines`
+
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
+    )
+
+    const data = await res.json()
+
+    if (data.length > 0) {
+      const { lat, lon, display_name } = data[0]
+
+      const zipMatch = display_name.match(/\b\d{4}\b/)
+
+      setForm(prev => ({
+        ...prev,
+        zipcode: zipMatch ? zipMatch[0] : ''
+      }))
+
+      mapRef.current?.zoomToLocation?.(Number(lat), Number(lon))
     }
+
+    setOpenDropdown(null)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Form submitted:', form)
-    // Handle form submission
+  // ======================
+  // FILTER HELPERS
+  // ======================
+  const filterList = (list: any[], value: string) =>
+    list.filter(item =>
+      item.name.toLowerCase().includes(value.toLowerCase())
+    )
+
+  // ======================
+  // INPUT FIELD COMPONENT
+  // ======================
+  const InputDropdown = ({
+    label,
+    value,
+    setValue,
+    list,
+    onSelect,
+    disabled = false,
+    fieldKey,
+  }: any) => {
+    const filtered = filterList(list, value)
+
+    return (
+      <div className="relative">
+        <input
+          value={value}
+          disabled={disabled}
+          onFocus={() => setOpenDropdown(fieldKey)}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={label}
+          className="w-full h-12 px-4 bg-gray-50 border rounded-xl"
+        />
+
+        {openDropdown === fieldKey && filtered.length > 0 && (
+          <div className="absolute z-10 w-full bg-white border rounded-xl mt-1 max-h-40 overflow-auto shadow">
+            {filtered.map((item: any) => (
+              <div
+                key={item.code}
+                onClick={() => onSelect(item)}
+                className="p-3 hover:bg-gray-100 cursor-pointer"
+              >
+                {item.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
-    <div className='w-full h-full flex flex-col bg-gray-50'>
-      <header className='w-full h-16 bg-white flex items-center justify-between px-4 shadow-sm shrink-0 border-b'>
-        <h1 className='text-xl font-bold text-gray-800'>Address</h1>
+    <div className="w-full h-full flex flex-col bg-gray-50">
+      <header className="h-16 bg-white flex items-center px-4 border-b">
+        <h1 className="text-xl font-bold">Address</h1>
       </header>
-      <main className='flex-1 overflow-scroll'>
-        {/* Map Section - Square Container */}
-        <div className='p-4'>
-          <div className='w-full aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+
+      <main className="flex-1 overflow-scroll">
+
+        {/* MAP */}
+        <div className="p-4">
+          <div className="aspect-square bg-white rounded-2xl overflow-hidden">
             <PhilippinesMap
+              ref={mapRef}
               onLocationChange={handleLocationChange}
-              onPinPlace={handlePinPlace}
             />
           </div>
         </div>
 
-        {/* Form Section */}
-        <div className='px-4 pb-4'>
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4'>
-              {/* Province */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>Province</label>
-                <input
-                  type="text"
-                  value={form.province}
-                  onChange={(e) => handleFormChange('province', e.target.value)}
-                  placeholder="Enter province"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
+        {/* FORM */}
+        <div className="px-4 pb-4 space-y-4">
 
-              {/* City */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>City</label>
-                <input
-                  type="text"
-                  value={form.city}
-                  onChange={(e) => handleFormChange('city', e.target.value)}
-                  placeholder="Enter city"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
+          {/* Province */}
+          <InputDropdown
+            label="Province"
+            value={form.province}
+            setValue={(v: string) =>
+              setForm(prev => ({ ...prev, province: v }))
+            }
+            list={provinces}
+            fieldKey="province"
+            onSelect={(item: any) => {
+              setForm(prev => ({
+                ...prev,
+                province: item.name,
+                provinceCode: item.code,
+              }))
+              setOpenDropdown(null)
+            }}
+          />
 
-              {/* Barangay */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>Barangay</label>
-                <input
-                  type="text"
-                  value={form.barangay}
-                  onChange={(e) => handleFormChange('barangay', e.target.value)}
-                  placeholder="Enter barangay"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
+          {/* City */}
+          <InputDropdown
+            label="City"
+            value={form.city}
+            setValue={(v: string) =>
+              setForm(prev => ({ ...prev, city: v }))
+            }
+            list={cities}
+            disabled={!form.provinceCode}
+            fieldKey="city"
+            onSelect={(item: any) => {
+              setForm(prev => ({
+                ...prev,
+                city: item.name,
+                cityCode: item.code,
+              }))
+              setOpenDropdown(null)
+            }}
+          />
 
-              {/* Street - Optional */}
-              <div>
-                <label className='block text-sm font-medium text-gray-500 mb-2'>Street <span className='text-gray-400 font-normal'>(Optional)</span></label>
-                <input
-                  type="text"
-                  value={form.street}
-                  onChange={(e) => handleFormChange('street', e.target.value)}
-                  placeholder="Enter street (optional)"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
+          {/* Barangay */}
+          <InputDropdown
+            label="Barangay"
+            value={form.barangay}
+            setValue={(v: string) =>
+              setForm(prev => ({ ...prev, barangay: v }))
+            }
+            list={barangays}
+            disabled={!form.cityCode}
+            fieldKey="barangay"
+            onSelect={handleBarangaySelect}
+          />
 
-              {/* Blk/Lot */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>Blk / Lot</label>
-                <input
-                  type="text"
-                  value={form.blkLot}
-                  onChange={(e) => handleFormChange('blkLot', e.target.value)}
-                  placeholder="Enter block and lot number"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
+          {/* Street */}
+          <input
+            value={form.street}
+            onChange={(e) =>
+              setForm(prev => ({ ...prev, street: e.target.value }))
+            }
+            placeholder="Street (optional)"
+            className="w-full h-12 px-4 bg-gray-50 border rounded-xl"
+          />
 
-              {/* Zipcode */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>Zipcode</label>
-                <input
-                  type="text"
-                  value={form.zipcode}
-                  onChange={(e) => handleFormChange('zipcode', e.target.value)}
-                  placeholder="Enter zipcode"
-                  className='w-full h-12 px-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-colors'
-                />
-              </div>
-            </div>
+          {/* Blk/Lot */}
+          <input
+            value={form.blkLot}
+            onChange={(e) =>
+              setForm(prev => ({ ...prev, blkLot: e.target.value }))
+            }
+            placeholder="Blk / Lot"
+            className="w-full h-12 px-4 bg-gray-50 border rounded-xl"
+          />
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className='w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors active:opacity-80'
-            >
-              Submit
-            </button>
-          </form>
+          {/* Zipcode */}
+          <input
+            value={form.zipcode}
+            readOnly
+            className="w-full h-12 px-4 bg-gray-200 border rounded-xl cursor-not-allowed"
+          />
+
         </div>
       </main>
     </div>
