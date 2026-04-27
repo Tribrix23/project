@@ -1,7 +1,7 @@
 "use client"
 
 import PhilippinesMap from '@/components/ui/Map'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -17,6 +17,72 @@ type AddressForm = {
   blkLot: string
   zipcode: string
 }
+
+type InputDropdownProps = {
+  label: string
+  value: string
+  setValue: (value: string) => void
+  list: any[]
+  onSelect: (item: any) => void
+  disabled?: boolean
+  fieldKey: string
+  openDropdown: string | null
+  setOpenDropdown: (key: string | null) => void
+}
+
+const InputDropdownInner = React.memo(function InputDropdown({
+  label,
+  value,
+  setValue,
+  list,
+  onSelect,
+  disabled = false,
+  fieldKey,
+  openDropdown,
+  setOpenDropdown,
+}: InputDropdownProps) {
+  const filtered = useMemo(
+    () =>
+      list.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      ),
+    [list, value]
+  )
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700 mb-2 block">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          value={value}
+          disabled={disabled}
+          onFocus={() => setOpenDropdown(fieldKey)}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={label}
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+        />
+
+        {openDropdown === fieldKey && filtered.length > 0 && (
+          <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-40 overflow-auto shadow">
+            {filtered.map((item: any) => (
+              <div
+                key={item.code}
+                onClick={() => onSelect(item)}
+                className="p-3 hover:bg-gray-100 cursor-pointer"
+              >
+                {item.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+})
+
+InputDropdownInner.displayName = 'InputDropdown'
 
 const Address = () => {
   const router = useRouter()
@@ -47,8 +113,8 @@ const Address = () => {
   // LOAD PROVINCES
   // ======================
   useEffect(() => {
-    fetch("/api/psgc?type=provinces")
-      .then(res => res.json())
+    fetch('/api/psgc?type=provinces')
+      .then((res) => res.json())
       .then(setProvinces)
   }, [])
 
@@ -59,16 +125,16 @@ const Address = () => {
     if (!form.provinceCode) return
 
     fetch(`/api/psgc?type=cities&code=${form.provinceCode}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setCities)
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       city: '',
       cityCode: '',
       barangay: '',
       barangayCode: '',
-      zipcode: ''
+      zipcode: '',
     }))
 
     setBarangays([])
@@ -81,22 +147,22 @@ const Address = () => {
     if (!form.cityCode) return
 
     fetch(`/api/psgc?type=barangays&code=${form.cityCode}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setBarangays)
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       barangay: '',
       barangayCode: '',
-      zipcode: ''
+      zipcode: '',
     }))
   }, [form.cityCode])
 
   // ======================
   // MAP → FORM UPDATE
   // ======================
-  const handleLocationChange = (data: any) => {
-    setForm(prev => ({
+  const handleLocationChange = useCallback((data: any) => {
+    setForm((prev) => ({
       ...prev,
       province: data.province || prev.province,
       city: data.city || prev.city,
@@ -104,46 +170,94 @@ const Address = () => {
       street: data.street || '',
       zipcode: data.zipcode || prev.zipcode,
     }))
-  }
+  }, [])
 
   // ======================
   // BARANGAY SELECT → ZOOM MAP
   // ======================
-  const handleBarangaySelect = async (item: any) => {
-    setForm(prev => ({
-      ...prev,
-      barangay: item.name,
-      barangayCode: item.code,
-    }))
-
-    const query = `${item.name}, ${form.city}, ${form.province}, Philippines`
-
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
-    )
-
-    const data = await res.json()
-
-    if (data.length > 0) {
-      const { lat, lon, display_name } = data[0]
-
-      const zipMatch = display_name.match(/\b\d{4}\b/)
-
-      setForm(prev => ({
+  const handleBarangaySelect = useCallback(
+    async (item: any) => {
+      setForm((prev) => ({
         ...prev,
-        zipcode: zipMatch ? zipMatch[0] : ''
+        barangay: item.name,
+        barangayCode: item.code,
       }))
 
-      mapRef.current?.zoomToLocation?.(Number(lat), Number(lon))
-    }
+      // Use current form values for the address query
+      const currentForm = {
+        city: form.city,
+        province: form.province,
+      }
+
+      const query = `${item.name}, ${currentForm.city}, ${currentForm.province}, Philippines`
+
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}`
+      )
+
+      const data = await res.json()
+
+      if (data.length > 0) {
+        const { lat, lon, display_name } = data[0]
+
+        const zipMatch = display_name.match(/\b\d{4}\b/)
+
+        setForm((prev) => ({
+          ...prev,
+          zipcode: zipMatch ? zipMatch[0] : '',
+        }))
+
+        mapRef.current?.zoomToLocation?.(Number(lat), Number(lon))
+      }
 
     setOpenDropdown(null)
-  }
+  }, [form.city, form.province])
+
+  // ======================
+  // SET FORM FIELD HELPERS
+  // ======================
+  const setProvince = useCallback((v: string) => {
+    setForm((prev) => ({ ...prev, province: v }))
+  }, [])
+
+  const setCity = useCallback((v: string) => {
+    setForm((prev) => ({ ...prev, city: v }))
+  }, [])
+
+  const setBarangay = useCallback((v: string) => {
+    setForm((prev) => ({ ...prev, barangay: v }))
+  }, [])
+
+  // ======================
+  // PROVINCE SELECT HANDLER
+  // ======================
+  const handleProvinceSelect = useCallback((item: any) => {
+    setForm((prev) => ({
+      ...prev,
+      province: item.name,
+      provinceCode: item.code,
+    }))
+    setOpenDropdown(null)
+  }, [])
+
+  // ======================
+  // CITY SELECT HANDLER
+  // ======================
+  const handleCitySelect = useCallback((item: any) => {
+    setForm((prev) => ({
+      ...prev,
+      city: item.name,
+      cityCode: item.code,
+    }))
+    setOpenDropdown(null)
+  }, [])
 
   // ======================
   // SUBMIT HANDLER
   // ======================
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsSubmitting(true)
     setSubmitError(null)
 
@@ -165,21 +279,19 @@ const Address = () => {
 
       const addressString = `${form.blkLot ? form.blkLot + ', ' : ''}${form.street}, ${form.barangay}, ${form.city}, ${form.province} ${form.zipcode}`.trim()
 
-      const { error } = await supabase
-        .from('addresses')
-        .insert({
-          user_id: user.id,
-          province: form.province,
-          province_code: form.provinceCode,
-          city: form.city,
-          city_code: form.cityCode,
-          barangay: form.barangay,
-          barangay_code: form.barangayCode,
-          street: form.street,
-          block_lot: form.blkLot,
-          zipcode: form.zipcode,
-          full_address: addressString,
-        })
+      const { error } = await supabase.from('addresses').insert({
+        user_id: user.id,
+        province: form.province,
+        province_code: form.provinceCode,
+        city: form.city,
+        city_code: form.cityCode,
+        barangay: form.barangay,
+        barangay_code: form.barangayCode,
+        street: form.street,
+        block_lot: form.blkLot,
+        zipcode: form.zipcode,
+        full_address: addressString,
+      })
 
       if (error) throw error
 
@@ -189,60 +301,15 @@ const Address = () => {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [supabase, router, form])
 
   // ======================
   // FILTER HELPERS
   // ======================
-  const filterList = (list: any[], value: string) =>
+  const filterList = useCallback((list: any[], value: string) =>
     list.filter(item =>
       item.name.toLowerCase().includes(value.toLowerCase())
-    )
-
-  // ======================
-  // INPUT FIELD COMPONENT
-  // ======================
-  const InputDropdown = ({
-    label,
-    value,
-    setValue,
-    list,
-    onSelect,
-    disabled = false,
-    fieldKey,
-  }: any) => {
-    const filtered = filterList(list, value)
-
-    return (
-      <div>
-        <label className='text-sm font-medium text-gray-700 mb-2 block'>{label}</label>
-        <div className="relative">
-          <input
-            value={value}
-            disabled={disabled}
-            onFocus={() => setOpenDropdown(fieldKey)}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={label}
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
-          />
-
-          {openDropdown === fieldKey && filtered.length > 0 && (
-            <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-40 overflow-auto shadow">
-              {filtered.map((item: any) => (
-                <div
-                  key={item.code}
-                  onClick={() => onSelect(item)}
-                  className="p-3 hover:bg-gray-100 cursor-pointer"
-                >
-                  {item.name}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
+    ), [])
 
   const isFormValid = form.province && form.city && form.barangay
 
@@ -277,55 +344,42 @@ const Address = () => {
         <div className="mt-5 bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
 
           {/* Province */}
-          <InputDropdown
+          <InputDropdownInner
             label="Province"
             value={form.province}
-            setValue={(v: string) =>
-              setForm(prev => ({ ...prev, province: v }))
-            }
+            setValue={setProvince}
             list={provinces}
             fieldKey="province"
-            onSelect={(item: any) => {
-              setForm(prev => ({
-                ...prev,
-                province: item.name,
-                provinceCode: item.code,
-              }))
-              setOpenDropdown(null)
-            }}
+            onSelect={handleProvinceSelect}
+            openDropdown={openDropdown}
+            setOpenDropdown={setOpenDropdown}
+            disabled={false}
           />
 
-          {/* City */}
-          <InputDropdown
+          {/* City / Municipality */}
+          <InputDropdownInner
             label="City / Municipality"
             value={form.city}
-            setValue={(v: string) =>
-              setForm(prev => ({ ...prev, city: v }))
-            }
+            setValue={setCity}
             list={cities}
             disabled={!form.provinceCode}
             fieldKey="city"
-            onSelect={(item: any) => {
-              setForm(prev => ({
-                ...prev,
-                city: item.name,
-                cityCode: item.code,
-              }))
-              setOpenDropdown(null)
-            }}
+            onSelect={handleCitySelect}
+            openDropdown={openDropdown}
+            setOpenDropdown={setOpenDropdown}
           />
 
           {/* Barangay */}
-          <InputDropdown
+          <InputDropdownInner
             label="Barangay"
             value={form.barangay}
-            setValue={(v: string) =>
-              setForm(prev => ({ ...prev, barangay: v }))
-            }
+            setValue={setBarangay}
             list={barangays}
             disabled={!form.cityCode}
             fieldKey="barangay"
             onSelect={handleBarangaySelect}
+            openDropdown={openDropdown}
+            setOpenDropdown={setOpenDropdown}
           />
 
           {/* Street */}
