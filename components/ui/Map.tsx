@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import "ol/ol.css";
 
 import Map from "ol/Map";
@@ -17,13 +17,55 @@ import Point from "ol/geom/Point";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { Style, Icon } from "ol/style";
 
-export default function PhilippinesMap() {
+interface PhilippinesMapProps {
+  onLocationChange?: (data: {
+    province: string;
+    city: string;
+    barangay: string;
+    street: string;
+    zipcode: string;
+    lat: number;
+    lon: number;
+  }) => void;
+  onPinPlace?: (coords: [number, number]) => void;
+}
+
+export default function PhilippinesMap({ onLocationChange, onPinPlace }: PhilippinesMapProps = {}) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapRefInstance = useRef<Map | null>(null);
   const vectorSource = useRef(new VectorSource());
 
-  const [search, setSearch] = useState("");
-  const [address, setAddress] = useState("");
+  // 📍 REVERSE GEOCODING
+  const reverseGeocode = useCallback(async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`
+      );
+      const data = await res.json();
+      const address = data.address;
+      if (!address) return null;
+
+      // Philippines address format parsing
+      const province = address.state || "";
+      const city = address.city || address.municipality || "";
+      const barangay = address.suburb || address.neighbourhood || address.village || "";
+      const street = address.road || "";
+      const postcode = address.postcode || "";
+
+      return {
+        province,
+        city,
+        barangay,
+        street,
+        zipcode: postcode,
+        lat,
+        lon,
+      };
+    } catch (e) {
+      console.error("Reverse geocoding error:", e);
+      return null;
+    }
+  }, []);
 
   // 🗺️ INIT MAP
   useEffect(() => {
@@ -59,14 +101,18 @@ export default function PhilippinesMap() {
 
       placeSinglePin(event.coordinate);
 
+      onPinPlace?.([lon, lat]);
+
       const result = await reverseGeocode(lat, lon);
-      setAddress(result);
+      if (result && onLocationChange) {
+        onLocationChange(result);
+      }
     });
 
     return () => {
       map.setTarget(undefined);
     };
-  }, []);
+  }, [onLocationChange, onPinPlace, reverseGeocode]);
 
   // 📌 ONLY ONE PIN (replace previous)
   const placeSinglePin = (coordinate: any) => {
@@ -88,77 +134,67 @@ export default function PhilippinesMap() {
     vectorSource.current.addFeature(marker);
   };
 
-  // 🔎 SEARCH LOCATION → FLY + PIN
-  const searchLocation = async () => {
-    if (!search) return;
-
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${search}`
-    );
-
-    const data = await res.json();
-
-    if (!data.length) {
-      alert("Location not found");
-      return;
+  // 📍 LOCATE USER
+  const locateUser = useCallback(async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return false;
     }
 
-    const { lon, lat } = data[0];
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
 
-    const coords = fromLonLat([parseFloat(lon), parseFloat(lat)]);
+      const { latitude, longitude } = position.coords;
+      const coords = fromLonLat([longitude, latitude]);
 
-    mapRefInstance.current?.getView().animate({
-      center: coords,
-      zoom: 14,
-      duration: 1000,
-    });
+      mapRefInstance.current?.getView().animate({
+        center: coords,
+        zoom: 16,
+        duration: 1000,
+      });
 
-    placeSinglePin(coords);
+      placeSinglePin(coords);
 
-    const result = await reverseGeocode(lat, lon);
-    setAddress(result);
-  };
+      onPinPlace?.([longitude, latitude]);
 
-  // 📍 REVERSE GEOCODING (Barangay / City / Street)
-  const reverseGeocode = async (lat: number, lon: number) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-    );
+      const result = await reverseGeocode(latitude, longitude);
+      if (result && onLocationChange) {
+        onLocationChange(result);
+      }
 
-    const data = await res.json();
-
-    return data.display_name || "No address found";
-  };
+      return true;
+    } catch (error) {
+      console.error("Geolocation error:", error);
+      const code = (error as GeolocationPositionError).code;
+      if (code === 1) {
+        alert("Location access denied. Please enable location permissions.");
+      } else {
+        alert("Unable to get your location. Please try again.");
+      }
+      return false;
+    }
+  }, [onLocationChange, onPinPlace, reverseGeocode]);
 
   return (
-    <div className="w-full h-screen relative">
-
-      {/* 🔎 SEARCH BAR */}
-      <div className="absolute top-4 left-4 z-10 flex gap-2">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search location..."
-          className="p-2 border rounded w-64 bg-white"
-        />
-
-        <button
-          onClick={searchLocation}
-          className="bg-blue-600 text-white px-3 rounded"
-        >
-          Search
-        </button>
-      </div>
-
-      {/* 📍 ADDRESS DISPLAY */}
-      {address && (
-        <div className="absolute bottom-4 left-4 z-10 bg-white p-3 rounded shadow max-w-sm text-sm">
-          📍 {address}
-        </div>
-      )}
-
-      {/* 🗺️ MAP */}
+    <div className="w-full h-full relative">
       <div ref={mapRef} className="w-full h-full" />
+      {/* Locate button overlay */}
+      <button
+        onClick={locateUser}
+        className="absolute bottom-4 right-4 z-10 w-10 h-10 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-150 active:scale-95"
+        title="Use my current location"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4285F4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="12" r="3" fill="#4285F4" />
+        </svg>
+      </button>
     </div>
   );
 }
