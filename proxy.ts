@@ -9,10 +9,32 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, '10 s'),
-})
+const ratelimiters = {
+  dashboard: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, '10 s'),
+  }),
+  file: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(50, '10 s'),
+  }),
+  search: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '10 s'),
+  }),
+  seller: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(80, '10 s'),
+  }),
+  payment: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, '10 s'),
+  }),
+  settings: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, '10 s'),
+  }),
+}
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,48 +49,38 @@ export async function proxy(req: NextRequest) {
     req.headers.get('x-real-ip') ||
     'anonymous'
 
-  const { success } = await ratelimit.limit(ip)
+  const pathname = req.nextUrl.pathname
+  const isDashboard = pathname.startsWith('/dashboard')
 
-  if (!success) {
-    return new NextResponse('Too many requests', { status: 429 })
-  }
+  // Dashboard authentication
+  if (isDashboard) {
+    const COOKIE_MAX_AGE = 60 * 60 * 24 * 100
 
-
-  const COOKIE_MAX_AGE = 60 * 60 * 24 * 100
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, {
-              ...options,
-              maxAge: options?.maxAge || COOKIE_MAX_AGE,
-              path: options?.path || '/',
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => req.cookies.getAll(),
+          setAll: (cookies) => {
+            cookies.forEach(({ name, value, options }) => {
+              res.cookies.set(name, value, {
+                ...options,
+                maxAge: options?.maxAge || COOKIE_MAX_AGE,
+                path: options?.path || '/',
+              })
             })
-          })
+          },
         },
-      },
+      }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.redirect(new URL('/', req.url))
     }
-  )
 
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const isDashboard = req.nextUrl.pathname.startsWith('/dashboard')
-
-
-  if (isDashboard && !user) {
-    return NextResponse.redirect(new URL('/', req.url))
-  }
-
-
-  if (isDashboard && user) {
     const { data, error } = await supabaseAdmin.auth.admin.getUserById(user.id)
 
     if (error || !data.user) {
@@ -76,11 +88,30 @@ export async function proxy(req: NextRequest) {
     }
 
     const role = data.user.app_metadata?.role
-
     const isSuperAdmin = role === 'superuser'
 
     if (!isSuperAdmin) {
       return NextResponse.redirect(new URL('/', req.url))
+    }
+  }
+
+  // Rate limiting for protected paths
+  const protectedPaths = ['/dashboard', '/file', '/search', '/seller', '/payment', '/settings']
+  const isProtected = protectedPaths.some(path => pathname === path || pathname.startsWith(path + '/'))
+
+  if (isProtected) {
+    let limiter = ratelimiters.dashboard
+
+    if (pathname.startsWith('/file')) limiter = ratelimiters.file
+    else if (pathname.startsWith('/search')) limiter = ratelimiters.search
+    else if (pathname.startsWith('/seller')) limiter = ratelimiters.seller
+    else if (pathname.startsWith('/payment')) limiter = ratelimiters.payment
+    else if (pathname.startsWith('/settings')) limiter = ratelimiters.settings
+
+    const { success } = await limiter.limit(ip)
+
+    if (!success) {
+      return new NextResponse('Too many requests', { status: 429 })
     }
   }
 
@@ -89,5 +120,13 @@ export async function proxy(req: NextRequest) {
 
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: [
+    '/',
+    '/dashboard/:path*',
+    '/file/:path*',
+    '/search/:path*',
+    '/seller/:path*',
+    '/payment/:path*',
+    '/settings/:path*',
+  ],
 }

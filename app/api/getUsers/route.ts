@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin";
 import { supabaseServer } from "@/lib/supabase/server";
+import redis from "@/lib/redis";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -14,18 +15,41 @@ export async function GET(request: Request) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: authUser, error: authError } =
-    await Server.auth.admin.listUsers();
+  // Try cache first (cache full merged dataset)
+  const cacheKey = 'users:full';
+  const cached = await redis.get<string>(cacheKey);
 
-  if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 500 });
-  }
+  let authUser: { users: any[] };
+  let profiles: any[];
 
-  const { data: profiles, error: profileError } =
-    await Server.from("profiles").select("*");
+  if (cached) {
+    const { authUsers, profiles: cachedProfiles } = JSON.parse(cached);
+    authUser = { users: authUsers };
+    profiles = cachedProfiles;
+  } else {
+    const { data: authUserData, error: authError } =
+      await Server.auth.admin.listUsers();
 
-  if (profileError) {
-    return NextResponse.json({ error: profileError.message }, { status: 500 });
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 500 });
+    }
+
+    const { data: profilesData, error: profileError } =
+      await Server.from("profiles").select("*");
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 });
+    }
+
+    authUser = authUserData;
+    profiles = profilesData;
+
+    // Cache for 5 minutes. Invalidate in user create/update/delete endpoints via redis.del('users:full')
+    await redis.setex(
+      cacheKey,
+      300,
+      JSON.stringify({ authUsers: authUser.users, profiles })
+    );
   }
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));

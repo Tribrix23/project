@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServerAdmin as supabaseServer } from "@/lib/supabase/serverAdmin";
+import redis from "@/lib/redis";
 
 export async function POST(req: Request) {
     try {
@@ -65,6 +66,13 @@ export async function POST(req: Request) {
         { error: updateError.message },
         { status: 500 }
       )
+    }
+
+    // Invalidate getUsers cache
+    try {
+      await redis.del('users:full');
+    } catch (e) {
+      console.error('Failed to invalidate cache:', e);
     }
 
     return NextResponse.json({ success: true, message: 'Role updated' })
