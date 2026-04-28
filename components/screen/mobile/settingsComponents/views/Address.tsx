@@ -1,5 +1,4 @@
 "use client"
-
 import PhilippinesMap from '@/components/ui/Map'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
@@ -28,6 +27,7 @@ type InputDropdownProps = {
   fieldKey: string
   openDropdown: string | null
   setOpenDropdown: (key: string | null) => void
+  error?: boolean
 }
 
 const InputDropdownInner = React.memo(function InputDropdown({
@@ -40,6 +40,7 @@ const InputDropdownInner = React.memo(function InputDropdown({
   fieldKey,
   openDropdown,
   setOpenDropdown,
+  error = false,
 }: InputDropdownProps) {
   const filtered = useMemo(
     () =>
@@ -48,6 +49,21 @@ const InputDropdownInner = React.memo(function InputDropdown({
       ),
     [list, value]
   )
+
+  const handleBlur = useCallback(() => {
+    // If there's a value but it doesn't match any item exactly, and we have items in the list,
+    // check if there's an exact match. If not, reset the value to empty.
+    if (value && list.length > 0 && !list.find(item => item.name === value)) {
+      // Check if value (case-insensitive) matches any item
+      const match = list.find(item => item.name.toLowerCase() === value.toLowerCase())
+      if (match) {
+        onSelect(match)
+      } else {
+        setValue('')
+        onSelect({ name: '', code: '' })
+      }
+    }
+  }, [value, list, setValue, onSelect])
 
   return (
     <div>
@@ -59,9 +75,12 @@ const InputDropdownInner = React.memo(function InputDropdown({
           value={value}
           disabled={disabled}
           onFocus={() => setOpenDropdown(fieldKey)}
+          onBlur={handleBlur}
           onChange={(e) => setValue(e.target.value)}
           placeholder={label}
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+          className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent ${
+            error ? 'border-red-500' : 'border-gray-200'
+          }`}
         />
 
         {openDropdown === fieldKey && filtered.length > 0 && (
@@ -110,6 +129,34 @@ const Address = () => {
   const mapRef = useRef<any>(null)
 
   // ======================
+  // VALIDATION: Reset child dropdowns when parent selection is cleared
+  // ======================
+  useEffect(() => {
+    if (!form.provinceCode && (form.city || form.cityCode || form.barangay || form.barangayCode)) {
+      setForm((prev) => ({
+        ...prev,
+        city: '',
+        cityCode: '',
+        barangay: '',
+        barangayCode: '',
+        zipcode: '',
+      }))
+      setBarangays([])
+    }
+  }, [form.provinceCode, form.city, form.cityCode, form.barangay, form.barangayCode])
+
+  useEffect(() => {
+    if (!form.cityCode && form.barangay) {
+      setForm((prev) => ({
+        ...prev,
+        barangay: '',
+        barangayCode: '',
+      }))
+      setBarangays([])
+    }
+  }, [form.cityCode, form.barangay])
+
+  // ======================
   // LOAD PROVINCES
   // ======================
   useEffect(() => {
@@ -122,40 +169,28 @@ const Address = () => {
   // LOAD CITIES
   // ======================
   useEffect(() => {
-    if (!form.provinceCode) return
+    if (!form.provinceCode) {
+      setCities([])
+      return
+    }
 
     fetch(`/api/psgc?type=cities&code=${form.provinceCode}`)
       .then((res) => res.json())
       .then(setCities)
-
-    setForm((prev) => ({
-      ...prev,
-      city: '',
-      cityCode: '',
-      barangay: '',
-      barangayCode: '',
-      zipcode: '',
-    }))
-
-    setBarangays([])
   }, [form.provinceCode])
 
   // ======================
   // LOAD BARANGAYS
   // ======================
   useEffect(() => {
-    if (!form.cityCode) return
+    if (!form.cityCode) {
+      setBarangays([])
+      return
+    }
 
     fetch(`/api/psgc?type=barangays&code=${form.cityCode}`)
       .then((res) => res.json())
       .then(setBarangays)
-
-    setForm((prev) => ({
-      ...prev,
-      barangay: '',
-      barangayCode: '',
-      zipcode: '',
-    }))
   }, [form.cityCode])
 
   // ======================
@@ -238,6 +273,11 @@ const Address = () => {
       ...prev,
       province: item.name,
       provinceCode: item.code,
+      city: '',
+      cityCode: '',
+      barangay: '',
+      barangayCode: '',
+      zipcode: '',
     }))
     setOpenDropdown(null)
   }, [])
@@ -250,6 +290,9 @@ const Address = () => {
       ...prev,
       city: item.name,
       cityCode: item.code,
+      barangay: '',
+      barangayCode: '',
+      zipcode: '',
     }))
     setOpenDropdown(null)
   }, [])
@@ -271,13 +314,13 @@ const Address = () => {
       }
 
       // Validate required fields
-      if (!form.province || !form.city || !form.barangay) {
-        setSubmitError('Please complete province, city, and barangay')
+      if (!form.province || !form.city || !form.barangay || !form.street || !form.blkLot) {
+        setSubmitError('Please complete all fields: province, city, barangay, street, and block/lot')
         setIsSubmitting(false)
         return
       }
 
-      const addressString = `${form.blkLot ? form.blkLot + ', ' : ''}${form.street}, ${form.barangay}, ${form.city}, ${form.province} ${form.zipcode}`.trim()
+      const addressString = `${form.blkLot}, ${form.street}, ${form.barangay}, ${form.city}, ${form.province} ${form.zipcode}`.trim()
 
       const { error } = await supabase.from('addresses').insert({
         user_id: user.id,
@@ -303,15 +346,7 @@ const Address = () => {
     }
   }, [supabase, router, form])
 
-  // ======================
-  // FILTER HELPERS
-  // ======================
-  const filterList = useCallback((list: any[], value: string) =>
-    list.filter(item =>
-      item.name.toLowerCase().includes(value.toLowerCase())
-    ), [])
-
-  const isFormValid = form.province && form.city && form.barangay
+  const isFormValid = form.province && form.city && form.barangay && form.street && form.blkLot
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
@@ -384,7 +419,7 @@ const Address = () => {
 
           {/* Street */}
           <div>
-            <label className='text-sm font-medium text-gray-700 mb-2 block'>Street Address <span className='text-gray-400'>(optional)</span></label>
+            <label className='text-sm font-medium text-gray-700 mb-2 block'>Street Address <span className='text-red-500'>*</span></label>
             <textarea
               value={form.street}
               onChange={(e) =>
@@ -392,20 +427,24 @@ const Address = () => {
               }
               placeholder="House number, street name, building, etc."
               rows={2}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none"
+              className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent ${
+                !form.street ? 'border-red-200' : 'border-gray-200'
+              }`}
             />
           </div>
 
           {/* Blk/Lot */}
           <div>
-            <label className='text-sm font-medium text-gray-700 mb-2 block'>Block / Lot <span className='text-gray-400'>(optional)</span></label>
+            <label className='text-sm font-medium text-gray-700 mb-2 block'>Block / Lot <span className='text-red-500'>*</span></label>
             <input
               value={form.blkLot}
               onChange={(e) =>
                 setForm(prev => ({ ...prev, blkLot: e.target.value }))
               }
               placeholder="Block number, lot number"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
+              className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent ${
+                !form.blkLot ? 'border-red-200' : 'border-gray-200'
+              }`}
             />
           </div>
 
