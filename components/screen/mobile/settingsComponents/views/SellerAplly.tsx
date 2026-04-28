@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import PhilippinesMap from '@/components/ui/Map'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { 
@@ -16,6 +17,13 @@ interface FormData {
   storeDescription: string
   address: string
   businessType: string
+  province?: string
+  city?: string
+  barangay?: string
+  street?: string
+  zipcode?: string
+  lat?: number
+  lon?: number
 }
 
 interface UserProfile {
@@ -42,6 +50,8 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
     businessType: ''
   })
 
+  const mapRef = useRef<any>(null)
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -60,36 +70,61 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
     fetchUserProfile()
   }, [supabase])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+     setFormData(prev => ({
+       ...prev,
+       [e.target.name]: e.target.value
+     }))
+   }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user) {
-        await supabase.from('seller_applications').insert({
-          user_id: user.id,
-          store_name: formData.storeName,
-          store_description: formData.storeDescription,
-          address: formData.address,
-          business_type: formData.businessType,
-          status: 'pending'
-        })
-      }
-      
-      setIsSubmitted(true)
-    } catch (error) {
-      console.error('Error submitting application:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+   // ======================
+   // MAP → FORM UPDATE
+   // ======================
+   const handleLocationChange = useCallback((data: any) => {
+     setFormData((prev) => ({
+       ...prev,
+       province: data.province || prev.province,
+       city: data.city || prev.city,
+       barangay: data.barangay || prev.barangay,
+       street: data.street || '',
+       zipcode: data.zipcode || prev.zipcode,
+       lat: data.lat,
+       lon: data.lon,
+     }))
+
+     // Also update the address field with full location
+     const addressParts = [data.street, data.barangay, data.city, data.province, data.zipcode]
+       .filter(Boolean)
+       .join(', ')
+     setFormData(prev => ({ ...prev, address: addressParts }))
+   }, [])
+
+   // ======================
+   // SUBMIT HANDLER
+   // ======================
+   const handleSubmit = async () => {
+     setIsSubmitting(true)
+     try {
+       const { data: { user } } = await supabase.auth.getUser()
+       
+       if (user) {
+         await supabase.from('seller_applications').insert({
+           user_id: user.id,
+           store_name: formData.storeName,
+           store_description: formData.storeDescription,
+           address: formData.address,
+           business_type: formData.businessType,
+           status: 'pending'
+         })
+       }
+       
+       setIsSubmitted(true)
+     } catch (error) {
+       console.error('Error submitting application:', error)
+     } finally {
+       setIsSubmitting(false)
+     }
+   }
 
   const canProceed = () => {
     if (step === 1) {
@@ -222,7 +257,20 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
                 <Building2 className='text-orange-500' size={22} />
                 Business Details
               </h2>
-              
+
+              {/* MAP */}
+              <div className='mb-4'>
+                <div className='aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200'>
+                  <PhilippinesMap
+                    ref={mapRef}
+                    onLocationChange={handleLocationChange}
+                  />
+                </div>
+                <p className='text-xs text-gray-500 mt-2 text-center'>
+                  Tap on the map to set your business location
+                </p>
+              </div>
+
               <div className='space-y-4'>
                 <div>
                   <label className='text-sm font-medium text-gray-700 mb-2 block'>Business Address</label>
@@ -232,7 +280,7 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
                       name='address'
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder='Enter your complete business address'
+                      placeholder='Enter your complete business address or select on map'
                       rows={2}
                       className='w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none'
                     />
