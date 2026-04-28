@@ -335,7 +335,7 @@ const Address = () => {
       item.name.toLowerCase().includes(value.toLowerCase())
     ), [])
 
-  const isFormValid = form.province && form.city && form.barangay
+  const isFormValid = form.province && form.city && form.barangay && form.street && form.blkLot
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50">
