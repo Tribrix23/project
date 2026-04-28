@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/browser'
 
 type UserData = {
   name: string
@@ -25,7 +25,6 @@ type ProfilePageProps = {
 
 const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
     const router = useRouter()
-    const supabase = createClient()
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
     const [avatarLoading, setAvatarLoading] = React.useState(false);
