@@ -28,6 +28,7 @@ type InputDropdownProps = {
   fieldKey: string
   openDropdown: string | null
   setOpenDropdown: (key: string | null) => void
+  onInvalidInput?: () => void
 }
 
 const InputDropdownInner = React.memo(function InputDropdown({
@@ -40,6 +41,7 @@ const InputDropdownInner = React.memo(function InputDropdown({
   fieldKey,
   openDropdown,
   setOpenDropdown,
+  onInvalidInput,
 }: InputDropdownProps) {
   const filtered = useMemo(
     () =>
@@ -48,6 +50,24 @@ const InputDropdownInner = React.memo(function InputDropdown({
       ),
     [list, value]
   )
+
+  const handleBlur = () => {
+    setOpenDropdown(null)
+    // Defer the validation to allow dropdown clicks to be processed first
+    setTimeout(() => {
+      if (value.trim()) {
+        const exactMatch = list.find(
+          (item) => item.name.toLowerCase() === value.toLowerCase().trim()
+        )
+        if (!exactMatch) {
+          setValue('')
+          if (onInvalidInput) {
+            onInvalidInput()
+          }
+        }
+      }
+    }, 150)
+  }
 
   return (
     <div>
@@ -59,6 +79,7 @@ const InputDropdownInner = React.memo(function InputDropdown({
           value={value}
           disabled={disabled}
           onFocus={() => setOpenDropdown(fieldKey)}
+          onBlur={handleBlur}
           onChange={(e) => setValue(e.target.value)}
           placeholder={label}
           className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent"
@@ -69,7 +90,10 @@ const InputDropdownInner = React.memo(function InputDropdown({
             {filtered.map((item: any) => (
               <div
                 key={item.code}
-                onClick={() => onSelect(item)}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  onSelect(item)
+                }}
                 className="p-3 hover:bg-gray-100 cursor-pointer"
               >
                 {item.name}
@@ -353,6 +377,20 @@ const Address = () => {
             onSelect={handleProvinceSelect}
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
+            onInvalidInput={() => {
+              setForm((prev) => ({
+                ...prev,
+                province: '',
+                provinceCode: '',
+                city: '',
+                cityCode: '',
+                barangay: '',
+                barangayCode: '',
+                zipcode: '',
+              }))
+              setCities([])
+              setBarangays([])
+            }}
             disabled={false}
           />
 
@@ -367,6 +405,17 @@ const Address = () => {
             onSelect={handleCitySelect}
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
+            onInvalidInput={() => {
+              setForm((prev) => ({
+                ...prev,
+                city: '',
+                cityCode: '',
+                barangay: '',
+                barangayCode: '',
+                zipcode: '',
+              }))
+              setBarangays([])
+            }}
           />
 
           {/* Barangay */}
@@ -380,11 +429,19 @@ const Address = () => {
             onSelect={handleBarangaySelect}
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
+            onInvalidInput={() => {
+              setForm((prev) => ({
+                ...prev,
+                barangay: '',
+                barangayCode: '',
+                zipcode: '',
+              }))
+            }}
           />
 
           {/* Street */}
           <div>
-            <label className='text-sm font-medium text-gray-700 mb-2 block'>Street Address <span className='text-gray-400'>(optional)</span></label>
+            <label className='text-sm font-medium text-gray-700 mb-2 block'>Street Address</label>
             <textarea
               value={form.street}
               onChange={(e) =>
@@ -398,7 +455,7 @@ const Address = () => {
 
           {/* Blk/Lot */}
           <div>
-            <label className='text-sm font-medium text-gray-700 mb-2 block'>Block / Lot <span className='text-gray-400'>(optional)</span></label>
+            <label className='text-sm font-medium text-gray-700 mb-2 block'>Block / Lot</label>
             <input
               value={form.blkLot}
               onChange={(e) =>
