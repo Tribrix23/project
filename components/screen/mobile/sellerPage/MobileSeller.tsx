@@ -10,9 +10,9 @@ import Profile from './views/Profile'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 const pageRoutes: Record<string, number> = {
-  home: 0,
+  home: 2,
   tracking: 1,
-  dashboard: 2,
+  dashboard: 0,
   profile: 3,
 }
 
@@ -22,10 +22,10 @@ const MobileSeller = () => {
   const [prevPage, setPrevPage] = useState('home')
   const [expanded, setExpanded] = useState(true)
 
-  const currentPage = searchParams.get('seller') || 'home'
+  const currentPage = searchParams.get('seller') || 'dashboard'
   const active = pageRoutes[currentPage] ?? 0
 
-  const shouldCollapse = active === 1 || active === 2
+  const shouldCollapse = active === 1 || active === 2 || active === 0 || active === 3
 
   useEffect(() => {
     if (shouldCollapse) {
@@ -45,7 +45,7 @@ const MobileSeller = () => {
   }
 
   const handleTabPress = (page: string) => {
-    if (page === 'tracking' || page === 'dashboard') {
+    if (page === 'tracking' || page === 'dashboard' ) {
       setExpanded(false)
     } else {
       setExpanded(true)
@@ -81,7 +81,7 @@ const MobileSeller = () => {
 
   const getCircleIcon = () => {
     if (active === 1) return <MapPin className="text-white size-6"/>
-    return <BarChart3 className="text-white size-6"/>
+    return <Store className="text-white size-6"/>
   }
 
   const getCircleColor = () => {
@@ -111,7 +111,7 @@ return (
           <div className="w-full h-full flex items-center justify-evenly relative z-10">
             <IconBadge icon={BarChart3} text='Metrics' textDesign={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('dashboard')}/>
             <IconBadge icon={MapPin} text='Track' textDesign={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('tracking')}/>
-              <IconBadge icon={Store} text='Store' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
+            <IconBadge icon={Store} text='Store' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
             <IconBadge icon={UserIcon} text='Profile' textDesign={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('profile')}/>
           </div>
         </div>
