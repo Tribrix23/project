@@ -109,9 +109,9 @@ return (
             style={{ left: `calc(${active * 25}% + 6px)` }}
           />
           <div className="w-full h-full flex items-center justify-evenly relative z-10">
-            <IconBadge icon={Store} text='Store' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
-            <IconBadge icon={MapPin} text='Track' textDesign={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('tracking')}/>
             <IconBadge icon={BarChart3} text='Metrics' textDesign={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('dashboard')}/>
+            <IconBadge icon={MapPin} text='Track' textDesign={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('tracking')}/>
+              <IconBadge icon={Store} text='Store' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
             <IconBadge icon={UserIcon} text='Profile' textDesign={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('profile')}/>
           </div>
         </div>
