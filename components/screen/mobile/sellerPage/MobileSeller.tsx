@@ -45,11 +45,7 @@ const MobileSeller = () => {
   }
 
   const handleTabPress = (page: string) => {
-    if (page === 'tracking' || page === 'dashboard' ) {
-      setExpanded(false)
-    } else {
-      setExpanded(true)
-    }
+    setExpanded(false)
     navigateTo(page)
   }
 
@@ -80,12 +76,14 @@ const MobileSeller = () => {
   }
 
   const getCircleIcon = () => {
+    if (active === 0 ) return <BarChart3 className="text-white size-6"/>
     if (active === 1) return <MapPin className="text-white size-6"/>
-    return <Store className="text-white size-6"/>
+    if (active === 2 ) return <Store className="text-white size-6"/>
+    if (active === 3 ) return <UserIcon className="text-white size-6"/>
   }
 
   const getCircleColor = () => {
-    return 'bg-blue-500'
+    return 'bg-orange-500'
   }
 
 return (
