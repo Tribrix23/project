@@ -5,7 +5,7 @@ import { Store, MapPin, LayoutDashboard, UserIcon, Package, BarChart3 } from 'lu
 import React, { useState, useEffect } from 'react'
 import SellerStore from './views/SellerStore'
 import Tracking from './views/Tracking'
-import Dashboard from './views/Dashboard'
+import Dashboard from './views/SellerDashboard'
 import Profile from './views/Profile'
 import { useSearchParams, useRouter } from 'next/navigation'
 
