@@ -265,18 +265,24 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
                  Business Location
                </h2>
 
-               {/* MAP */}
-               <div className='mb-4'>
-                 <div className='aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200'>
-                   <PhilippinesMap
-                     ref={mapRef}
-                     onLocationChange={handleLocationChange}
-                   />
-                 </div>
-                 <p className='text-xs text-gray-500 mt-2 text-center'>
-                   Tap on the map to set your business location
-                 </p>
-               </div>
+                {/* MAP */}
+                <div className='mb-4'>
+                  <div className='aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200'>
+                    <PhilippinesMap
+                      ref={mapRef}
+                      onLocationChange={handleLocationChange}
+                    />
+                  </div>
+                  <p className='text-xs text-gray-500 mt-2 text-center'>
+                    Tap on the map to set your business location
+                  </p>
+                  <div className='mt-3 p-3 rounded-xl border border-orange-500 bg-orange-500/20 bg-opacity-20 flex items-start gap-2'>
+                    <MapPin className='text-gray-700 shrink-0 mt-0.5' size={16} />
+                    <p className='text-xs text-gray-700'>
+                      Info: To set Location please press the pin point button on the lower right of the map It's the blue circle Thank you
+                    </p>
+                  </div>
+                </div>
 
                <div className='space-y-4'>
                  <div>
@@ -294,51 +300,51 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
                    </div>
                  </div>
 
-                 <div className='grid grid-cols-2 gap-3'>
-                   <div>
-                     <label className='text-sm font-medium text-gray-700 mb-2 block'>City / Municipality</label>
-                     <input
-                       type='text'
-                       value={formData.city || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                       placeholder='City'
-                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                     />
-                   </div>
-                   <div>
-                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Province</label>
-                     <input
-                       type='text'
-                       value={formData.province || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, province: e.target.value }))}
-                       placeholder='Province'
-                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                     />
-                   </div>
-                 </div>
-
-                 <div className='grid grid-cols-2 gap-3'>
-                   <div>
-                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Barangay</label>
-                     <input
-                       type='text'
-                       value={formData.barangay || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, barangay: e.target.value }))}
-                       placeholder='Barangay'
-                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                     />
-                   </div>
-                   <div>
-                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Zip Code</label>
-                     <input
-                       type='text'
-                       value={formData.zipcode || ''}
-                       onChange={(e) => setFormData(prev => ({ ...prev, zipcode: e.target.value }))}
-                       placeholder='Zip code'
-                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                     />
-                   </div>
-                 </div>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div>
+                      <label className='text-sm font-medium text-gray-700 mb-2 block'>City / Municipality</label>
+                      <input
+                        type='text'
+                        value={formData.city || ''}
+                        readOnly
+                        placeholder='City'
+                        className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none'
+                      />
+                    </div>
+                    <div>
+                      <label className='text-sm font-medium text-gray-700 mb-2 block'>Province</label>
+                      <input
+                        type='text'
+                        value={formData.province || ''}
+                        readOnly
+                        placeholder='Province'
+                        className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none'
+                      />
+                    </div>
+                  </div>
+ 
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div>
+                      <label className='text-sm font-medium text-gray-700 mb-2 block'>Barangay</label>
+                      <input
+                        type='text'
+                        value={formData.barangay || ''}
+                        readOnly
+                        placeholder='Barangay'
+                        className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none'
+                      />
+                    </div>
+                    <div>
+                      <label className='text-sm font-medium text-gray-700 mb-2 block'>Zip Code</label>
+                      <input
+                        type='text'
+                        value={formData.zipcode || ''}
+                        readOnly
+                        placeholder='Zip code'
+                        className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none'
+                      />
+                    </div>
+                  </div>
 
                  <div className='bg-blue-50 p-4 rounded-xl flex items-start gap-3'>
                    <Shield className='text-blue-500 shrink-0 mt-0.5' size={20} />
