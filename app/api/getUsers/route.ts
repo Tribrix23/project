@@ -11,46 +11,75 @@ export async function GET(request: Request) {
   const statusFilter = searchParams.get('status') || '';
   const skip = (page - 1) * limit;
 
-  const supabase = await supabaseServer();
+   const supabase = await supabaseServer();
 
-  const { data: { user } } = await supabase.auth.getUser();
+   const { data: { user } } = await supabase.auth.getUser();
 
-  // Try cache first (cache full merged dataset)
-  const cacheKey = 'users:full';
-  const cached = await redis.get<string>(cacheKey);
+   // Try cache first (cache full merged dataset)
+   const cacheKey = 'users:full';
+   let cached: string | null = null;
+   try {
+     cached = await redis.get<string>(cacheKey);
+   } catch (err) {
+     console.error('Redis get error:', err);
+     // Continue without cache
+   }
 
-  let authUser: { users: any[] };
-  let profiles: any[];
+    let authUser: { users: any[] } = { users: [] };
+    let profiles: any[] = [];
 
-  if (cached) {
-    const { authUsers, profiles: cachedProfiles } = JSON.parse(cached);
-    authUser = { users: authUsers };
-    profiles = cachedProfiles;
-  } else {
-    const { data: authUserData, error: authError } =
-      await Server.auth.admin.listUsers();
+   if (cached) {
+     try {
+       const { authUsers, profiles: cachedProfiles } = JSON.parse(cached);
+       authUser = { users: authUsers };
+       profiles = cachedProfiles;
+     } catch (err) {
+       console.error('Cache parse error:', err);
+       cached = null;
+     }
+   }
+   
+    if (!cached) {
+     let authUserData: any;
+     let profilesData: any;
+     
+     try {
+       const { data, error: authError } = await Server.auth.admin.listUsers();
+       if (authError) {
+         return NextResponse.json({ error: authError.message }, { status: 500 });
+       }
+       authUserData = data;
+     } catch (err: any) {
+       console.error('Supabase listUsers error:', err);
+       return NextResponse.json({ error: err.message || 'Failed to fetch users' }, { status: 500 });
+     }
 
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 500 });
-    }
+     try {
+       const { data, error: profileError } = await Server.from("profiles").select("*");
+       if (profileError) {
+         return NextResponse.json({ error: profileError.message }, { status: 500 });
+       }
+       profilesData = data;
+     } catch (err: any) {
+       console.error('Supabase profiles error:', err);
+       return NextResponse.json({ error: err.message || 'Failed to fetch profiles' }, { status: 500 });
+     }
 
-    const { data: profilesData, error: profileError } =
-      await Server.from("profiles").select("*");
+     authUser = authUserData;
+     profiles = profilesData;
 
-    if (profileError) {
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
-    }
-
-    authUser = authUserData;
-    profiles = profilesData;
-
-    // Cache for 5 minutes. Invalidate in user create/update/delete endpoints via redis.del('users:full')
-    await redis.setex(
-      cacheKey,
-      300,
-      JSON.stringify({ authUsers: authUser.users, profiles })
-    );
-  }
+     // Cache for 5 minutes. Invalidate in user create/update/delete endpoints via redis.del('users:full')
+     try {
+       await redis.setex(
+         cacheKey,
+         300,
+         JSON.stringify({ authUsers: authUser.users, profiles })
+       );
+     } catch (err) {
+       console.error('Redis setex error:', err);
+       // Continue without caching
+     }
+   }
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 

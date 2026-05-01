@@ -33,8 +33,19 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    
+    const { data: existingStore } = await supabase
+    .from("sellerStore")
+    .select("id")
+    .eq("owner_id", user.id)
+    .maybeSingle()
 
-
+    if (existingStore) {
+    return NextResponse.json(
+        { error: "You already have a store application" },
+        { status: 409 }
+    )
+    }
 
     // Insert seller application into database
     const { data, error } = await supabase
@@ -56,7 +67,7 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
-        const { data: profileData, error: profileError } = await supabase
+    const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .update({
         sellerStatus: 'PENDING'
