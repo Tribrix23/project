@@ -92,37 +92,41 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
       }))
     }, [])
 
-    // ======================
-    // SUBMIT HANDLER
-    // ======================
-    const handleSubmit = async () => {
-      setIsSubmitting(true)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (user) {
-          // Construct address from location parts
-          const addressParts = [formData.street, formData.barangay, formData.city, formData.province, formData.zipcode]
-            .filter(Boolean)
-            .join(', ')
-          
-          await supabase.from('seller_applications').insert({
-            user_id: user.id,
-            store_name: formData.storeName,
-            store_description: formData.storeDescription,
-            address: addressParts,
-            business_type: formData.businessType,
-            status: 'pending'
+     // ======================
+     // SUBMIT HANDLER
+     // ======================
+     const handleSubmit = async () => {
+       setIsSubmitting(true)
+       try {
+          const response = await fetch('/api/applySeller', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              storeName: formData.storeName,
+              storeDescription: formData.storeDescription,
+              businessType: formData.businessType,
+              province: formData.province,
+              city: formData.city,
+              barangay: formData.barangay,
+              street: formData.street,
+              zipcode: formData.zipcode,
+            }),
           })
-        }
-        
-        setIsSubmitted(true)
-      } catch (error) {
-        console.error('Error submitting application:', error)
-      } finally {
-        setIsSubmitting(false)
-      }
-    }
+
+         if (!response.ok) {
+           const error = await response.json()
+           throw new Error(error.error || 'Failed to submit application')
+         }
+
+         setIsSubmitted(true)
+       } catch (error) {
+         console.error('Error submitting application:', error)
+       } finally {
+         setIsSubmitting(false)
+       }
+     }
 
   const canProceed = () => {
     if (step === 1) {
