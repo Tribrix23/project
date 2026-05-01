@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { MapPin, Plus, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 interface Address {
   id: string
@@ -26,23 +25,15 @@ const ShowAddresses = () => {
 
   const fetchAddresses = async () => {
     try {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/showAddr')
+      const data = await res.json()
 
-      if (!user) {
-        setLoading(false)
-        return
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch addresses')
       }
 
-      const { data, error } = await supabase
-        .from('Adress')
-        .select('*')
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      setAddresses(data || [])
-    } catch (err) {
+      setAddresses(data.addresses || [])
+    } catch (err: any) {
       console.error('Error fetching addresses:', err)
     } finally {
       setLoading(false)
@@ -58,7 +49,6 @@ const ShowAddresses = () => {
    }
 
   const handleAddressClick = (address: Address) => {
-    // Could be used for selecting an address
     console.log('Selected address:', address)
   }
 
@@ -92,14 +82,14 @@ const ShowAddresses = () => {
                 className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
                     <MapPin size={20} className="text-orange-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
                       {address.street || 'Unnamed Address'}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1 break-words">
+                    <p className="text-xs text-gray-500 mt-1 wrap-break-word">
                       {address.lot && `${address.lot}, `}
                       {address.barangay}, {address.city}, {address.province}
                       {address.zip && ` ${address.zip}`}
