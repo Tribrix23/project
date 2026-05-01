@@ -278,54 +278,48 @@ const Address = () => {
     setOpenDropdown(null)
   }, [])
 
-  // ======================
-  // SUBMIT HANDLER
-  // ======================
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true)
-    setSubmitError(null)
+   // ======================
+   // SUBMIT HANDLER
+   // ======================
+   const handleSubmit = useCallback(async () => {
+     setIsSubmitting(true)
+     setSubmitError(null)
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
+     try {
+       // Validate required fields
+       if (!form.province || !form.city || !form.barangay) {
+         setSubmitError('Please complete province, city, and barangay')
+         setIsSubmitting(false)
+         return
+       }
 
-      if (!user) {
-        setSubmitError('You must be logged in to save an address')
-        router.push('/auth')
-        return
-      }
+       const response = await fetch('/api/setAddress', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+           province: form.province,
+           city: form.city,
+           barangay: form.barangay,
+           street: form.street,
+           blkLot: form.blkLot,
+           zipcode: form.zipcode,
+         }),
+       })
 
-      // Validate required fields
-      if (!form.province || !form.city || !form.barangay) {
-        setSubmitError('Please complete province, city, and barangay')
-        setIsSubmitting(false)
-        return
-      }
+       if (!response.ok) {
+         const errorData = await response.json()
+         throw new Error(errorData.error || 'Failed to save address')
+       }
 
-      const addressString = `${form.blkLot ? form.blkLot + ', ' : ''}${form.street}, ${form.barangay}, ${form.city}, ${form.province} ${form.zipcode}`.trim()
-
-      const { error } = await supabase.from('addresses').insert({
-        user_id: user.id,
-        province: form.province,
-        province_code: form.provinceCode,
-        city: form.city,
-        city_code: form.cityCode,
-        barangay: form.barangay,
-        barangay_code: form.barangayCode,
-        street: form.street,
-        block_lot: form.blkLot,
-        zipcode: form.zipcode,
-        full_address: addressString,
-      })
-
-      if (error) throw error
-
-      router.back()
-    } catch (error: any) {
-      setSubmitError(error.message || 'Failed to save address')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [supabase, router, form])
+       router.back()
+     } catch (error: any) {
+       setSubmitError(error.message || 'Failed to save address')
+     } finally {
+       setIsSubmitting(false)
+     }
+   }, [router, form])
 
   // ======================
   // FILTER HELPERS
