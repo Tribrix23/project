@@ -35,6 +35,7 @@ export async function POST(req: Request) {
     }
 
 
+
     // Insert seller application into database
     const { data, error } = await supabase
       .from("sellerStore")
@@ -54,6 +55,17 @@ export async function POST(req: Request) {
       .single();
 
     if (error) throw error;
+
+        const { data: profileData, error: profileError } = await supabase
+    .from("profiles")
+    .update({
+        sellerStatus: 'PENDING'
+    })
+    .eq('id', user.id)
+    .select()
+    .single()
+
+
 
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err: any) {

@@ -1,16 +1,13 @@
-'use client'
+ 'use client'
 import PhilippinesMap from '@/components/ui/Map'
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { 
   Store, MapPin, Building2, 
-  Package, Truck, Shield, ArrowLeft, CheckCircle
+  Package, Truck, Shield, ArrowLeft, CheckCircle, XCircle
 } from 'lucide-react'
 
-type SellerApllyProps = {
-  onBack?: () => void
-}
 
 type FormData = {
   storeName: string
@@ -36,12 +33,11 @@ interface UserProfile {
 
 const businessTypes = ['Individual', 'Partnership', 'Corporation', 'Registered Business']
 
-const SellerAplly = ({ onBack }: SellerApllyProps) => {
+const SellerAplly = () => {
   const router = useRouter()
-  const supabase = createClient()
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [popup, setPopup] = useState<{type: 'success' | 'error', message: string} | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [formData, setFormData] = useState<FormData>({
     storeName: '',
@@ -77,38 +73,45 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
      // ======================
      // SUBMIT HANDLER
      // ======================
-     const handleSubmit = async () => {
-       setIsSubmitting(true)
-       try {
-          const response = await fetch('/api/applySeller', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              storeName: formData.storeName,
-              storeDescription: formData.storeDescription,
-              businessType: formData.businessType,
-              province: formData.province,
-              city: formData.city,
-              barangay: formData.barangay,
-              street: formData.street,
-              zipcode: formData.zipcode,
-            }),
-          })
+      const handleSubmit = async () => {
+        setIsSubmitting(true)
+        setPopup(null)
+        try {
+           const response = await fetch('/api/applySeller', {
+             method: 'POST',
+             headers: {
+               'Content-Type': 'application/json',
+             },
+             body: JSON.stringify({
+               storeName: formData.storeName,
+               storeDescription: formData.storeDescription,
+               businessType: formData.businessType,
+               province: formData.province,
+               city: formData.city,
+               barangay: formData.barangay,
+               street: formData.street,
+               zipcode: formData.zipcode,
+             }),
+           })
 
-         if (!response.ok) {
-           const error = await response.json()
-           throw new Error(error.error || 'Failed to submit application')
-         }
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || 'Failed to submit application')
+          }
 
-         setIsSubmitted(true)
-       } catch (error) {
-         console.error('Error submitting application:', error)
-       } finally {
-         setIsSubmitting(false)
-       }
-     }
+          setPopup({type: 'success', message: 'Application submitted successfully!'})
+          setTimeout(() => {
+            router.push('/?page=profile')
+          }, 3000)
+        } catch (error: any) {
+          setPopup({type: 'error', message: error.message || 'Failed to submit application'})
+          setTimeout(() => {
+            setPopup(null)
+          }, 3000)
+        } finally {
+          setIsSubmitting(false)
+        }
+      }
 
   const canProceed = () => {
     if (step === 1) {
@@ -127,26 +130,34 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
     return parts.join(' ')
   }
 
-  if (isSubmitted) {
+  if (popup) {
     return (
       <div className='w-full h-full flex flex-col bg-gray-50'>
         <header className='w-full h-16 bg-white flex items-center px-4 shadow-sm shrink-0'>
-          <button onClick={onBack} className='p-2 -ml-2 rounded-full hover:bg-gray-100'>
+          <button onClick={() => router.push('/?page=profile')} className='p-2 -ml-2 rounded-full hover:bg-gray-100'>
             <ArrowLeft size={20} className='text-gray-700' />
           </button>
           <h1 className='text-xl font-bold text-gray-800 ml-2'>Seller Application</h1>
         </header>
 
         <div className='flex-1 flex flex-col items-center justify-center px-6'>
-          <div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6'>
-            <CheckCircle size={48} className='text-green-500' />
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${
+            popup.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+          }`}>
+            {popup.type === 'success' ? (
+              <CheckCircle size={48} className='text-green-500' />
+            ) : (
+              <XCircle size={48} className='text-red-500' />
+            )}
           </div>
-          <h2 className='text-2xl font-bold text-gray-800 mb-3'>Application Submitted!</h2>
+          <h2 className='text-2xl font-bold text-gray-800 mb-3'>
+            {popup.type === 'success' ? 'Application Submitted!' : 'Submission Failed'}
+          </h2>
           <p className='text-gray-500 text-center mb-8'>
-            Your seller application has been submitted successfully. We will review it and get back to you within 2-3 business days.
+            {popup.message}
           </p>
           <button 
-            onClick={onBack}
+            onClick={() => router.push('/?page=profile')}
             className='w-full py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'
           >
             Back to Profile
@@ -159,7 +170,7 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
   return (
     <div className='w-full h-full flex flex-col bg-gray-50'>
       <header className='w-full h-16 bg-white flex items-center px-4 shadow-sm shrink-0'>
-        <button onClick={onBack} className='p-2 -ml-2 rounded-full hover:bg-gray-100'>
+        <button onClick={() => router.push('/?page=profile')} className='p-2 -ml-2 rounded-full hover:bg-gray-100'>
           <ArrowLeft size={20} className='text-gray-700' />
         </button>
         <h1 className='text-xl font-bold text-gray-800 ml-2'>Become a Seller</h1>
