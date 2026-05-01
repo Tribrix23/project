@@ -203,7 +203,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
             <OptionTabs icons={User} text='Edit Profile' borderDown={true} />
             <OptionTabs icons={Wallet} text='Payment Methods' borderDown={true} />
-            <OptionTabs icons={MapPin} text='Addresses' borderDown={true} onClick={() => router.push("/settings?c=addr")}/>
+            <OptionTabs icons={MapPin} text='Addresses' borderDown={true} onClick={() => router.push("/settings?c=sddr")}/>
             <OptionTabs icons={BellIcon} text='Notifications' borderDown={false} />
           </div>
         </div>
