@@ -12,11 +12,11 @@ type SellerApllyProps = {
   onBack?: () => void
 }
 
-interface FormData {
+type FormData = {
   storeName: string
   storeDescription: string
-  address: string
   businessType: string
+  // Location fields (Step 2)
   province?: string
   city?: string
   barangay?: string
@@ -46,7 +46,6 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
   const [formData, setFormData] = useState<FormData>({
     storeName: '',
     storeDescription: '',
-    address: '',
     businessType: ''
   })
 
@@ -77,60 +76,63 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
      }))
    }
 
-   // ======================
-   // MAP → FORM UPDATE
-   // ======================
-   const handleLocationChange = useCallback((data: any) => {
-     setFormData((prev) => ({
-       ...prev,
-       province: data.province || prev.province,
-       city: data.city || prev.city,
-       barangay: data.barangay || prev.barangay,
-       street: data.street || '',
-       zipcode: data.zipcode || prev.zipcode,
-       lat: data.lat,
-       lon: data.lon,
-     }))
+    // ======================
+    // MAP → FORM UPDATE
+    // ======================
+    const handleLocationChange = useCallback((data: any) => {
+      setFormData((prev) => ({
+        ...prev,
+        province: data.province || prev.province,
+        city: data.city || prev.city,
+        barangay: data.barangay || prev.barangay,
+        street: data.street || '',
+        zipcode: data.zipcode || prev.zipcode,
+        lat: data.lat,
+        lon: data.lon,
+      }))
+    }, [])
 
-     // Also update the address field with full location
-     const addressParts = [data.street, data.barangay, data.city, data.province, data.zipcode]
-       .filter(Boolean)
-       .join(', ')
-     setFormData(prev => ({ ...prev, address: addressParts }))
-   }, [])
-
-   // ======================
-   // SUBMIT HANDLER
-   // ======================
-   const handleSubmit = async () => {
-     setIsSubmitting(true)
-     try {
-       const { data: { user } } = await supabase.auth.getUser()
-       
-       if (user) {
-         await supabase.from('seller_applications').insert({
-           user_id: user.id,
-           store_name: formData.storeName,
-           store_description: formData.storeDescription,
-           address: formData.address,
-           business_type: formData.businessType,
-           status: 'pending'
-         })
-       }
-       
-       setIsSubmitted(true)
-     } catch (error) {
-       console.error('Error submitting application:', error)
-     } finally {
-       setIsSubmitting(false)
-     }
-   }
+    // ======================
+    // SUBMIT HANDLER
+    // ======================
+    const handleSubmit = async () => {
+      setIsSubmitting(true)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          // Construct address from location parts
+          const addressParts = [formData.street, formData.barangay, formData.city, formData.province, formData.zipcode]
+            .filter(Boolean)
+            .join(', ')
+          
+          await supabase.from('seller_applications').insert({
+            user_id: user.id,
+            store_name: formData.storeName,
+            store_description: formData.storeDescription,
+            address: addressParts,
+            business_type: formData.businessType,
+            status: 'pending'
+          })
+        }
+        
+        setIsSubmitted(true)
+      } catch (error) {
+        console.error('Error submitting application:', error)
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
 
   const canProceed = () => {
     if (step === 1) {
       return formData.storeName.trim().length >= 3 && formData.storeDescription.trim().length >= 10
     }
-    return formData.address.trim().length >= 10 && formData.businessType
+    if (step === 2) {
+      return formData.province && formData.city && formData.barangay && 
+             formData.street && formData.zipcode && formData.lat && formData.lon
+    }
+    return !!formData.businessType
   }
 
   const getFullName = () => {
@@ -177,18 +179,19 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
         <h1 className='text-xl font-bold text-gray-800 ml-2'>Become a Seller</h1>
       </header>
 
-      <div className='px-4 py-4'>
-        <div className='flex items-center justify-between mb-6'>
-          {[1, 2].map((s) => (
-            <div key={s} className='flex items-center'>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+      <main className='flex-1 overflow-y-auto px-4 py-4'>
+        {/* Step Indicator */}
+        <div className='flex items-center justify-between mb-6 px-2 pl-20 '>
+          {[1, 2, 3].map((s) => (
+            <div key={s} className='flex items-center flex-1'>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
                 step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
               }`}>
                 {step > s ? <CheckCircle size={16} /> : s}
               </div>
-              {s < 2 && (
-                <div className={`w-16 h-1 mx-1 rounded ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />
-              )}
+               {s < 3 && (
+                 <div className={`h-1 rounded flex-1 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />
+               )}
             </div>
           ))}
         </div>
@@ -204,153 +207,230 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
           </div>
         )}
 
-        <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-          {step === 1 && (
-            <>
-              <h2 className='text-lg font-bold text-gray-800 mb-5 flex items-center gap-2'>
-                <Store className='text-orange-500' size={22} />
-                Store Information
-              </h2>
-              
-              <div className='space-y-4'>
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2 block'>Store Name</label>
-                  <input
-                    type='text'
-                    name='storeName'
-                    value={formData.storeName}
-                    onChange={handleChange}
-                    placeholder='Enter your store name'
-                    className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                  />
-                </div>
+         <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+           {step === 1 && (
+             <>
+               <h2 className='text-lg font-bold text-gray-800 mb-5 flex items-center gap-2'>
+                 <Store className='text-orange-500' size={22} />
+                 Store Information
+               </h2>
+               
+               <div className='space-y-4'>
+                 <div>
+                   <label className='text-sm font-medium text-gray-700 mb-2 block'>Store Name</label>
+                   <input
+                     type='text'
+                     name='storeName'
+                     value={formData.storeName}
+                     onChange={handleChange}
+                     placeholder='Enter your store name'
+                     className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                   />
+                 </div>
 
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2 block'>Store Description</label>
-                  <textarea
-                    name='storeDescription'
-                    value={formData.storeDescription}
-                    onChange={handleChange}
-                    placeholder='Describe your store and the products you sell'
-                    rows={4}
-                    className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none'
-                  />
-                </div>
+                 <div>
+                   <label className='text-sm font-medium text-gray-700 mb-2 block'>Store Description</label>
+                   <textarea
+                     name='storeDescription'
+                     value={formData.storeDescription}
+                     onChange={handleChange}
+                     placeholder='Describe your store and the products you sell'
+                     rows={4}
+                     className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none'
+                   />
+                 </div>
 
-                <div className='grid grid-cols-2 gap-3 pt-2'>
-                  <div className='bg-orange-50 p-3 rounded-xl text-center'>
-                    <Package className='text-orange-500 mx-auto mb-1' size={20} />
-                    <p className='text-xs text-gray-600'>List Products</p>
-                  </div>
-                  <div className='bg-gray-50 p-3 rounded-xl text-center'>
-                    <Truck className='text-gray-500 mx-auto mb-1' size={20} />
-                    <p className='text-xs text-gray-600'>Manage Orders</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+                 <div className='grid grid-cols-2 gap-3 pt-2'>
+                   <div className='bg-orange-50 p-3 rounded-xl text-center'>
+                     <Package className='text-orange-500 mx-auto mb-1' size={20} />
+                     <p className='text-xs text-gray-600'>List Products</p>
+                   </div>
+                   <div className='bg-gray-50 p-3 rounded-xl text-center'>
+                     <Truck className='text-gray-500 mx-auto mb-1' size={20} />
+                     <p className='text-xs text-gray-600'>Manage Orders</p>
+                   </div>
+                 </div>
+               </div>
+             </>
+           )}
 
-          {step === 2 && (
-            <>
-              <h2 className='text-lg font-bold text-gray-800 mb-5 flex items-center gap-2'>
-                <Building2 className='text-orange-500' size={22} />
-                Business Details
-              </h2>
+           {step === 2 && (
+             <>
+               <h2 className='text-lg font-bold text-gray-800 mb-5 flex items-center gap-2'>
+                 <MapPin className='text-orange-500' size={22} />
+                 Business Location
+               </h2>
 
-              {/* MAP */}
-              <div className='mb-4'>
-                <div className='aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200'>
-                  <PhilippinesMap
-                    ref={mapRef}
-                    onLocationChange={handleLocationChange}
-                  />
-                </div>
-                <p className='text-xs text-gray-500 mt-2 text-center'>
-                  Tap on the map to set your business location
-                </p>
-              </div>
+               {/* MAP */}
+               <div className='mb-4'>
+                 <div className='aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200'>
+                   <PhilippinesMap
+                     ref={mapRef}
+                     onLocationChange={handleLocationChange}
+                   />
+                 </div>
+                 <p className='text-xs text-gray-500 mt-2 text-center'>
+                   Tap on the map to set your business location
+                 </p>
+               </div>
 
-              <div className='space-y-4'>
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2 block'>Business Address</label>
-                  <div className='relative'>
-                    <MapPin className='absolute left-3 top-3 text-gray-400' size={18} />
-                    <textarea
-                      name='address'
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder='Enter your complete business address or select on map'
-                      rows={2}
-                      className='w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none'
-                    />
-                  </div>
-                </div>
+               <div className='space-y-4'>
+                 <div>
+                   <label className='text-sm font-medium text-gray-700 mb-2 block'>Street Address</label>
+                   <div className='relative'>
+                     <MapPin className='absolute left-3 top-3 text-gray-400' size={18} />
+                     <textarea
+                       name='address'
+                       value={formData.street || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, street: e.target.value }))}
+                       placeholder='House number, street name, building, etc.'
+                       rows={2}
+                       className='w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none'
+                     />
+                   </div>
+                 </div>
 
-                <div>
-                  <label className='text-sm font-medium text-gray-700 mb-2 block'>Business Type</label>
-                  <select
-                    name='businessType'
-                    value={formData.businessType}
-                    onChange={handleChange}
-                    className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
-                  >
-                    <option value=''>Select business type</option>
-                    {businessTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
+                 <div className='grid grid-cols-2 gap-3'>
+                   <div>
+                     <label className='text-sm font-medium text-gray-700 mb-2 block'>City / Municipality</label>
+                     <input
+                       type='text'
+                       value={formData.city || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                       placeholder='City'
+                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                     />
+                   </div>
+                   <div>
+                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Province</label>
+                     <input
+                       type='text'
+                       value={formData.province || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, province: e.target.value }))}
+                       placeholder='Province'
+                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                     />
+                   </div>
+                 </div>
 
-                <div className='bg-blue-50 p-4 rounded-xl flex items-start gap-3'>
-                  <Shield className='text-blue-500 shrink-0 mt-0.5' size={20} />
-                  <div>
-                    <p className='text-sm font-medium text-blue-800'>Your data is secure</p>
-                    <p className='text-xs text-blue-600 mt-1'>We will only use your information to process your seller application.</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+                 <div className='grid grid-cols-2 gap-3'>
+                   <div>
+                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Barangay</label>
+                     <input
+                       type='text'
+                       value={formData.barangay || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, barangay: e.target.value }))}
+                       placeholder='Barangay'
+                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                     />
+                   </div>
+                   <div>
+                     <label className='text-sm font-medium text-gray-700 mb-2 block'>Zip Code</label>
+                     <input
+                       type='text'
+                       value={formData.zipcode || ''}
+                       onChange={(e) => setFormData(prev => ({ ...prev, zipcode: e.target.value }))}
+                       placeholder='Zip code'
+                       className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                     />
+                   </div>
+                 </div>
 
-        <div className='flex gap-3 mt-5'>
-          {step > 1 && (
-            <button
-              onClick={() => setStep(step - 1)}
-              className='flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-full hover:bg-gray-200 transition-colors'
-            >
-              Back
-            </button>
-          )}
-          {step < 2 ? (
-            <button
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-              className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
-                canProceed() 
-                  ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Continue
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={!canProceed() || isSubmitting}
-              className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
-                canProceed() && !isSubmitting
-                  ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+                 <div className='bg-blue-50 p-4 rounded-xl flex items-start gap-3'>
+                   <Shield className='text-blue-500 shrink-0 mt-0.5' size={20} />
+                   <div>
+                     <p className='text-sm font-medium text-blue-800'>Your location is secure</p>
+                     <p className='text-xs text-blue-600 mt-1'>This information will be used to calculate shipping costs and delivery estimates.</p>
+                   </div>
+                 </div>
+               </div>
+             </>
+           )}
+
+           {step === 3 && (
+             <>
+               <h2 className='text-lg font-bold text-gray-800 mb-5 flex items-center gap-2'>
+                 <Building2 className='text-orange-500' size={22} />
+                 Business Details
+               </h2>
+
+               <div className='space-y-4'>
+                 <div>
+                   <label className='text-sm font-medium text-gray-700 mb-2 block'>Business Type</label>
+                   <select
+                     name='businessType'
+                     value={formData.businessType}
+                     onChange={handleChange}
+                     className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                   >
+                     <option value=''>Select business type</option>
+                     {businessTypes.map(type => (
+                       <option key={type} value={type}>{type}</option>
+                     ))}
+                   </select>
+                 </div>
+
+                 {/* Location Summary */}
+                 {(formData.street || formData.barangay || formData.city || formData.province) && (
+                   <div className='bg-gray-50 p-4 rounded-xl'>
+                     <p className='text-sm font-medium text-gray-700 mb-2'>Business Address</p>
+                     <p className='text-sm text-gray-600'>
+                       {[formData.street, formData.barangay, formData.city, formData.province, formData.zipcode]
+                         .filter(Boolean)
+                         .join(', ')}
+                     </p>
+                   </div>
+                 )}
+
+                 <div className='bg-blue-50 p-4 rounded-xl flex items-start gap-3'>
+                   <Shield className='text-blue-500 shrink-0 mt-0.5' size={20} />
+                   <div>
+                     <p className='text-sm font-medium text-blue-800'>Your data is secure</p>
+                     <p className='text-xs text-blue-600 mt-1'>We will only use your information to process your seller application.</p>
+                   </div>
+                 </div>
+               </div>
+             </>
+           )}
+         </div>
+
+          <div className='flex gap-3 mt-5 pb-4'>
+            {step > 1 && (
+              <button
+                onClick={() => setStep(step - 1)}
+                className='flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-full hover:bg-gray-200 transition-colors'
+              >
+                Back
+              </button>
+            )}
+            {step < 3 ? (
+              <button
+                onClick={() => setStep(step + 1)}
+                disabled={!canProceed()}
+                className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
+                  canProceed() 
+                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={!canProceed() || isSubmitting}
+                className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
+                  canProceed() && !isSubmitting
+                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+              </button>
+            )}
+          </div>
+        </main>
+     </div>
   )
 }
 
