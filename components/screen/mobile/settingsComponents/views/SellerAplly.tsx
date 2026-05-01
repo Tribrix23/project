@@ -51,24 +51,6 @@ const SellerAplly = ({ onBack }: SellerApllyProps) => {
 
   const mapRef = useRef<any>(null)
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('first_name, middle_name, last_name, email, phone')
-          .eq('id', user.id)
-          .single()
-        
-        if (data) {
-          setUserProfile(data)
-        }
-      }
-    }
-    fetchUserProfile()
-  }, [supabase])
-
    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
      setFormData(prev => ({
        ...prev,
