@@ -80,9 +80,16 @@ const Preview = ({ userId }: PreviewProps) => {
   // Format name: first_name + first letter of middle_name (capitalized) + . + last_name
   const getFormattedName = (profile: Profile | null): string => {
     if (!profile) return 'Unknown'
-    const firstLetter = profile.middle_name ? profile.middle_name.charAt(0).toUpperCase() : ''
+    const { first_name, middle_name, last_name } = profile
+    // Handle case where all names might be empty or null/undefined
+    const hasFirstName = first_name && first_name.trim()
+    const hasLastName = last_name && last_name.trim()
+    if (!hasFirstName && !hasLastName) return 'Unknown'
+    
+    const firstLetter = middle_name && middle_name.trim() ? middle_name.charAt(0).toUpperCase() : ''
     const middleInitial = firstLetter ? `${firstLetter}.` : ''
-    return `${profile.first_name} ${middleInitial} ${profile.last_name}`.trim()
+    const name = `${first_name || ''} ${middleInitial} ${last_name || ''}`.trim()
+    return name || 'Unknown'
   }
 
   // Get phone number
@@ -99,7 +106,7 @@ const Preview = ({ userId }: PreviewProps) => {
             <div className="relative">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 1v4h4M9 7H6a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3h-3M9 1v4h6V1M9 7a3 3 0 00-3 3v10a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3H9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
             </div>
@@ -127,7 +134,7 @@ const Preview = ({ userId }: PreviewProps) => {
             {/* Store Logo/Image Area - No circle picture */}
             <div className="w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
               <svg className="w-8 h-8 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 1v4h4M9 7H6a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3h-3M9 1v4h6V1M9 7a3 3 0 00-3 3v10a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3H9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
 
