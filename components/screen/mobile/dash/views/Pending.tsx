@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { MoreVertical, User, Shield, Check, X, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
 
@@ -16,6 +17,7 @@ interface UserData {
 }
 
 const Pending = () => {
+  const router = useRouter()
   const [users, setUsers] = useState<UserData[]>([])
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -84,8 +86,8 @@ const Pending = () => {
     setSelectedUser(null)
   }
 
-  const handleReview = (userId: string) => {
-    alert(`Review user ${userId}`)
+const handleReview = (userId: string) => {
+    router.push(`/dash?page=preview&userId=${userId}`)
     setSelectedUser(null)
   }
 
