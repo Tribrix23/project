@@ -68,19 +68,18 @@ export async function POST(req: Request) {
       )
     }
 
-    // Upsert profile with email into public.profiles
+    // Update profile with email into public.profiles
     const userEmail = userData.user.email;
     if (userEmail) {
       const { error: profileError } = await supabaseServer
         .from('profiles')
-        .upsert({
-          id: userId,
+        .update({
           email: userEmail,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'id' })
+        })
+        .eq('id', userId)
 
       if (profileError) {
-        console.error('Failed to upsert profile:', profileError);
+        console.error('Failed to update profile:', profileError);
       }
     }
 
