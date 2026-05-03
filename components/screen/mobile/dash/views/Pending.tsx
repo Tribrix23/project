@@ -148,8 +148,8 @@ const Pending = () => {
                           </tr>
                           <tr>
                             <td align="center" style="padding: 0 40px 32px;">
-                              <a href="https://construco.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
-                                Go to Dashboard
+<a href="https://construco.devctr.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
+                                 Go to Website
                               </a>
                             </td>
                           </tr>
@@ -165,7 +165,7 @@ const Pending = () => {
                           <tr>
                             <td style="padding: 24px 40px 40px;">
                               <p style="font-size: 14px; color: #a3a3a3; margin: 0; text-align: center;">
-                                Having trouble? Contact us at <a href="mailto:support@construco.com" style="color: #f97316; text-decoration: none;">support@construco.com</a>
+                                Having trouble? Contact us at <a href="mailto:support@devctr.com" style="color: #f97316; text-decoration: none;">support@devctr.com</a>
                               </p>
                             </td>
                           </tr>
@@ -177,7 +177,7 @@ const Pending = () => {
                                 &copy; 2026 Construco. All rights reserved.
                               </p>
                               <p style="font-size: 13px; color: #a3a3a3; margin: 8px 0 0;">
-                                construco.com
+                                construco.devctr.com
                               </p>
                             </td>
                           </tr>
@@ -191,7 +191,7 @@ const Pending = () => {
             }),
           })
           const emailData = await emailRes.json()
-          console.log('Email response for approved seller:', emailRes.status, emailData)
+          
         } catch (emailErr) {
           console.error('Failed to send email:', emailErr)
         }
@@ -279,7 +279,7 @@ const Pending = () => {
                           </tr>
                           <tr>
                             <td align="center" style="padding: 0 40px 32px;">
-                              <a href="mailto:support@construco.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
+                              <a href="mailto:support@devctr.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
                                 Contact Support
                               </a>
                             </td>
@@ -299,7 +299,7 @@ const Pending = () => {
                                 If you believe this was a mistake, please reach out to our support team.
                               </p>
                               <p style="font-size: 13px; color: #a3a3a3; margin: 0; text-align: center;">
-                                support@construco.com
+                                support@devctr.com
                               </p>
                             </td>
                           </tr>
@@ -311,7 +311,7 @@ const Pending = () => {
                                 &copy; 2026 Construco. All rights reserved.
                               </p>
                               <p style="font-size: 13px; color: #a3a3a3; margin: 8px 0 0;">
-                                construco.com
+                                construco.devctr.com
                               </p>
                             </td>
                           </tr>
@@ -325,7 +325,7 @@ const Pending = () => {
             }),
           })
           const emailData = await emailRes.json()
-          console.log('Email response for rejected seller:', emailRes.status, emailData)
+          
         } catch (emailErr) {
           console.error('Failed to send email:', emailErr)
         }
