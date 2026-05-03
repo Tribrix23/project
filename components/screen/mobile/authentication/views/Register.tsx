@@ -25,7 +25,6 @@ type RegisterProps = {
 }
 
 const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgreed = false, formData, setFormData }: RegisterProps) => {
-  const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -100,74 +99,44 @@ const Register = ({ onRegister, onGoBack, onLogin, termsAndServices, isTermsAgre
     } = formData
 
     try {
-      const { data: exists } = await supabase.rpc("email_exists", {
-        check_email: email,
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          middleName,
+          lastName,
+          phone,
+        }),
       })
 
-      if (exists) {
+      const result = await response.json()
+
+      if (!response.ok) {
         setIsLoading(false)
-        setPopup({ type: 'error', message: 'An account with this email already exists' })
+        setPopup({ type: 'error', message: result.error || 'Registration failed' })
         return
       }
 
-      const { error: signUpError, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            middle_name: middleName,
-            last_name: lastName,
-            phone: phone,
-            role: 'user',
-          }
-        }
-      })
-
+      setPopup({ type: 'success', message: 'Check your email to confirm your account' })
       setIsLoading(false)
-
-      if (signUpError) {
-        setPopup({ type: 'error', message: signUpError.message })
-        return
-      }
-
-      if (data?.user) {
-        setPopup({ type: 'success', message: 'Check your email to confirm your account' })
-            setFormData({
-          firstName: '',
-          middleName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          password: '',
-          confirmPassword: '',
-        })
-
-        setAgreedToTerms(false)
-        
-      } else {
-        setPopup({ type: 'error', message: 'An account with this email already exists' })
-      }
-
-      if(data.user) {
-        try {
-          const roleResponse = await fetch('/api/set-role', {
-            method: "POST",
-            headers: {
-              'Content-Type' : 'application/json',
-            },
-            body: JSON.stringify({userId: data.user.id})
-          })
-          if (!roleResponse.ok) {
-            console.error('Failed to set role:', roleResponse.statusText)
-          }
-        } catch (apiError) {
-          console.error('set-role API error:', apiError)
-        }
-      }
+      setFormData({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+      })
+      setAgreedToTerms(false)
 
     } catch (err: unknown) {
-      const error = err as Error;
+      const error = err as Error
       setIsLoading(false)
       setPopup({ type: 'error', message: error.message || 'An error occurred' })
     }

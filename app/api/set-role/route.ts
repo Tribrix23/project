@@ -68,11 +68,20 @@ export async function POST(req: Request) {
       )
     }
 
-    // Invalidate getUsers cache
-    try {
-      await redis.del('users:full');
-    } catch (e) {
-      console.error('Failed to invalidate cache:', e);
+    // Upsert profile with email into public.profiles
+    const userEmail = userData.user.email;
+    if (userEmail) {
+      const { error: profileError } = await supabaseServer
+        .from('profiles')
+        .upsert({
+          id: userId,
+          email: userEmail,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' })
+
+      if (profileError) {
+        console.error('Failed to upsert profile:', profileError);
+      }
     }
 
     return NextResponse.json({ success: true, message: 'Role updated' })
