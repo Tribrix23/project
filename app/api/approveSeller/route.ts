@@ -19,23 +19,47 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: profile, error: profileError } = await Server
-      .from("profiles")
-      .update({ sellerStatus: action === "approve" ? "SELLER" : "BUYER" })
-      .eq("id", userId)
-      .select()
-      .single();
+    if (action === "approve") {
+      const { data: profile, error: profileError } = await Server
+        .from("profiles")
+        .update({ sellerStatus: "SELLER" })
+        .eq("id", userId)
+        .select()
+        .single();
 
-    if (profileError) throw profileError;
+      if (profileError) throw profileError;
 
-    await Server
-      .from("sellerStore")
-      .update({ status: action === "approve" ? "APPROVED" : "REJECTED" })
-      .eq("owner_id", userId);
+      await Server
+        .from("sellerStore")
+        .update({ 
+          status: "APPROVED",
+          date_approved: new Date().toISOString()
+        })
+        .eq("owner_id", userId);
 
-    const status = action === "approve" ? "APPROVED" : "REJECTED";
+      const status = "APPROVED";
+      return NextResponse.json({ success: true, profile, status });
+    } else {
+      const { data: profile, error: profileError } = await Server
+        .from("profiles")
+        .update({ sellerStatus: "BUYER" })
+        .eq("id", userId)
+        .select()
+        .single();
 
-    return NextResponse.json({ success: true, profile, status });
+      if (profileError) throw profileError;
+
+      await Server
+        .from("sellerStore")
+        .update({ 
+          status: "REJECTED",
+          date_rejected: new Date().toISOString()
+        })
+        .eq("owner_id", userId);
+
+      const status = "REJECTED";
+      return NextResponse.json({ success: true, profile, status });
+    }
   } catch (err: any) {
     console.error("Error updating seller status:", err);
     return NextResponse.json(
