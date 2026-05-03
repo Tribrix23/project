@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { MoreVertical, User, Shield, Check, X, Eye } from 'lucide-react'
+import { MoreVertical, User, Check, X, Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
@@ -14,6 +14,10 @@ interface UserData {
   last_name: string
   sellerStatus: UserRole
   isActive: boolean
+  profile?: {
+    first_name?: string
+    last_name?: string
+  }
 }
 
 const Pending = () => {
@@ -68,22 +72,269 @@ const Pending = () => {
     return gradients[index]
   }
 
-  const getRoleIcon = (role: UserRole) => {
-    return role === 'SELLER' || role === 'PENDING' ? (
-      <Shield size={12} />
-    ) : (
-      <User size={12} />
-    )
+  const handleApprove = async (userId: string) => {
+    try {
+      const res = await fetch('/api/approveSeller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action: 'approve' }),
+      })
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Failed to approve seller:', errorData)
+        return
+      }
+      
+      const user = users.find(u => u.id === userId)
+      if (user) {
+        const storeRes = await fetch(`/api/reviewApi?userId=${userId}`)
+        const storeData = await storeRes.json()
+        const store = storeData.sellerStore
+        
+        try {
+          const emailRes = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              subject: 'Seller Application Approved - Construco',
+              htmlContent: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Seller Application Approved</title>
+                </head>
+                <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f6f3e7; min-height: 100vh;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f3e7; min-height: 100vh;">
+                    <tr>
+                      <td align="center" style="padding: 40px 20px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 20px 20px 0 0;">
+                          <tr>
+                            <td align="center" style="padding: 40px 40px 60px;">
+                              <img src="https://construco.devctr.com/favicon.png" alt="Construco" width="80" style="display: block; width: 80px; height: 80px; border-radius: 16px;">
+                              <h1 style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 24px 0 8px; letter-spacing: -0.5px;">
+                                Congratulations!
+                              </h1>
+                              <p style="font-size: 16px; color: #ffffff; opacity: 0.9; margin: 0;">
+                                Your seller application has been approved
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; background-color: #ffffff; border-radius: 0 0 20px 20px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);">
+                          <tr>
+                            <td style="padding: 40px 40px 32px;">
+                              <p style="font-size: 16px; line-height: 1.8; color: #525252; margin: 0 0 24px; text-align: center;">
+                                Dear ${user.first_name} ${user.last_name}, your seller application has been approved. You can now start selling on Construco!
+                              </p>
+                              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafaf9; border-radius: 16px; margin-bottom: 32px;">
+                                <tr>
+                                  <td style="padding: 24px;">
+                                    <p style="font-size: 14px; color: #171717; margin: 0 0 8px; font-weight: 500;">
+                                      Store Details:
+                                    </p>
+                                    <p style="font-size: 14px; color: #525252; margin: 0;">
+                                      <strong>Store Name:</strong> ${store?.name || 'N/A'}<br>
+                                      <strong>Business Type:</strong> ${store?.business_type || 'N/A'}<br>
+                                      <strong>Location:</strong> ${[store?.street, store?.barangay, store?.city, store?.province].filter(Boolean).join(', ') || 'N/A'}
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="center" style="padding: 0 40px 32px;">
+                              <a href="https://construco.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
+                                Go to Dashboard
+                              </a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 0 40px;">
+                              <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <td style="border-top: 1px solid #e5e5e5;"></td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 24px 40px 40px;">
+                              <p style="font-size: 14px; color: #a3a3a3; margin: 0; text-align: center;">
+                                Having trouble? Contact us at <a href="mailto:support@construco.com" style="color: #f97316; text-decoration: none;">support@construco.com</a>
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
+                          <tr>
+                            <td style="padding: 32px 0 24px; text-align: center;">
+                              <p style="font-size: 14px; color: #a3a3a3; margin: 0;">
+                                &copy; 2026 Construco. All rights reserved.
+                              </p>
+                              <p style="font-size: 13px; color: #a3a3a3; margin: 8px 0 0;">
+                                construco.com
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </body>
+                </html>
+              `,
+            }),
+          })
+          const emailData = await emailRes.json()
+          console.log('Email response for approved seller:', emailRes.status, emailData)
+        } catch (emailErr) {
+          console.error('Failed to send email:', emailErr)
+        }
+      }
+      load(1)
+      setSelectedUser(null)
+    } catch (err) {
+      console.error('Error approving seller:', err)
+    }
   }
 
-  const handleApprove = (userId: string) => {
-    alert(`Approve user ${userId}`)
-    setSelectedUser(null)
-  }
-
-  const handleReject = (userId: string) => {
-    alert(`Reject user ${userId}`)
-    setSelectedUser(null)
+  const handleReject = async (userId: string) => {
+    try {
+      const res = await fetch('/api/approveSeller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action: 'reject' }),
+      })
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Failed to reject seller:', errorData)
+        return
+      }
+      
+      const user = users.find(u => u.id === userId)
+      if (user) {
+        const storeRes = await fetch(`/api/reviewApi?userId=${userId}`)
+        const storeData = await storeRes.json()
+        const store = storeData.sellerStore
+        
+        try {
+          const emailRes = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              subject: 'Seller Application Declined - Construco',
+              htmlContent: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Seller Application Declined</title>
+                </head>
+                <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f6f3e7; min-height: 100vh;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f3e7; min-height: 100vh;">
+                    <tr>
+                      <td align="center" style="padding: 40px 20px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 20px 20px 0 0;">
+                          <tr>
+                            <td align="center" style="padding: 40px 40px 60px;">
+                              <img src="https://construco.devctr.com/favicon.png" alt="Construco" width="80" style="display: block; width: 80px; height: 80px; border-radius: 16px;">
+                              <h1 style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 24px 0 8px; letter-spacing: -0.5px;">
+                                Application Update
+                              </h1>
+                              <p style="font-size: 16px; color: #ffffff; opacity: 0.9; margin: 0;">
+                                Your seller application status
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; background-color: #ffffff; border-radius: 0 0 20px 20px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);">
+                          <tr>
+                            <td style="padding: 40px 40px 32px;">
+                              <p style="font-size: 16px; line-height: 1.8; color: #525252; margin: 0 0 24px; text-align: center;">
+                                Dear ${user.first_name} ${user.last_name}, we regret to inform you that your seller application has been declined.
+                              </p>
+                              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafaf9; border-radius: 16px; margin-bottom: 32px;">
+                                <tr>
+                                  <td style="padding: 24px;">
+                                    <p style="font-size: 14px; color: #171717; margin: 0; font-weight: 500;">
+                                      Store Details:
+                                    </p>
+                                    <p style="font-size: 14px; color: #525252; margin: 8px 0 0;">
+                                      <strong>Store Name:</strong> ${store?.name || 'N/A'}<br>
+                                      <strong>Business Type:</strong> ${store?.business_type || 'N/A'}<br>
+                                      <strong>Location:</strong> ${[store?.street, store?.barangay, store?.city, store?.province].filter(Boolean).join(', ') || 'N/A'}
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="center" style="padding: 0 40px 32px;">
+                              <a href="mailto:support@construco.com" style="display: inline-block; background: linear-gradient(to right, #f97316, #ea580c); color: #ffffff; padding: 18px 48px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 9999px; box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);">
+                                Contact Support
+                              </a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 0 40px;">
+                              <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <td style="border-top: 1px solid #e5e5e5;"></td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 24px 40px 40px;">
+                              <p style="font-size: 14px; color: #a3a3a3; margin: 0 0 8px; text-align: center;">
+                                If you believe this was a mistake, please reach out to our support team.
+                              </p>
+                              <p style="font-size: 13px; color: #a3a3a3; margin: 0; text-align: center;">
+                                support@construco.com
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
+                          <tr>
+                            <td style="padding: 32px 0 24px; text-align: center;">
+                              <p style="font-size: 14px; color: #a3a3a3; margin: 0;">
+                                &copy; 2026 Construco. All rights reserved.
+                              </p>
+                              <p style="font-size: 13px; color: #a3a3a3; margin: 8px 0 0;">
+                                construco.com
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </body>
+                </html>
+              `,
+            }),
+          })
+          const emailData = await emailRes.json()
+          console.log('Email response for rejected seller:', emailRes.status, emailData)
+        } catch (emailErr) {
+          console.error('Failed to send email:', emailErr)
+        }
+      }
+      load(1)
+      setSelectedUser(null)
+    } catch (err) {
+      console.error('Error rejecting seller:', err)
+    }
   }
 
 const handleReview = (userId: string) => {
