@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { 
   Coins, LogOutIcon, MapPin, MessageSquareTextIcon, SettingsIcon, 
   StoreIcon, Ticket, User, Wallet, BellIcon, HeartIcon, HelpCircle, 
-  Shield, Star, Camera, ShoppingBag, FileText, LogIn
+  Shield, Star, Camera, ShoppingBag, FileText, LogIn, Clock, Store
 } from 'lucide-react'
 import React from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,6 +15,7 @@ type UserData = {
   email: string
   memberSince: string
   level: string
+  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING'
 }
 
 type ProfilePageProps = {
@@ -230,15 +231,21 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           </div>
         </div>
 
-        {isLoggedIn && (
-          <div className='py-2 space-y-1'>
-            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-              <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
-              <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
-              <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
-            </div>
-          </div>
-        )}
+{isLoggedIn && (
+           <div className='py-2 space-y-1'>
+             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+              {user.sellerStatus === 'SELLER' ? (
+                <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
+              ) : user.sellerStatus === 'PENDING' ? (
+                <OptionTabs icons={Clock} text='Under Review' borderDown={true} />
+              ) : (
+                <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
+              )}
+               <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
+               <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
+             </div>
+           </div>
+         )}
 
         {!isLoggedIn && (
           <div className='py-2 space-y-1'>

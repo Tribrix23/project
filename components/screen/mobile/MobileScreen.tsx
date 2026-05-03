@@ -16,6 +16,7 @@ type UserData = {
   email: string
   memberSince: string
   level: string
+  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING'
 }
 
 const pageRoutes: Record<string, number> = {
@@ -51,7 +52,7 @@ const MobileScreen = () => {
         
         const { data: profile } = await supabase
           .from('profiles')
-          .select('first_name, middle_name, last_name')
+          .select('first_name, middle_name, last_name, sellerStatus')
           .eq('id', userId)
           .single()
         
@@ -66,7 +67,8 @@ const MobileScreen = () => {
           name: fullName || session.user.email?.split('@')[0] || 'User',
           email: session.user.email || '',
           memberSince: new Date().getFullYear().toString(),
-          level: 'Bronze'
+          level: 'Bronze',
+          sellerStatus: profile?.sellerStatus
         })
       }
     })
@@ -116,7 +118,8 @@ const MobileScreen = () => {
       name: 'Guest User',
       email: 'guest@example.com',
       memberSince: '2025',
-      level: 'Bronze'
+      level: 'Bronze',
+      sellerStatus: undefined
     })
     navigateTo('home')
   }
