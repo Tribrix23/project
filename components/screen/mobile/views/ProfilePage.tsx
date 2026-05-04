@@ -4,7 +4,8 @@ import Image from 'next/image'
 import { 
   Coins, LogOutIcon, MapPin, MessageSquareTextIcon, SettingsIcon, 
   StoreIcon, Ticket, User, Wallet, BellIcon, HeartIcon, HelpCircle, 
-  Shield, Star, Camera, ShoppingBag, FileText, LogIn, Clock, Store
+  Shield, Star, Camera, ShoppingBag, FileText, LogIn, Clock, Store,
+  CircleAlert
 } from 'lucide-react'
 import React from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,7 +16,7 @@ type UserData = {
   email: string
   memberSince: string
   level: string
-  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING'
+  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING' | 'REJECTED'
 }
 
 type ProfilePageProps = {
@@ -231,13 +232,15 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           </div>
         </div>
 
-{isLoggedIn && (
+ {isLoggedIn && (
            <div className='py-2 space-y-1'>
              <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
               {user.sellerStatus === 'SELLER' ? (
                 <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
               ) : user.sellerStatus === 'PENDING' ? (
                 <OptionTabs icons={Clock} text='Under Review' borderDown={true} />
+              ) : user.sellerStatus === 'REJECTED' ? (
+                <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} />
               ) : (
                 <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
               )}

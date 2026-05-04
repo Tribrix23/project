@@ -16,7 +16,7 @@ type UserData = {
   email: string
   memberSince: string
   level: string
-  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING'
+  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING' | 'REJECTED'
 }
 
 const pageRoutes: Record<string, number> = {
@@ -50,15 +50,12 @@ const MobileScreen = () => {
       if (session?.user) {
         const userId = session.user.id
         
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('first_name, middle_name, last_name, sellerStatus')
-          .eq('id', userId)
-          .single()
+        const res = await fetch('/api/userData')
+        const data = await res.json()
         
-        const fname = profile?.first_name || ''
-        const mname = profile?.middle_name?.[0] ? profile.middle_name[0].toUpperCase() + '.' : ''
-        const lname = profile?.last_name || ''
+        const fname = data.profile?.first_name || ''
+        const mname = data.profile?.middle_name?.[0] ? data.profile.middle_name[0].toUpperCase() + '.' : ''
+        const lname = data.profile?.last_name || ''
         
         const fullName = [fname, mname, lname].filter(Boolean).join(' ')
         
@@ -68,7 +65,7 @@ const MobileScreen = () => {
           email: session.user.email || '',
           memberSince: new Date().getFullYear().toString(),
           level: 'Bronze',
-          sellerStatus: profile?.sellerStatus
+          sellerStatus: data.profile?.sellerStatus
         })
       }
     })

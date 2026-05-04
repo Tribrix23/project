@@ -39,13 +39,13 @@ export async function POST(req: Request) {
 
       const status = "APPROVED";
       return NextResponse.json({ success: true, profile, status });
-    } else {
-      const { data: profile, error: profileError } = await Server
-        .from("profiles")
-        .update({ sellerStatus: "BUYER" })
-        .eq("id", userId)
-        .select()
-        .single();
+     } else {
+       const { data: profile, error: profileError } = await Server
+         .from("profiles")
+         .update({ sellerStatus: "REJECTED" })
+         .eq("id", userId)
+         .select()
+         .single();
 
       if (profileError) throw profileError;
 
