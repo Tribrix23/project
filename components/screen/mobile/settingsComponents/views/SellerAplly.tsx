@@ -395,44 +395,44 @@ const SellerAplly = () => {
                </div>
              </>
            )}
-         </div>
-
-          <div className='flex gap-3 mt-5 pb-4'>
-            {step > 1 && (
-              <button
-                onClick={() => setStep(step - 1)}
-                className='flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-full hover:bg-gray-200 transition-colors'
-              >
-                Back
-              </button>
-            )}
-            {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                disabled={!canProceed()}
-                className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
-                  canProceed() 
-                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                Continue
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={!canProceed() || isSubmitting}
-                className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
-                  canProceed() && !isSubmitting
-                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
-              </button>
-            )}
           </div>
         </main>
+
+         <div className='flex gap-3 mt-4 pb-12 px-4'>
+           {step > 1 && (
+             <button
+               onClick={() => setStep(step - 1)}
+               className='flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-full hover:bg-gray-200 transition-colors'
+             >
+               Back
+             </button>
+           )}
+           {step < 3 ? (
+             <button
+               onClick={() => setStep(step + 1)}
+               disabled={!canProceed()}
+               className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
+                 canProceed() 
+                   ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+               }`}
+             >
+               Continue
+             </button>
+           ) : (
+             <button
+               onClick={handleSubmit}
+               disabled={!canProceed() || isSubmitting}
+               className={`flex-1 py-3 font-semibold rounded-full transition-colors ${
+                 canProceed() && !isSubmitting
+                   ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+               }`}
+             >
+               {isSubmitting ? 'Submitting...' : 'Submit Application'}
+             </button>
+           )}
+         </div>
      </div>
   )
 }
