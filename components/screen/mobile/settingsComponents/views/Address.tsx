@@ -340,7 +340,7 @@ const Address = () => {
         <h1 className="text-xl font-bold text-gray-800 ml-2">Add Address</h1>
       </header>
 
-      <main className="flex-1 overflow-scroll px-4 pb-4">
+      <main className="flex-1 overflow-scroll px-4">
 
         {submitError && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
@@ -471,10 +471,12 @@ const Address = () => {
             />
           </div>
 
-        </div>
+</div>
+
+        </main>
 
         {/* SUBMIT BUTTON */}
-        <div className="mt-6">
+        <footer className="shrink-0 px-4 pb-12 bg-white border-t border-gray-200">
           <button
             onClick={handleSubmit}
             disabled={!isFormValid || isSubmitting}
@@ -486,10 +488,9 @@ const Address = () => {
           >
             {isSubmitting ? 'Saving...' : 'Save Address'}
           </button>
-        </div>
+        </footer>
 
-      </main>
-    </div>
+      </div>
   )
 }
 
