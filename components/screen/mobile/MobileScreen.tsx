@@ -12,11 +12,11 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 type UserData = {
-  name: string
-  email: string
-  memberSince: string
-  level: string
-  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING' | 'REJECTED'
+   name: string
+   email: string
+   memberSince: string
+   level: string
+   sellerStatus?: 'APPROVED' | 'PENDING' | 'REJECTED' | null
 }
 
 const pageRoutes: Record<string, number> = {

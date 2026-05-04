@@ -4,20 +4,20 @@ import React, { useEffect, useState } from 'react'
 import { MoreVertical, User, Check, X, Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-type UserRole = 'BUYER' | 'SELLER' | 'PENDING'
+type UserRole = 'APPROVED' | 'PENDING' | 'REJECTED'
 
 interface UserData {
-  id: string
-  email: string
-  first_name: string
-  middle_name: string
-  last_name: string
-  sellerStatus: UserRole
-  isActive: boolean
-  profile?: {
-    first_name?: string
-    last_name?: string
-  }
+   id: string
+   email: string
+   first_name: string
+   middle_name: string
+   last_name: string
+   sellerStatus: UserRole
+   isActive: boolean
+   profile?: {
+     first_name?: string
+     last_name?: string
+   }
 }
 
 const Pending = () => {
@@ -92,6 +92,11 @@ const Pending = () => {
         const storeData = await storeRes.json()
         const store = storeData.sellerStore
         
+        // Get user's name from profile
+        const recipientName = [user.profile?.first_name, user.profile?.last_name]
+          .filter(Boolean)
+          .join(' ') || 'Applicant'
+        
         try {
           const emailRes = await fetch('/api/send-email', {
             method: 'POST',
@@ -128,7 +133,7 @@ const Pending = () => {
                           <tr>
                             <td style="padding: 40px 40px 32px;">
                               <p style="font-size: 16px; line-height: 1.8; color: #525252; margin: 0 0 24px; text-align: center;">
-                                Dear ${user.first_name} ${user.last_name}, your seller application has been approved. You can now start selling on Construco!
+                                Dear ${recipientName}, your seller application has been approved. You can now start selling on Construco!
                               </p>
                               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafaf9; border-radius: 16px; margin-bottom: 32px;">
                                 <tr>
@@ -223,6 +228,11 @@ const Pending = () => {
         const storeData = await storeRes.json()
         const store = storeData.sellerStore
         
+        // Get user's name from profile
+        const recipientName = [user.profile?.first_name, user.profile?.last_name]
+          .filter(Boolean)
+          .join(' ') || 'Applicant'
+        
         try {
           const emailRes = await fetch('/api/send-email', {
             method: 'POST',
@@ -259,7 +269,7 @@ const Pending = () => {
                           <tr>
                             <td style="padding: 40px 40px 32px;">
                               <p style="font-size: 16px; line-height: 1.8; color: #525252; margin: 0 0 24px; text-align: center;">
-                                Dear ${user.first_name} ${user.last_name}, we regret to inform you that your seller application has been declined.
+                                Dear ${recipientName}, we regret to inform you that your seller application has been declined.
                               </p>
                               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafaf9; border-radius: 16px; margin-bottom: 32px;">
                                 <tr>

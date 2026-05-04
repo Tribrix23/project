@@ -12,12 +12,12 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/browser'
 
 type UserData = {
-  name: string
-  email: string
-  memberSince: string
-  level: string
-  sellerStatus?: 'BUYER' | 'SELLER' | 'PENDING' | 'REJECTED'
-}
+   name: string
+   email: string
+   memberSince: string
+   level: string
+   sellerStatus?: 'APPROVED' | 'PENDING' | 'REJECTED' | null
+ }
 
 type ProfilePageProps = {
   isLoggedIn: boolean
@@ -235,15 +235,15 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
  {isLoggedIn && (
            <div className='py-2 space-y-1'>
              <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-              {user.sellerStatus === 'SELLER' ? (
-                <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
-              ) : user.sellerStatus === 'PENDING' ? (
-                <OptionTabs icons={Clock} text='Under Review' borderDown={true} />
-              ) : user.sellerStatus === 'REJECTED' ? (
-                <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} />
-              ) : (
-                <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
-              )}
+     {user.sellerStatus === 'APPROVED' ? (
+                 <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
+               ) : user.sellerStatus === 'PENDING' ? (
+                 <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} />
+               ) : user.sellerStatus === 'REJECTED' ? (
+                 <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} />
+               ) : (
+                 <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
+               )}
                <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
                <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
              </div>
