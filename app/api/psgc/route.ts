@@ -3,6 +3,7 @@ export async function GET(req: Request) {
 
   const type = searchParams.get("type") // provinces | cities | barangays
   const code = searchParams.get("code") // parent code
+  const isValidCode = typeof code === "string" && /^\d+$/.test(code)
 
   let url = ""
 
@@ -11,11 +12,11 @@ export async function GET(req: Request) {
       url = "https://psgc.gitlab.io/api/provinces/"
     }
 
-    if (type === "cities" && code) {
+    if (type === "cities" && isValidCode) {
       url = `https://psgc.gitlab.io/api/provinces/${code}/cities-municipalities/`
     }
 
-    if (type === "barangays" && code) {
+    if (type === "barangays" && isValidCode) {
       url = `https://psgc.gitlab.io/api/cities-municipalities/${code}/barangays/`
     }
 
