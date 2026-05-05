@@ -52,6 +52,7 @@ const MobileScreen = () => {
         
         const res = await fetch('/api/userData')
         const data = await res.json()
+        console.log(data)
         
         const fname = data.profile?.first_name || ''
         const mname = data.profile?.middle_name?.[0] ? data.profile.middle_name[0].toUpperCase() + '.' : ''

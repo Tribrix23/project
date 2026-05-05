@@ -42,7 +42,7 @@ export async function POST(req: Request) {
      } else {
        const { data: profile, error: profileError } = await Server
          .from("profiles")
-         .update({ sellerStatus: "REJECTED" })
+         .update({ sellerStatus: "BUYER" })
          .eq("id", userId)
          .select()
          .single();
