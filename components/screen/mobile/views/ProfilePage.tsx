@@ -239,9 +239,9 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
               {user.sellerStore?.status === 'APPROVED' ? (
                 <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
               ) : user.sellerStore?.status === 'PENDING' ? (
-                <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} />
+                <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} disabled={true} />
               ) : user.sellerStore?.status === 'REJECTED' ? (
-                <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} />
+                <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} disabled={true} />
               ) : (
                 <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
               )}

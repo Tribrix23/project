@@ -16,6 +16,7 @@ interface OTabs {
     number?: number,
     showBadge?: boolean,
     onClick?: () => void
+    disabled?: boolean
 }
 
 const OptionTabs:React.FC<OTabs> = ({
@@ -30,10 +31,11 @@ const OptionTabs:React.FC<OTabs> = ({
     badgeNumber = 0,
     number = 0,
     showBadge = false,
-    onClick
+    onClick,
+    disabled = false
 }) => {
   return (
-    <div className={`px-5 w-full h-20 flex flex-row justify-center shrink-0 ${onClick ? 'cursor-pointer active:opacity-50' : ''}`} onClick={onClick}>
+    <div className={`px-5 w-full h-20 flex flex-row justify-center shrink-0 ${disabled ? 'opacity-60 cursor-not-allowed' : onClick ? 'cursor-pointer active:opacity-50' : ''}`} onClick={disabled ? undefined : onClick}>
         <div className={`w-full h-full flex flex-row gap-2 items-center relative ${borderDown ? 'border-b-2 border-[#a9c0c485]' : ''}`}>
             <IconBadge icon={icons} w={10} design={`${design}`} container='pb-1 pt-0' badge={badge} number={badgeNumber} size={size}/>
             <h1 className={`text-2xl font-bold ${textDesign}`}>{text}</h1>
