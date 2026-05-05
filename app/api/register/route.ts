@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
+import { setUserRole } from '@/lib/set-role'
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,15 +82,9 @@ export async function POST(request: NextRequest) {
 
     // Set user role
     try {
-      await fetch(`${request.nextUrl.origin}/api/set-role`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: data.user.id }),
-      })
-    } catch (apiError) {
-      console.error('set-role API error:', apiError)
+      await setUserRole(data.user.id)
+    } catch (roleError) {
+      console.error('Failed to set user role:', roleError)
     }
 
     return NextResponse.json({
