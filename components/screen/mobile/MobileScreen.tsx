@@ -17,7 +17,8 @@ type UserData = {
    memberSince: string
    level: string
    sellerStatus?: 'APPROVED' | 'PENDING' | 'REJECTED' | null
-}
+   sellerStore?: { status: 'APPROVED' | 'PENDING' | 'REJECTED' } | null
+ }
 
 const pageRoutes: Record<string, number> = {
   home: 0,
@@ -61,13 +62,14 @@ const MobileScreen = () => {
         const fullName = [fname, mname, lname].filter(Boolean).join(' ')
         
         setIsLoggedIn(true)
-        setUserData({
-          name: fullName || session.user.email?.split('@')[0] || 'User',
-          email: session.user.email || '',
-          memberSince: new Date().getFullYear().toString(),
-          level: 'Bronze',
-          sellerStatus: data.profile?.sellerStatus
-        })
+setUserData({
+           name: fullName || session.user.email?.split('@')[0] || 'User',
+           email: session.user.email || '',
+           memberSince: new Date().getFullYear().toString(),
+           level: 'Bronze',
+           sellerStatus: data.profile?.sellerStatus,
+           sellerStore: data.sellerStore
+         })
       }
     })
   }, [supabase])

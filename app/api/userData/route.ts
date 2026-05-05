@@ -18,26 +18,17 @@ export async function GET(request: Request) {
       .eq("id", user.id)
       .single();
 
-     // Check sellerStore for REJECTED status and sync profile if needed
-     const { data: sellerStore } = await Server
-       .from("sellerStore")
-       .select("status")
-       .eq("owner_id", user.id)
-       .single();
+    // Check sellerStore status
+    const { data: sellerStore } = await Server
+      .from("sellerStore")
+      .select("status")
+      .eq("owner_id", user.id)
+      .single();
 
-      // If sellerStore exists with REJECTED status but profile says otherwise, sync it
-      if (sellerStore?.status === "REJECTED" && profile && profile.sellerStatus !== "REJECTED") {
-        await Server
-          .from("profiles")
-          .update({ sellerStatus: "REJECTED" })
-          .eq("id", user.id);
-        profile.sellerStatus = "REJECTED";
-      }
-
-     return NextResponse.json({
-       profile,
-       sellerStore: sellerStore?.status === "REJECTED" ? sellerStore : null
-     });
+    return NextResponse.json({
+      profile,
+      sellerStore
+    });
   } catch (err: any) {
     console.error("Error fetching user data:", err);
     return NextResponse.json(
