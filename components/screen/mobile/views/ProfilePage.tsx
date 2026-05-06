@@ -24,9 +24,10 @@ type ProfilePageProps = {
   isLoggedIn: boolean
   user: UserData
   onLogout?: () => void
+  isLoading?: boolean
 }
 
-const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
+const ProfilePage = ({ isLoggedIn, user, onLogout, isLoading = false }: ProfilePageProps) => {
     const router = useRouter()
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
@@ -73,6 +74,46 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
         const name = user?.name || "";
         return name.split(" ")[0]?.[0]?.toUpperCase() || "?";
     };
+
+    const SkeletonProfileCard = () => (
+        <div className='py-4'>
+            <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+                <div className='flex items-center gap-4'>
+                    <div className='relative w-20 h-20 rounded-full bg-gray-200 animate-pulse'></div>
+                    <div className='flex-1'>
+                        <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-2 w-3/4'></div>
+                        <div className='h-4 bg-gray-200 rounded-md animate-pulse mb-2 w-1/2'></div>
+                        <div className='flex items-center gap-2 mt-2'>
+                            <div className='h-4 bg-gray-200 rounded-full animate-pulse w-20'></div>
+                            <div className='h-4 bg-gray-200 rounded-md animate-pulse w-16'></div>
+                        </div>
+                    </div>
+                </div>
+                <div className='mt-5 pt-4 border-t border-gray-100 flex gap-4'>
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
+                            <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-1 w-8 mx-auto'></div>
+                            <div className='h-3 bg-gray-200 rounded-md animate-pulse w-12 mx-auto'></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const SkeletonTabs = () => (
+        <div className='py-2 space-y-1'>
+            <div className='h-3 bg-gray-200 rounded-md animate-pulse mb-2 w-20 px-2'></div>
+            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                {[1, 2, 3].map(i => (
+                    <div key={i} className='flex items-center gap-3 px-4 py-3'>
+                        <div className='w-9 h-9 bg-gray-200 rounded-full animate-pulse'></div>
+                        <div className='h-4 bg-gray-200 rounded-md animate-pulse flex-1'></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
     const handleUpload = async (file: File) => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -132,6 +173,14 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
       />
 
       <main className='flex-1 overflow-scroll px-4 pb-44'>
+        {isLoading ? (
+          <>
+            <SkeletonProfileCard />
+            <SkeletonTabs />
+            <SkeletonTabs />
+          </>
+        ) : (
+          <>
         {uploadError && (
           <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded-xl'>
             <p className='text-sm text-red-600 text-center'>{uploadError}</p>
@@ -237,7 +286,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
           <div className='py-2 space-y-1'>
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
               {user.sellerStore?.status === 'APPROVED' ? (
-                <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/dash")} />
+                <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/seller")} />
               ) : user.sellerStore?.status === 'PENDING' ? (
                 <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} disabled={true} />
               ) : user.sellerStore?.status === 'REJECTED' ? (
@@ -262,6 +311,8 @@ const ProfilePage = ({ isLoggedIn, user, onLogout }: ProfilePageProps) => {
         <div className='py-6 text-center'>
           <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
         </div>
+          </>
+        )}
       </main>
     </div>
   )

@@ -35,6 +35,7 @@ const MobileScreen = () => {
   const [expanded, setExpanded] = useState(true)
   const [prevPage, setPrevPage] = useState('home')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [userData, setUserData] = useState<UserData>({
     name: 'Guest User',
     email: 'guest@example.com',
@@ -46,7 +47,7 @@ const MobileScreen = () => {
   const currentPage = searchParams.get('page') || 'home'
   const active = pageRoutes[currentPage] ?? 0
 
-  useEffect(() => {
+useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const userId = session.user.id
@@ -63,14 +64,15 @@ const MobileScreen = () => {
         
         setIsLoggedIn(true)
 setUserData({
-           name: fullName || session.user.email?.split('@')[0] || 'User',
-           email: session.user.email || '',
-           memberSince: new Date().getFullYear().toString(),
-           level: 'Bronze',
-           sellerStatus: data.profile?.sellerStatus,
-           sellerStore: data.sellerStore
-         })
+            name: fullName || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || '',
+            memberSince: new Date().getFullYear().toString(),
+            level: 'Bronze',
+            sellerStatus: data.profile?.sellerStatus,
+            sellerStore: data.sellerStore
+          })
       }
+      setIsLoading(false)
     })
   }, [supabase])
 
@@ -160,7 +162,7 @@ setUserData({
         {currentPage === 'home' && <HomePage onNavigate={navigateTo}/>}
         {currentPage === 'orders' && <OrdersPage isLoggedIn={isLoggedIn} user={userData}/>}
         {currentPage === 'cart' && <CartPage isLoggedIn={isLoggedIn} user={userData}/>}
-        {currentPage === 'profile' && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout}/>}
+        {currentPage === 'profile' && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout} isLoading={isLoading}/>}
         {currentPage === 'search' && <SearchTab goBack={() => navigateTo('home')} showDetails={() => navigateTo('details')}/>}
         {currentPage === 'details' && <Details goBack={goBack} isLoggedIn={isLoggedIn} user={userData}/>}
       </div>
