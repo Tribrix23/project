@@ -9,6 +9,31 @@ import Dashboard from './views/SellerDashboard'
 import Profile from './views/Profile'
 import { useSearchParams, useRouter } from 'next/navigation'
 
+type StoreData = {
+  sellerStore: {
+    id: string
+    owner_id: string
+    name: string
+    description: string
+    business_type: string
+    province: string
+    city: string
+    barangay: string
+    street: string
+    zipcode: string
+    status: string
+    created_at?: string
+    updated_at?: string
+  } | null
+  profile: {
+    first_name: string
+    middle_name: string | null
+    last_name: string
+    email: string
+    phone: string | null
+  } | null
+}
+
 const pageRoutes: Record<string, number> = {
   home: 2,
   tracking: 1,
@@ -27,6 +52,10 @@ const MobileSeller = () => {
 
   const shouldCollapse = active === 1 || active === 2 || active === 0 || active === 3
 
+  const [storeData, setStoreData] = useState<StoreData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
     if (shouldCollapse) {
       setExpanded(false)
@@ -34,6 +63,25 @@ const MobileSeller = () => {
       setExpanded(true)
     }
   }, [active])
+
+  useEffect(() => {
+    const fetchStoreData = async () => {
+      try {
+        const res = await fetch('/api/getStore')
+        if (!res.ok) {
+          throw new Error('Failed to fetch store data')
+        }
+        const data = await res.json()
+        setStoreData(data)
+      } catch (err: any) {
+        console.error('Error fetching store data:', err)
+        setError(err.message || 'Failed to load store data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchStoreData()
+  }, [])
 
   const navigateTo = (page: string) => {
     setPrevPage(currentPage)
@@ -86,17 +134,17 @@ const MobileSeller = () => {
     return 'bg-orange-500'
   }
 
-return (
-  <div className='w-full h-full flex flex-col relative overflow-hidden'>
-    <div 
-      className='flex-1 overflow-hidden' 
-      onClick={handleContentClick}
-    >
-      {currentPage === 'home' && <SellerStore onNavigate={navigateTo}/>}
-      {currentPage === 'tracking' && <Tracking goBack={goBack}/>}
-      {currentPage === 'dashboard' && <Dashboard goBack={goBack}/>}
-      {currentPage === 'profile' && <Profile goBack={goBack}/>}
-    </div>
+  return (
+    <div className='w-full h-full flex flex-col relative overflow-hidden'>
+      <div
+        className='flex-1 overflow-hidden'
+        onClick={handleContentClick}
+      >
+        {currentPage === 'home' && <SellerStore onNavigate={navigateTo} storeData={storeData} loading={loading} error={error} />}
+        {currentPage === 'tracking' && <Tracking goBack={goBack}/>}
+        {currentPage === 'dashboard' && <Dashboard goBack={goBack}/>}
+        {currentPage === 'profile' && <Profile goBack={goBack}/>}
+      </div>
 
     <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>
       <div style={navStyle} className=' w-full h-full absolute flex justify-center items-center pointer-events-none'>
