@@ -137,54 +137,50 @@ const SellerStore = ({ onNavigate }: SellerStoreProps) => {
             </button>
           </div>
           <div className='grid grid-cols-2 gap-3'>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
-              <div className='absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full'></div>
-              <div className='w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-3'>
-                <DollarSign size={20} className='text-emerald-600' />
-              </div>
-              <p className='text-xs text-gray-500 mb-1'>Total Sales</p>
-              <p className='text-xl font-bold text-gray-800 mb-1'>₱12,450</p>
-              <div className='flex items-center gap-1'>
-                <TrendingUp size={14} className='text-emerald-500' />
-                <span className='text-xs text-emerald-600 font-medium'>+12.5%</span>
-              </div>
-            </div>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
-              <div className='absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full'></div>
-              <div className='w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3'>
-                <Eye size={20} className='text-blue-600' />
-              </div>
-              <p className='text-xs text-gray-500 mb-1'>Store Views</p>
-              <p className='text-xl font-bold text-gray-800 mb-1'>2,856</p>
-              <div className='flex items-center gap-1'>
-                <TrendingUp size={14} className='text-blue-500' />
-                <span className='text-xs text-blue-600 font-medium'>+8.2%</span>
-              </div>
-            </div>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
-              <div className='absolute top-0 right-0 w-16 h-16 bg-purple-50 rounded-bl-full'></div>
-              <div className='w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-3'>
-                <Heart size={20} className='text-purple-600' />
-              </div>
-              <p className='text-xs text-gray-500 mb-1'>Favorites</p>
-              <p className='text-xl font-bold text-gray-800 mb-1'>489</p>
-              <div className='flex items-center gap-1'>
-                <TrendingUp size={14} className='text-purple-500' />
-                <span className='text-xs text-purple-600 font-medium'>+15.3%</span>
-              </div>
-            </div>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
-              <div className='absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full'></div>
-              <div className='w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3'>
-                <MessageCircle size={20} className='text-amber-600' />
-              </div>
-              <p className='text-xs text-gray-500 mb-1'>Inquiries</p>
-              <p className='text-xl font-bold text-gray-800 mb-1'>32</p>
-              <div className='flex items-center gap-1'>
-                <TrendingDown size={14} className='text-amber-500' />
-                <span className='text-xs text-amber-600 font-medium'>-3.1%</span>
-              </div>
-            </div>
+             <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
+               <div className='w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-3'>
+                 <DollarSign size={20} className='text-emerald-600' />
+               </div>
+               <p className='text-xs text-gray-500 mb-1'>Total Sales</p>
+               <p className='text-xl font-bold text-gray-800 mb-1'>₱12,450</p>
+               <div className='flex items-center gap-1'>
+                 <TrendingUp size={14} className='text-emerald-500' />
+                 <span className='text-xs text-emerald-600 font-medium'>+12.5%</span>
+               </div>
+             </div>
+             <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
+               <div className='w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3'>
+                 <Eye size={20} className='text-blue-600' />
+               </div>
+               <p className='text-xs text-gray-500 mb-1'>Store Views</p>
+               <p className='text-xl font-bold text-gray-800 mb-1'>2,856</p>
+               <div className='flex items-center gap-1'>
+                 <TrendingUp size={14} className='text-blue-500' />
+                 <span className='text-xs text-blue-600 font-medium'>+8.2%</span>
+               </div>
+             </div>
+             <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
+               <div className='w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-3'>
+                 <Heart size={20} className='text-purple-600' />
+               </div>
+               <p className='text-xs text-gray-500 mb-1'>Favorites</p>
+               <p className='text-xl font-bold text-gray-800 mb-1'>489</p>
+               <div className='flex items-center gap-1'>
+                 <TrendingUp size={14} className='text-purple-500' />
+                 <span className='text-xs text-purple-600 font-medium'>+15.3%</span>
+               </div>
+             </div>
+             <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
+               <div className='w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-3'>
+                 <MessageCircle size={20} className='text-amber-600' />
+               </div>
+               <p className='text-xs text-gray-500 mb-1'>Inquiries</p>
+               <p className='text-xl font-bold text-gray-800 mb-1'>32</p>
+               <div className='flex items-center gap-1'>
+                 <TrendingDown size={14} className='text-amber-500' />
+                 <span className='text-xs text-amber-600 font-medium'>-3.1%</span>
+               </div>
+             </div>
           </div>
         </div>
 

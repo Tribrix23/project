@@ -15,7 +15,7 @@ type DashboardProps = {
 
 const Dashboard = ({ goBack }: DashboardProps) => {
   const stats = [
-    { label: 'Total Revenue', value: '₱45,230', change: '+18.2%', trend: 'up', icon: DollarSign, color: 'emerald' },
+    { label: 'Total Products', value: '0', change: '+18.2%', trend: 'up', icon: Package, color: 'emerald' },
     { label: 'Total Orders', value: '156', change: '+12.5%', trend: 'up', icon: ShoppingBag, color: 'orange' },
     { label: 'Products Sold', value: '289', change: '+8.1%', trend: 'up', icon: Package, color: 'purple' },
     { label: 'Store Visits', value: '4,521', change: '-2.3%', trend: 'down', icon: Eye, color: 'amber' },
@@ -34,11 +34,11 @@ const Dashboard = ({ goBack }: DashboardProps) => {
   ]
 
   const getColorStyles = (color: string) => {
-    const colors: Record<string, { bg: string, text: string, light: string }> = {
-      emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600', light: 'bg-emerald-50' },
-      orange: { bg: 'bg-orange-100', text: 'text-orange-600', light: 'bg-orange-50' },
-      purple: { bg: 'bg-purple-100', text: 'text-purple-600', light: 'bg-purple-50' },
-      amber: { bg: 'bg-amber-100', text: 'text-amber-600', light: 'bg-amber-50' },
+    const colors: Record<string, { bg: string, text: string, light: string, gradient: string, dark: string }> = {
+      emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600', light: 'bg-emerald-50', gradient: 'bg-linear-to-br from-emerald-500 to-emerald-600', dark: 'text-emerald-700' },
+      orange: { bg: 'bg-orange-100', text: 'text-orange-600', light: 'bg-orange-50', gradient: 'bg-linear-to-br from-orange-500 to-orange-600', dark: 'text-orange-700' },
+      purple: { bg: 'bg-purple-100', text: 'text-purple-600', light: 'bg-purple-50', gradient: 'bg-linear-to-br from-purple-500 to-purple-600', dark: 'text-purple-700' },
+      amber: { bg: 'bg-amber-100', text: 'text-amber-600', light: 'bg-amber-50', gradient: 'bg-linear-to-br from-amber-500 to-amber-600', dark: 'text-amber-700' },
     }
     return colors[color] || colors.emerald
   }
@@ -112,29 +112,34 @@ const Dashboard = ({ goBack }: DashboardProps) => {
       <div className='flex-1 overflow-scroll pb-20'>
         <div className='w-full px-4 pt-4'>
           <div className='grid grid-cols-2 gap-3'>
-            {stats.map((stat, index) => {
-              const colorStyles = getColorStyles(stat.color)
-              return (
-                <div key={index} className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative overflow-hidden'>
-                  <div className={`absolute top-0 right-0 w-16 h-16 ${colorStyles.light} rounded-bl-full`}></div>
-                  <div className={`w-10 h-10 ${colorStyles.bg} rounded-xl flex items-center justify-center mb-3`}>
-                    <stat.icon size={20} className={colorStyles.text} />
-                  </div>
-                  <p className='text-xs text-gray-500 mb-1'>{stat.label}</p>
-                  <p className='text-xl font-bold text-gray-800 mb-1'>{stat.value}</p>
-                  <div className='flex items-center gap-1'>
-                    {stat.trend === 'up' ? (
-                      <TrendingUp size={14} className='text-emerald-500' />
-                    ) : (
-                      <TrendingDown size={14} className='text-red-500' />
-                    )}
-                    <span className={`text-xs font-medium ${stat.trend === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
+             {stats.map((stat, index) => {
+               const colorStyles = getColorStyles(stat.color)
+               return (
+                 <div key={index} className='group relative bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer overflow-hidden'>
+                   <div className='relative z-10'>
+                     <div className={`w-12 h-12 ${colorStyles.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300`}>
+                       <stat.icon size={24} className={`${colorStyles.text} stroke-[2.5]`} />
+                     </div>
+                     <p className='text-xs font-medium text-gray-400 mb-1.5 tracking-wide uppercase'>{stat.label}</p>
+                     <p className='text-2xl font-bold text-gray-800 mb-2 leading-tight'>{stat.value}</p>
+                     <div className='flex items-center gap-1.5'>
+                       {stat.trend === 'up' ? (
+                         <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
+                           <TrendingUp size={12} className={colorStyles.text} />
+                         </div>
+                       ) : (
+                         <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
+                           <TrendingDown size={12} className={colorStyles.text} />
+                         </div>
+                       )}
+                       <span className={`text-xs font-semibold ${stat.trend === 'up' ? colorStyles.dark : 'text-red-600'}`}>
+                         {stat.change}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               )
+             })}
           </div>
         </div>
 
