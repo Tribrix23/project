@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import {
   MapPin, Phone, Mail, Star, Package, ShoppingBag,
@@ -11,6 +11,7 @@ import {
   MoreHorizontal, Store
 } from 'lucide-react'
 import ProductCard from '@/components/ui/ProductCard'
+import AddProductPopup from './AddProductPopup'
 
 type SellerStoreProps = {
   onNavigate?: (page: string) => void
@@ -157,6 +158,9 @@ const SkeletonStoreInfoItem = () => (
 )
 
 const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps) => {
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
+  const [products, setProducts] = useState<any[]>([])
+  
   const getFormattedName = (profile: StoreData['profile']): string => {
     if (!profile) return 'Store Owner'
     const { first_name, middle_name, last_name } = profile
@@ -363,33 +367,60 @@ const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps
         </div>
       </div>
 
-       <div className='w-full px-4 py-3 shrink-0 bg-white border-b border-gray-100'>
-         <div className='flex gap-3 justify-center'>
-           <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all active:scale-95'>
-             <Plus size={16} />
-             Add Product
-           </button>
-           <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 transition-all active:scale-95'>
-             <Share2 size={16} />
-             Share Store
-           </button>
-         </div>
-       </div>
+<div className='w-full px-4 py-3 shrink-0 bg-white border-b border-gray-100'>
+          <div className='flex gap-3 justify-center'>
+            <button 
+              onClick={() => setIsAddProductOpen(true)}
+              className='flex-1 flex items-center justify-center gap-2 py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all active:scale-95'
+            >
+              <Plus size={16} />
+              Add Product
+            </button>
+            <button className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 transition-all active:scale-95'>
+              <Share2 size={16} />
+              Share Store
+            </button>
+          </div>
+        </div>
 
-       <div className='w-full px-4 mt-4'>
-         <div className='flex items-center justify-between mb-3'>
-           <div className='flex items-center gap-2'>
-             <h2 className='text-lg font-bold text-gray-800'>My Products</h2>
-           </div>
-         </div>
-         <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
-           <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
-             <Package className='text-gray-400' size={28} />
-           </div>
-           <p className='text-gray-500 text-sm mb-1'>No products yet</p>
-           <p className='text-gray-400 text-xs'>Add your first product to get started</p>
-         </div>
-       </div>
+        <div className='w-full px-4 mt-4'>
+          <div className='flex items-center justify-between mb-3'>
+            <div className='flex items-center gap-2'>
+              <h2 className='text-lg font-bold text-gray-800'>My Products</h2>
+            </div>
+          </div>
+          {products.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+              <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+                <Package className='text-gray-400' size={28} />
+              </div>
+              <p className='text-gray-500 text-sm mb-1'>No products yet</p>
+              <p className='text-gray-400 text-xs'>Add your first product to get started</p>
+            </div>
+          ) : (
+            <div className='grid grid-cols-2 gap-3'>
+              {products.map((product, index) => (
+                <div key={index} className='bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden'>
+                  <div className='relative h-32 bg-gray-200'>
+                    {product.image && (
+                      <img src={product.image} alt={product.name} className='w-full h-full object-cover' />
+                    )}
+                  </div>
+                  <div className='p-3'>
+                    <h3 className='font-medium text-gray-800 text-sm truncate'>{product.name}</h3>
+                    <p className='text-xs text-gray-500 mt-1 line-clamp-2'>{product.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <AddProductPopup
+          isOpen={isAddProductOpen}
+          onClose={() => setIsAddProductOpen(false)}
+          onSave={(product) => setProducts([...products, product])}
+        />
     </div>
   )
 }
