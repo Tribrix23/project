@@ -56,6 +56,8 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
     guarantees: [...guaranteeOptions]
   })
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
   const handleInputChange = (field: keyof ProductData, value: string) => {
     setProductData(prev => ({ ...prev, [field]: value }))
   }
@@ -74,6 +76,7 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setSelectedFile(file)
       const reader = new FileReader()
       reader.onload = (event) => {
         setProductData(prev => ({ ...prev, image: event.target?.result as string }))
@@ -96,10 +99,38 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
 
   const handleSave = async () => {
     setIsSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    onSave(productData)
-    setIsSaving(false)
-    handleClose()
+    try {
+      const formData = new FormData()
+      formData.append('name', productData.name)
+      formData.append('category', productData.category)
+      formData.append('description', productData.description)
+      if (productData.details) {
+        formData.append('details', productData.details)
+      }
+      formData.append('guarantees', JSON.stringify(productData.guarantees))
+      if (selectedFile) {
+        formData.append('image', selectedFile)
+      }
+
+      const response = await fetch('/api/addProducts', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save product')
+      }
+
+      const data = await response.json()
+      onSave(data.data[0]) // data is { data: [...] } from the API
+      await new Promise(resolve => setTimeout(resolve, 500))
+      handleClose()
+    } catch (error) {
+      console.error('Error saving product:', error)
+      alert('Failed to save product. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleClose = () => {
