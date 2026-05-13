@@ -36,70 +36,114 @@ export async function POST(request: NextRequest) {
     // --------------------
     // 1. GET USER AUTH
     // --------------------
-    const {
-      data: { user },
-    } = await Server.auth.getUser()
+    let userId: string
+    try {
+      const supabase = await supabaseServer()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized - No user found' }, { status: 401 })
+      }
+      userId = user.id
+      console.log('Authenticated user:', user.id)
+    } catch (err: any) {
+      console.error('Auth error:', err)
+      return NextResponse.json({ error: 'Auth failed: ' + err.message }, { status: 500 })
     }
 
     // --------------------
     // 2. GET STORE ID
     // --------------------
-    const { data: sellerStore } = await Server.from('sellerStore').select('id').eq('owner_id', user.id).single()
+    let storeId: string
+    try {
+      const { data: sellerStore } = await Server.from('sellerStore').select('id').eq('owner_id', userId).single()
 
-    if (!sellerStore) {
-      return NextResponse.json({ error: 'Store not found' }, { status: 404 })
+      if (!sellerStore) {
+        return NextResponse.json({ error: 'Store not found for this user' }, { status: 404 })
+      }
+
+      storeId = sellerStore.id
+      console.log('Found store:', storeId)
+    } catch (err: any) {
+      console.error('Store lookup error:', err)
+      return NextResponse.json({ error: 'Store lookup failed: ' + err.message }, { status: 500 })
     }
-
-    const storeId = sellerStore.id
 
     // --------------------
     // 3. UPLOAD IMAGE TO R2
     // --------------------
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const uuid = crypto.randomUUID()
-    // Remove spaces and special chars from filename, keep extension
-    const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
-    const fileKey = `storeProducts/${storeId}/${uuid}-${cleanName}`
+    let imageUrl: string
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const uuid = crypto.randomUUID()
+      // Remove spaces and special chars from filename, keep extension
+      const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
+      const fileKey = `storeProducts/${storeId}/${uuid}-${cleanName}`
 
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME!,
-        Key: fileKey,
-        Body: buffer,
-        ContentType: file.type,
-      })
-    )
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: process.env.R2_PUBLIC_BUCKET_NAME!,
+          Key: fileKey,
+          Body: buffer,
+          ContentType: file.type,
+        })
+      )
 
-    const imageUrl = `${process.env.R2_PUBLIC_URL}${fileKey}`
+      imageUrl = `${process.env.R2_PUBLIC_URL}${fileKey}`
+      console.log('Uploaded image to R2:', imageUrl)
+    } catch (err: any) {
+      console.error('R2 upload error:', err)
+      return NextResponse.json({ error: 'Image upload failed: ' + err.message }, { status: 500 })
+    }
 
     // --------------------
     // 4. INSERT PRODUCT
     // --------------------
-    const { data, error } = await (await supabaseServer())
-      .from('storeProducts')
-      .insert([
-        {
-          store_id: storeId,
-          name,
-          category,
-          description,
-          details,
-          image: imageUrl,
-          guarantees,
-        },
-      ])
-      .select()
+    console.log('Inserting product with guarantees:', guarantees, 'type:', Array.isArray(guarantees))
+    try {
+      const productInsert: Record<string, any> = {
+        store_id: storeId,
+        productName: name,
+        category,
+        description,
+        image_url: imageUrl,
+        sellerGuarantees: JSON.stringify(guarantees),
+      }
+      if (details && details.trim().length > 0) {
+        productInsert.productDetails = details
+      }
 
-    if (error) {
-      throw error
+      const { data, error } = await (await supabaseServer())
+        .from('storeProducts')
+        .insert([productInsert])
+        .select()
+
+      if (error) {
+        console.error('Supabase insert error:', error)
+        throw error
+      }
+
+      console.log('Product inserted successfully:', data)
+      return NextResponse.json({ data }, { status: 201 })
+    } catch (err: any) {
+      console.error('Database insert error:', err)
+      return NextResponse.json({ 
+        error: 'Database insert failed: ' + err.message,
+        ...(process.env.NODE_ENV === 'development' && { 
+          details: err.details,
+          code: err.code,
+          hint: err.hint
+        })
+      }, { status: 500 })
     }
-
-    return NextResponse.json({ data }, { status: 201 })
   } catch (error: any) {
-    console.error('Error adding product:', error)
+    console.error('Unexpected error in addProducts:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    })
     return NextResponse.json(
       { error: error.message || 'Failed to add product' },
       { status: 500 }
