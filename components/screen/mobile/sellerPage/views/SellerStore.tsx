@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import {
   MapPin, Phone, Mail, Star, Package, ShoppingBag,
@@ -160,6 +160,28 @@ const SkeletonStoreInfoItem = () => (
 const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps) => {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false)
   const [products, setProducts] = useState<any[]>([])
+  const [productsLoading, setProductsLoading] = useState(false)
+
+  useEffect(() => {
+    if (storeData?.sellerStore?.owner_id) {
+      fetchProducts()
+    }
+  }, [storeData?.sellerStore?.owner_id])
+
+  const fetchProducts = async () => {
+    setProductsLoading(true)
+    try {
+      const response = await fetch(`/api/sellerProducts?sellerId=${storeData?.sellerStore?.owner_id}`)
+      const result = await response.json()
+      if (response.ok) {
+        setProducts(result.data || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    } finally {
+      setProductsLoading(false)
+    }
+  }
   
   const getFormattedName = (profile: StoreData['profile']): string => {
     if (!profile) return 'Store Owner'
@@ -367,7 +389,7 @@ const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps
         </div>
       </div>
 
-<div className='w-full px-4 py-3 shrink-0 bg-white border-b border-gray-100'>
+      <div className='w-full px-4 py-3 shrink-0 bg-white border-b border-gray-100'>
           <div className='flex gap-3 justify-center'>
             <button 
               onClick={() => setIsAddProductOpen(true)}
@@ -400,17 +422,16 @@ const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps
           ) : (
             <div className='grid grid-cols-2 gap-3'>
               {products.map((product, index) => (
-                <div key={index} className='bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden'>
-                  <div className='relative h-32 bg-gray-200'>
-                    {product.image && (
-                      <img src={product.image} alt={product.name} className='w-full h-full object-cover' />
-                    )}
-                  </div>
-                  <div className='p-3'>
-                    <h3 className='font-medium text-gray-800 text-sm truncate'>{product.name}</h3>
-                    <p className='text-xs text-gray-500 mt-1 line-clamp-2'>{product.description}</p>
-                  </div>
-                </div>
+                <ProductCard
+                  key={product.id || index}
+                  category={product.category}
+                  name={product.productName}
+                  price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
+                  image={product.image_url}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  sold={product.sold}
+                />
               ))}
             </div>
           )}
@@ -419,10 +440,13 @@ const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps
         <AddProductPopup
           isOpen={isAddProductOpen}
           onClose={() => setIsAddProductOpen(false)}
-          onSave={(product) => setProducts([...products, product])}
+          onSave={() => {
+            setIsAddProductOpen(false)
+            fetchProducts()
+          }}
         />
-    </div>
-  )
-}
+      </div>
+    )
+  }
 
-export default SellerStore
+  export default SellerStore

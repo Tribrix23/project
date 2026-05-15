@@ -10,7 +10,7 @@ import {
 type AddProductPopupProps = {
   isOpen: boolean
   onClose: () => void
-  onSave: (product: ProductData) => void
+  onSave: () => void
 }
 
 type ProductData = {
@@ -20,6 +20,7 @@ type ProductData = {
   details: string
   image: string | null
   guarantees: string[]
+  price: number
 }
 
 const productCategories = [
@@ -53,12 +54,13 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
     description: '',
     details: '',
     image: null,
-    guarantees: [...guaranteeOptions]
+    guarantees: [...guaranteeOptions],
+    price: 0
   })
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const handleInputChange = (field: keyof ProductData, value: string) => {
+  const handleInputChange = (field: keyof ProductData, value: string | number) => {
     setProductData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -71,6 +73,10 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
         return { ...prev, guarantees: [...prev.guarantees, guarantee] }
       }
     })
+  }
+
+  const handlePriceChange = (value: number) => {
+    setProductData(prev => ({ ...prev, price: value }))
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,9 +94,10 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
   const canProceedStep1 = productData.name.trim().length >= 2 && productData.category !== ''
   const canProceedStep2 = productData.description.trim().length >= 10
   const canProceedStep3 = productData.image !== null
+  const canProceedStep4 = productData.price > 0
 
   const handleNext = () => {
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1)
     } else {
       handleSave()
@@ -108,6 +115,7 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
         formData.append('details', productData.details)
       }
       formData.append('guarantees', JSON.stringify(productData.guarantees))
+      formData.append('price', productData.price.toString())
       if (selectedFile) {
         formData.append('image', selectedFile)
       }
@@ -121,8 +129,7 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
         throw new Error('Failed to save product')
       }
 
-      const data = await response.json()
-      onSave(data.data[0]) // data is { data: [...] } from the API
+      onSave()
       await new Promise(resolve => setTimeout(resolve, 500))
       handleClose()
     } catch (error) {
@@ -141,7 +148,8 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
       description: '',
       details: '',
       image: null,
-      guarantees: [...guaranteeOptions]
+      guarantees: [...guaranteeOptions],
+      price: 0
     })
     onClose()
   }
@@ -172,14 +180,14 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
         </div>
 
         <div className='flex items-center justify-center px-6 py-4 gap-2'>
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <div key={s} className='flex items-center'>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
               }`}>
                 {step > s ? <CheckCircle size={16} /> : s}
               </div>
-              {s < 3 && (
+              {s < 4 && (
                 <div className={`w-8 h-1 rounded ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />
               )}
             </div>
@@ -307,6 +315,46 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
               </div>
             </div>
           )}
+
+          {step === 4 && (
+            <div className='space-y-5'>
+              <div>
+                <label className='text-sm font-medium text-gray-700 mb-3 block'>Set Price (₱)</label>
+                <div className='px-4'>
+                  <div className='relative mb-4'>
+                    <span className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg'>₱</span>
+                    <input
+                      type='number'
+                      min='0'
+                      max='100000'
+                      step='100'
+                      value={productData.price || ''}
+                      onChange={(e) => handlePriceChange(Number(e.target.value))}
+                      placeholder='0'
+                      className='w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent text-lg'
+                    />
+                  </div>
+                  <input
+                    type='range'
+                    min='0'
+                    max='100000'
+                    step='100'
+                    value={productData.price}
+                    onChange={(e) => handlePriceChange(Number(e.target.value))}
+                    className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500'
+                  />
+                  <div className='flex justify-between text-xs text-gray-500 mt-2'>
+                    <span>₱0</span>
+                    <span>₱50,000</span>
+                    <span>₱100,000</span>
+                  </div>
+                  <div className='text-center mt-4'>
+                    <span className='text-3xl font-bold text-orange-500'>₱{productData.price.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className='p-6 border-t border-gray-100'>
@@ -316,17 +364,19 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
               (step === 1 && !canProceedStep1) || 
               (step === 2 && !canProceedStep2) || 
               (step === 3 && !canProceedStep3) ||
+              (step === 4 && !canProceedStep4) ||
               isSaving
             }
             className={`w-full py-3 font-semibold rounded-full transition-colors ${
               ((step === 1 && canProceedStep1) || 
                (step === 2 && canProceedStep2) || 
-               (step === 3 && canProceedStep3)) && !isSaving
+               (step === 3 && canProceedStep3) ||
+               (step === 4 && canProceedStep4)) && !isSaving
                 ? 'bg-orange-500 text-white hover:bg-orange-600' 
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {isSaving ? 'Saving...' : step < 3 ? 'Continue' : 'Save Product'}
+            {isSaving ? 'Saving...' : step < 4 ? 'Continue' : 'Save Product'}
           </button>
         </div>
       </div>

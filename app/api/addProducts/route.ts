@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     const name = formData.get('name') as string
     const category = formData.get('category') as string
     const description = formData.get('description') as string
+    const price = formData.get('price') as string
     const details = formData.get('details') as string | null
     const guarantees = (JSON.parse((formData.get('guarantees') as string) || '[]')) as string[]
     const file = formData.get('image') as File | null
@@ -110,6 +111,7 @@ export async function POST(request: NextRequest) {
         description,
         image_url: imageUrl,
         sellerGuarantees: JSON.stringify(guarantees),
+        price: price ? parseFloat(price) : 0,
       }
       if (details && details.trim().length > 0) {
         productInsert.productDetails = details
