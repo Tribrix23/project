@@ -2,10 +2,10 @@
 import IconBadge from '@/components/ui/IconBadge'
 import IconCard from '@/components/ui/IconCard'
 import ProductCard from '@/components/ui/ProductCard'
-import { BellIcon, HeartIcon, SearchIcon } from 'lucide-react'
+import { BellIcon, HeartIcon, SearchIcon, AlertCircle, Package } from 'lucide-react'
 import { Allura } from 'next/font/google'
 import Image from 'next/image'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 const allura = Allura({
     subsets: ['latin'],
@@ -17,6 +17,33 @@ type NavigateProps = {
 }
 
 const HomePage = ({ onNavigate } : NavigateProps) => {
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/fetchProducts')
+      const result = await response.json()
+      if (response.ok) {
+        setProducts(result.data || [])
+      } else {
+        setError(result.error || 'Failed to fetch products')
+      }
+    } catch (err) {
+      console.error('Failed to fetch products:', err)
+      setError('Failed to fetch products')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <>
     <div className='w-full h-[16%] flex flex-col shrink-0 select-none bg-gray-50'>
@@ -73,14 +100,36 @@ const HomePage = ({ onNavigate } : NavigateProps) => {
                 <h2 className='text-lg font-bold text-gray-800'>Featured</h2>
                 <button className='text-orange-500 text-sm font-medium'>See All</button>
             </div>
-            <div className='grid grid-cols-2 gap-3'>
-                <ProductCard onC={() => onNavigate('details')}/>
-                <ProductCard onC={() => onNavigate('details')}/>
-                <ProductCard onC={() => onNavigate('details')}/>
-                <ProductCard onC={() => onNavigate('details')}/>
-                <ProductCard onC={() => onNavigate('details')}/>
-                <ProductCard onC={() => onNavigate('details')}/>
-            </div>
+            {loading ? (
+                <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+                    <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+                        <Package className='text-gray-400' size={28} />
+                    </div>
+                    <p className='text-gray-500 text-sm mb-1'>Loading products...</p>
+                </div>
+            ) : error ? (
+                <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
+                    <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+                        <AlertCircle className='w-8 h-8 text-red-500' />
+                    </div>
+                    <p className='text-gray-600 font-medium'>{error}</p>
+                </div>
+            ) : (
+                <div className='grid grid-cols-2 gap-3'>
+                    {products.slice(0, 4).map((product, index) => (
+                        <ProductCard
+                            key={product.id || index}
+                            category={product.category}
+                            name={product.productName}
+                            price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
+                            image={product.image_url}
+                            rating={product.rating}
+                            reviewCount={product.reviewCount}
+                            sold={product.sold}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
       </main>
     </>
