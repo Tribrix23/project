@@ -1,9 +1,9 @@
 'use client'
 import IconBadge from '@/components/ui/IconBadge'
 import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BsHeart, BsHeartFill } from 'react-icons/bs'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type ProductDetails = {
   id: number
@@ -19,7 +19,8 @@ type ProductDetails = {
   description?: string
   details?: string[]
   sellerStore?: {
-    storeName?: string
+    id?: number
+    name?: string
   }
 }
 
@@ -65,12 +66,51 @@ type DetailsProps = {
 }
 
 const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
-   const [isWishlisted, setIsWishlisted] = useState(false)
-   const [quantity, setQuantity] = useState(1)
-   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-   const displayProduct = product || mockProduct
-   const storeName = displayProduct.sellerStore?.storeName || displayProduct.storeName || 'Store Name'
-   const router = useRouter()
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [productData, setProductData] = useState<ProductDetails | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const itemId = searchParams.get('item')
+      if (!itemId) {
+        // If no item ID in URL, use the passed product prop or mock
+        setProductData(product || mockProduct)
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+      try {
+        // Fetch product details from API
+        const response = await fetch(`/api/fetchProductById?id=${itemId}`)
+        const result = await response.json()
+        if (response.ok) {
+          setProductData(result.data || null)
+        } else {
+          setError(result.error || 'Failed to fetch product details')
+          setProductData(product || mockProduct) // Fallback to passed product or mock
+        }
+      } catch (err) {
+        console.error('Failed to fetch product details:', err)
+        setError('Failed to fetch product details')
+        setProductData(product || mockProduct) // Fallback to passed product or mock
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProductDetails()
+  }, [searchParams, product])
+
+  const displayProduct = productData || mockProduct
+  const storeName = displayProduct.sellerStore?.name || displayProduct.storeName || 'Store Name'
 
   const handleRequireLogin = () => {
     if (!isLoggedIn) {

@@ -6,6 +6,7 @@ import { BellIcon, HeartIcon, SearchIcon, AlertCircle, Package } from 'lucide-re
 import { Allura } from 'next/font/google'
 import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const allura = Allura({
     subsets: ['latin'],
@@ -116,21 +117,21 @@ const HomePage = ({ onNavigate } : NavigateProps) => {
                 </div>
             ) : (
 <div className='grid grid-cols-2 gap-3'>
-                     {products.slice(0, 4).map((product, index) => (
-<ProductCard
-                              key={product.id || index}
-                              category={product.category}
-                              name={product.productName}
-                              price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
-                              image={product.image_url}
-                              rating={product.rating}
-                              reviewCount={product.reviewCount}
-                              sold={product.sold}
-                              count={product.count}
-                              onPress={() => onNavigate('details', product)}
-                              productData={product}
-                          />
-                     ))}
+                      {products.slice(0, 4).map((product, index) => (
+                      <ProductCard
+                               key={product.id || index}
+                               category={product.category}
+                               name={product.productName}
+                               price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
+                               image={product.image_url}
+                               rating={product.rating}
+                               reviewCount={product.reviewCount}
+                               sold={product.sold}
+                               count={product.count}
+                               onPress={() => onNavigate('details', { item: product.id })}
+                               productData={product}
+                           />
+                          ))}
                  </div>
             )}
         </div>

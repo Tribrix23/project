@@ -78,12 +78,18 @@ setUserData({
   }, [supabase])
 
 const navigateTo = (page: string, productData?: any) => {
-     setPrevPage(currentPage)
-     if (productData) {
-       setSelectedProduct(productData)
-     }
-     router.push(`?page=${page}`)
-  }
+      setPrevPage(currentPage)
+      if (productData) {
+        setSelectedProduct(productData)
+      }
+      let url = `?page=${page}`
+      if (productData && productData.item) {
+        url += `&item=${productData.item}`
+      } else if (productData && productData.id) {
+        url += `&item=${productData.id}`
+      }
+      router.push(url)
+    }
 
   const goBack = () => {
     navigateTo(prevPage)
