@@ -5,23 +5,26 @@ import { useRouter } from 'next/navigation'
 import React, { useState, useRef, useEffect } from 'react'
 
 type SearchTabProps = {
-  goBack: () => void,
-  showDetails: () => void,
+   goBack: () => void,
+   showDetails: (product: any) => void,
 }
 
 const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [products, setProducts] = useState<{
-    id: string
-    productName: string
-    category: string
-    price: number
-    image_url: string | null
-    rating?: number
-    reviewCount?: number
-    sold?: number
-    count?: number
-  }>([])
+const [products, setProducts] = useState<Array<{
+     id: string
+     productName: string
+     category: string
+     price: number
+     image_url: string | null
+     rating?: number
+     reviewCount?: number
+     sold?: number
+     count?: number
+     sellerStore?: {
+       storeName?: string
+     }
+   }>>([])
   const [productsLoading, setProductsLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -141,20 +144,21 @@ const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
         <div className='mb-3'>
           <h3 className='text-base font-bold text-gray-800 mb-3'>Popular Products</h3>
           <div className='grid grid-cols-2 gap-3'>
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                category={product.category}
-                name={product.productName}
-                price={`₱${Number(product.price).toLocaleString()}`}
-                image={product.image_url || undefined}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                sold={product.sold}
-                count={product.count}
-                onC={showDetails}
-              />
-            ))}
+{products.map((product) => (
+               <ProductCard
+                 key={product.id}
+                 category={product.category}
+                 name={product.productName}
+                 price={`₱${Number(product.price).toLocaleString()}`}
+                 image={product.image_url || undefined}
+                 rating={product.rating}
+                 reviewCount={product.reviewCount}
+                 sold={product.sold}
+                 count={product.count}
+                 onPress={showDetails}
+                 productData={product}
+               />
+             ))}
           </div>
         </div>
       </div>

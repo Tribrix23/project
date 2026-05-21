@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation'
 
 type ProductDetails = {
   id: number
-  name: string
+  productName: string
   category: string
-  price: string
-  image?: string
+  price: number | string
+  image_url?: string
   rating?: number
   reviewCount?: number
   sold?: number
@@ -18,13 +18,17 @@ type ProductDetails = {
   storeRating?: number
   description?: string
   details?: string[]
+  sellerStore?: {
+    storeName?: string
+  }
 }
 
 const mockProduct: ProductDetails = {
   id: 1,
-  name: 'Professional Tool - Heavy Duty Hammer Drill Set with Case',
+  productName: 'Professional Tool - Heavy Duty Hammer Drill Set with Case',
   category: 'Tools',
-  price: '₱5,500',
+  price: 5500,
+  image_url: undefined,
   rating: 4.8,
   reviewCount: 124,
   sold: 2340,
@@ -57,14 +61,16 @@ type DetailsProps = {
   goBack?: () => void
   isLoggedIn?: boolean
   user?: UserData
+  product?: ProductDetails
 }
 
-const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const [quantity, setQuantity] = useState(1)
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-  const product = mockProduct
-  const router = useRouter()
+const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
+   const [isWishlisted, setIsWishlisted] = useState(false)
+   const [quantity, setQuantity] = useState(1)
+   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+   const displayProduct = product || mockProduct
+   const storeName = displayProduct.sellerStore?.storeName || displayProduct.storeName || 'Store Name'
+   const router = useRouter()
 
   const handleRequireLogin = () => {
     if (!isLoggedIn) {
@@ -79,9 +85,9 @@ const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
       <div className='flex-1 overflow-scroll pb-28'>
         <div className='relative'>
           <div className='h-72 bg-gray-100'>
-            {product.image ? (
-              <img src={product.image} alt={product.name} className='w-full h-full object-cover' />
-            ) : (
+{displayProduct.image_url ? (
+               <img src={displayProduct.image_url} alt={displayProduct.productName} className='w-full h-full object-cover' />
+             ) : (
               <div className='w-full h-full flex items-center justify-center bg-gray-100'>
                 <span className='text-6xl'>📦</span>
               </div>
@@ -102,8 +108,8 @@ const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
         </div>
 
         <div className='p-4'>
-          <p className='text-xs text-gray-500 mb-1'>{product.category}</p>
-          <h1 className='text-lg font-bold text-gray-800 leading-tight'>{product.name}</h1>
+          <p className='text-xs text-gray-500 mb-1'>{displayProduct.category}</p>
+          <h1 className='text-lg font-bold text-gray-800 leading-tight'>{displayProduct.productName}</h1>
           
           <div className='flex items-center gap-4 mt-3'>
             <div className='flex items-center gap-1'>
@@ -111,18 +117,18 @@ const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
                 <StarIcon 
                   key={star}
                   size={16} 
-                  className={star <= Math.round(product.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+                  className={star <= Math.round(displayProduct.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
                 />
               ))}
-              <span className='text-sm font-medium text-gray-700 ml-1'>{product.rating}</span>
-              <span className='text-xs text-gray-400 ml-1'>({product.reviewCount} reviews)</span>
+              <span className='text-sm font-medium text-gray-700 ml-1'>{displayProduct.rating}</span>
+              <span className='text-xs text-gray-400 ml-1'>({displayProduct.reviewCount} reviews)</span>
             </div>
           </div>
           
-          <p className='text-xs text-gray-400 mt-1'>{product.sold?.toLocaleString()} sold</p>
+          <p className='text-xs text-gray-400 mt-1'>{displayProduct.sold?.toLocaleString()} sold</p>
 
           <div className='mt-4'>
-            <p className='text-2xl font-bold text-orange-500'>{product.price}</p>
+            <p className='text-2xl font-bold text-orange-500'>₱{typeof displayProduct.price === 'number' ? displayProduct.price.toLocaleString() : displayProduct.price}</p>
           </div>
 
           <div className='mt-4 border-t border-gray-100 pt-4'>
@@ -131,10 +137,10 @@ const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
                 <Store size={24} className='text-orange-500'/>
               </div>
               <div className='flex-1'>
-                <p className='text-sm font-semibold text-gray-800'>{product.storeName}</p>
+                <p className='text-sm font-semibold text-gray-800'>{storeName}</p>
                 <div className='flex items-center gap-1'>
                   <StarIcon size={12} className='text-yellow-400 fill-yellow-400'/>
-                  <span className='text-xs text-gray-500'>{product.storeRating} store rating</span>
+                  <span className='text-xs text-gray-500'>{displayProduct.storeRating} store rating</span>
                 </div>
               </div>
               <button className='px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded-full'>
@@ -145,13 +151,13 @@ const Details = ({ goBack, isLoggedIn, user }: DetailsProps) => {
 
           <div className='mt-4 border-t border-gray-100 pt-4'>
             <h2 className='text-base font-semibold text-gray-800 mb-2'>Description</h2>
-            <p className='text-sm text-gray-600 leading-relaxed'>{product.description}</p>
+            <p className='text-sm text-gray-600 leading-relaxed'>{displayProduct.description}</p>
           </div>
 
           <div className='mt-4 border-t border-gray-100 pt-4'>
             <h2 className='text-base font-semibold text-gray-800 mb-2'>Product Details</h2>
             <ul className='space-y-2'>
-              {product.details?.map((detail, index) => (
+              {displayProduct.details?.map((detail, index) => (
                 <li key={index} className='text-sm text-gray-600 flex items-center gap-2'>
                   <span className='w-1.5 h-1.5 bg-orange-500 rounded-full'/>
                   {detail}

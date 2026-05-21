@@ -3,10 +3,16 @@ import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin"
 
 export async function GET(request: NextRequest) {
   try {
-    // Fetch all products from storeProducts, limit to 4
+    // Fetch all products from storeProducts with store name, limit to 4
     const { data: products, error } = await Server
       .from('storeProducts')
-      .select('*')
+      .select(`
+        *,
+        sellerStore:store_id (
+          id,
+          name
+        )
+      `)
       .limit(4)
 
     if (error) {

@@ -13,6 +13,8 @@ type ProductCardProps = {
   count?: number
   showRating?: boolean,
   onC?: () => void
+  onPress?: (product: any) => void
+  productData?: any
 }
 
 const ProductCard = ({ 
@@ -25,10 +27,21 @@ const ProductCard = ({
   sold = 0,
   count = 0,
   showRating = false,
-  onC
+  onC,
+  onPress,
+  productData
 }: ProductCardProps) => {
+  const handleClick = () => {
+    if (onPress && productData) {
+      onPress(productData)
+    }
+    if (onC) {
+      onC()
+    }
+  }
+
   return (
-    <div className='bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1' onClick={onC}>
+    <div className='bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1' onClick={handleClick}>
       <div className='h-32 bg-gray-100 relative'>
         {image ? (
           <img src={image} alt={name} className='w-full h-full object-cover' />

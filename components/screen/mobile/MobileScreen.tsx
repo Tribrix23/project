@@ -30,13 +30,14 @@ const pageRoutes: Record<string, number> = {
 }
 
 const MobileScreen = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [expanded, setExpanded] = useState(true)
-  const [prevPage, setPrevPage] = useState('home')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [userData, setUserData] = useState<UserData>({
+   const router = useRouter()
+   const searchParams = useSearchParams()
+   const [expanded, setExpanded] = useState(true)
+   const [prevPage, setPrevPage] = useState('home')
+   const [isLoggedIn, setIsLoggedIn] = useState(false)
+   const [isLoading, setIsLoading] = useState(true)
+   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+   const [userData, setUserData] = useState<UserData>({
     name: 'Guest User',
     email: 'guest@example.com',
     memberSince: '2025',
@@ -76,9 +77,12 @@ setUserData({
     })
   }, [supabase])
 
-  const navigateTo = (page: string) => {
-    setPrevPage(currentPage)
-    router.push(`?page=${page}`)
+const navigateTo = (page: string, productData?: any) => {
+     setPrevPage(currentPage)
+     if (productData) {
+       setSelectedProduct(productData)
+     }
+     router.push(`?page=${page}`)
   }
 
   const goBack = () => {
@@ -163,8 +167,8 @@ setUserData({
         {currentPage === 'orders' && <OrdersPage isLoggedIn={isLoggedIn} user={userData}/>}
         {currentPage === 'cart' && <CartPage isLoggedIn={isLoggedIn} user={userData}/>}
         {currentPage === 'profile' && <ProfilePage isLoggedIn={isLoggedIn} user={userData} onLogout={handleLogout} isLoading={isLoading}/>}
-        {currentPage === 'search' && <SearchTab goBack={() => navigateTo('home')} showDetails={() => navigateTo('details')}/>}
-        {currentPage === 'details' && <Details goBack={goBack} isLoggedIn={isLoggedIn} user={userData}/>}
+        {currentPage === 'search' && <SearchTab goBack={() => navigateTo('home')} showDetails={(product) => navigateTo('details', product)}/>}
+        {currentPage === 'details' && <Details goBack={goBack} isLoggedIn={isLoggedIn} user={userData} product={selectedProduct}/>}
       </div>
 
       <div className='w-full h-20 bottom-25 absolute pointer-events-none flex justify-center items-center'>

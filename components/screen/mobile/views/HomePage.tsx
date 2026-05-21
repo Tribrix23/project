@@ -13,7 +13,7 @@ const allura = Allura({
 });
 
 type NavigateProps = {
-    onNavigate: (page: string) => void
+    onNavigate: (page: string, productData?: any) => void
 }
 
 const HomePage = ({ onNavigate } : NavigateProps) => {
@@ -115,21 +115,23 @@ const HomePage = ({ onNavigate } : NavigateProps) => {
                     <p className='text-gray-600 font-medium'>{error}</p>
                 </div>
             ) : (
-                <div className='grid grid-cols-2 gap-3'>
-                    {products.slice(0, 4).map((product, index) => (
+<div className='grid grid-cols-2 gap-3'>
+                     {products.slice(0, 4).map((product, index) => (
 <ProductCard
-                             key={product.id || index}
-                             category={product.category}
-                             name={product.productName}
-                             price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
-                             image={product.image_url}
-                             rating={product.rating}
-                             reviewCount={product.reviewCount}
-                             sold={product.sold}
-                             count={product.count}
-                         />
-                    ))}
-                </div>
+                              key={product.id || index}
+                              category={product.category}
+                              name={product.productName}
+                              price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
+                              image={product.image_url}
+                              rating={product.rating}
+                              reviewCount={product.reviewCount}
+                              sold={product.sold}
+                              count={product.count}
+                              onPress={() => onNavigate('details', product)}
+                              productData={product}
+                          />
+                     ))}
+                 </div>
             )}
         </div>
       </main>
