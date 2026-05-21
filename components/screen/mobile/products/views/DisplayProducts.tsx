@@ -14,6 +14,7 @@ type Product = {
   rating?: number
   reviewCount?: number
   sold?: number,
+  count?: number
 }
 
 type DisplayProductsProps = {
@@ -106,18 +107,19 @@ const DisplayProducts = ({ setS }: DisplayProductsProps) => {
         <div className='grid grid-cols-2 gap-3'>
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <ProductCard 
-                key={product.id}
-                category={product.category}
-                name={product.name}
-                price={product.price}
-                image={product.image}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                sold={product.sold}
-                showRating
-                onC={setS}
-              />
+<ProductCard 
+                 key={product.id}
+                 category={product.category}
+                 name={product.name}
+                 price={product.price}
+                 image={product.image}
+                 rating={product.rating}
+                 reviewCount={product.reviewCount}
+                 sold={product.sold}
+                 count={product.count}
+                 showRating
+                 onC={setS}
+               />
             ))
           ) : (
             <div className='col-span-2 flex flex-col items-center justify-center py-12'>

@@ -10,6 +10,7 @@ type ProductCardProps = {
   rating?: number
   reviewCount?: number
   sold?: number
+  count?: number
   showRating?: boolean,
   onC?: () => void
 }
@@ -22,6 +23,7 @@ const ProductCard = ({
   rating = 0,
   reviewCount = 0,
   sold = 0,
+  count = 0,
   showRating = false,
   onC
 }: ProductCardProps) => {
@@ -62,6 +64,10 @@ const ProductCard = ({
         
         {sold > 0 && (
           <p className='text-xs text-gray-400 mt-1'>{sold.toLocaleString()} sold</p>
+        )}
+        
+        {count !== undefined && count > 0 && (
+          <p className='text-xs text-gray-500 mt-1 font-medium'>{count.toLocaleString()} left</p>
         )}
       </div>
     </div>

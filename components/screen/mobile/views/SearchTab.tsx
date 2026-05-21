@@ -6,21 +6,52 @@ import React, { useState, useRef, useEffect } from 'react'
 
 type SearchTabProps = {
   goBack: () => void,
-  showDetails: () => void
+  showDetails: () => void,
 }
 
 const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
   const [searchQuery, setSearchQuery] = useState('')
+  const [products, setProducts] = useState<{
+    id: string
+    productName: string
+    category: string
+    price: number
+    image_url: string | null
+    rating?: number
+    reviewCount?: number
+    sold?: number
+    count?: number
+  }>([])
+  const [productsLoading, setProductsLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
-  
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    setProductsLoading(true)
+    try {
+      const response = await fetch('/api/fetchProducts')
+      const result = await response.json()
+      if (response.ok) {
+        setProducts(result.data || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch products:', err)
+    } finally {
+      setProductsLoading(false)
+    }
+  }
+
+  const categories = ['All', 'Tools', 'Materials', 'Hardware', 'Safety', 'Electrical']
   const recentSearches = ['Power Drill', 'Cement', 'Hammer', 'Safety Helmet', 'Screwdriver']
   const popularSearches = ['Building Materials', 'Hand Tools', 'Power Tools', 'Fasteners']
-  const categories = ['All', 'Tools', 'Materials', 'Hardware', 'Safety', 'Electrical']
 
   const Search = (query : string) => {
     router.push(`/search?q=${query}`)
@@ -46,7 +77,6 @@ const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKey}
-            placeholder='Search products...' 
             className='bg-gray-100 w-full h-11 rounded-full pl-11 pr-20 text-sm text-black outline-none focus:ring-2 focus:ring-orange-300'
           />
           <SearchIcon className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400' size={20}/>
@@ -111,10 +141,20 @@ const SearchTab = ({ goBack, showDetails }: SearchTabProps) => {
         <div className='mb-3'>
           <h3 className='text-base font-bold text-gray-800 mb-3'>Popular Products</h3>
           <div className='grid grid-cols-2 gap-3'>
-            <ProductCard onC={showDetails}/>
-            <ProductCard onC={showDetails}/>
-            <ProductCard onC={showDetails}/>
-            <ProductCard onC={showDetails}/>
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                category={product.category}
+                name={product.productName}
+                price={`₱${Number(product.price).toLocaleString()}`}
+                image={product.image_url || undefined}
+                rating={product.rating}
+                reviewCount={product.reviewCount}
+                sold={product.sold}
+                count={product.count}
+                onC={showDetails}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -117,16 +117,17 @@ const HomePage = ({ onNavigate } : NavigateProps) => {
             ) : (
                 <div className='grid grid-cols-2 gap-3'>
                     {products.slice(0, 4).map((product, index) => (
-                        <ProductCard
-                            key={product.id || index}
-                            category={product.category}
-                            name={product.productName}
-                            price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
-                            image={product.image_url}
-                            rating={product.rating}
-                            reviewCount={product.reviewCount}
-                            sold={product.sold}
-                        />
+<ProductCard
+                             key={product.id || index}
+                             category={product.category}
+                             name={product.productName}
+                             price={product.price ? `₱${Number(product.price).toLocaleString()}` : '₱0'}
+                             image={product.image_url}
+                             rating={product.rating}
+                             reviewCount={product.reviewCount}
+                             sold={product.sold}
+                             count={product.count}
+                         />
                     ))}
                 </div>
             )}

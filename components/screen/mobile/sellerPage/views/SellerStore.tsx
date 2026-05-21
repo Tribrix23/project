@@ -431,6 +431,7 @@ const SellerStore = ({ onNavigate, storeData, loading, error }: SellerStoreProps
                   rating={product.rating}
                   reviewCount={product.reviewCount}
                   sold={product.sold}
+                  count={product.count}
                 />
               ))}
             </div>
