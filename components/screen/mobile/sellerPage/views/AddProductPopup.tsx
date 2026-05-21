@@ -21,6 +21,7 @@ type ProductData = {
   image: string | null
   guarantees: string[]
   price: number
+  amount: number
 }
 
 const productCategories = [
@@ -55,7 +56,8 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
     details: '',
     image: null,
     guarantees: [...guaranteeOptions],
-    price: 0
+    price: 0,
+    amount: 0
   })
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -94,7 +96,7 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
   const canProceedStep1 = productData.name.trim().length >= 2 && productData.category !== ''
   const canProceedStep2 = productData.description.trim().length >= 10
   const canProceedStep3 = productData.image !== null
-  const canProceedStep4 = productData.price > 0
+  const canProceedStep4 = productData.price > 0 && productData.amount > 0
 
   const handleNext = () => {
     if (step < 4) {
@@ -116,6 +118,7 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
       }
       formData.append('guarantees', JSON.stringify(productData.guarantees))
       formData.append('price', productData.price.toString())
+      formData.append('amount', productData.amount.toString())
       if (selectedFile) {
         formData.append('image', selectedFile)
       }
@@ -149,7 +152,8 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
       details: '',
       image: null,
       guarantees: [...guaranteeOptions],
-      price: 0
+      price: 0,
+      amount: 0
     })
     onClose()
   }
@@ -348,13 +352,27 @@ const AddProductPopup = ({ isOpen, onClose, onSave }: AddProductPopupProps) => {
                     <span>₱50,000</span>
                     <span>₱100,000</span>
                   </div>
-                  <div className='text-center mt-4'>
-                    <span className='text-3xl font-bold text-orange-500'>₱{productData.price.toLocaleString()}</span>
+                    <div className='text-center mt-4'>
+                     <span className='text-3xl font-bold text-orange-500'>₱{productData.price.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium text-gray-700 mb-3 block'>Set Amount</label>
+                  <div className='relative'>
+                    <input
+                      type='number'
+                      min='0'
+                      value={productData.amount || ''}
+                      onChange={(e) => handleInputChange('amount', Number(e.target.value))}
+                      placeholder='0'
+                      className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent'
+                    />
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         <div className='p-6 border-t border-gray-100'>

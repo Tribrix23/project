@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     const category = formData.get('category') as string
     const description = formData.get('description') as string
     const price = formData.get('price') as string
+    const amount = formData.get('amount') as string
     const details = formData.get('details') as string | null
     const guarantees = (JSON.parse((formData.get('guarantees') as string) || '[]')) as string[]
     const file = formData.get('image') as File | null
@@ -102,7 +103,6 @@ export async function POST(request: NextRequest) {
     // --------------------
     // 4. INSERT PRODUCT
     // --------------------
-    console.log('Inserting product with guarantees:', guarantees, 'type:', Array.isArray(guarantees))
     try {
       const productInsert: Record<string, any> = {
         store_id: storeId,
@@ -115,6 +115,10 @@ export async function POST(request: NextRequest) {
       }
       if (details && details.trim().length > 0) {
         productInsert.productDetails = details
+      }
+
+      if (amount) {
+        productInsert.count = parseInt(amount, 10)
       }
 
       const { data, error } = await (await supabaseServer())
