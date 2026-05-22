@@ -25,8 +25,9 @@ type CartPageProps = {
   user: UserData
 }
 
-const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
+const CartPage = ({ isLoggedIn }: CartPageProps) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
@@ -44,8 +45,44 @@ const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
     ))
   }
 
-  const handleRemove = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id))
+  const handleRemove = async (id: number) => {
+    try {
+      const res = await fetch('/api/deleteCart', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: id }),
+      })
+      if (res.ok) {
+        setCartItems(items => items.filter(item => item.id !== id))
+        setSelectedItems(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(id)
+          return newSet
+        })
+      }
+    } catch (err) {
+      console.error('Failed to remove item:', err)
+    }
+  }
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(id)) {
+        newSet.delete(id)
+      } else {
+        newSet.add(id)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedItems.size === cartItems.length) {
+      setSelectedItems(new Set())
+    } else {
+      setSelectedItems(new Set(cartItems.map(item => item.id)))
+    }
   }
 
   const fetchCartItems = useCallback(async () => {
@@ -72,7 +109,6 @@ const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
     }
   }, [isLoggedIn, fetchCartItems])
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   return (
     <div className='w-full h-full flex flex-col bg-gray-50'>
       <header className='w-full h-16 bg-white flex items-center justify-between px-4 shadow-sm'>
@@ -122,6 +158,20 @@ const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
           </div>
         ) : (
           <div className='space-y-3'>
+            <div className='flex items-center justify-between px-2'>
+              <label className='flex items-center gap-2 cursor-pointer'>
+                <input
+                  type='checkbox'
+                  checked={selectedItems.size === cartItems.length && cartItems.length > 0}
+                  onChange={handleSelectAll}
+                  className='w-5 h-5 text-orange-500 rounded focus:ring-orange-500'
+                />
+                <span className='text-sm font-medium text-gray-700'>Select All</span>
+              </label>
+              <span className='text-sm text-gray-500'>
+                {selectedItems.size > 0 && `${selectedItems.size} selected`}
+              </span>
+            </div>
             {cartItems.map((item) => (
               <CartCard
                 key={item.id}
@@ -131,9 +181,11 @@ const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
                 price={item.price}
                 quantity={item.quantity}
                 image={item.image}
+                selected={selectedItems.has(item.id)}
                 onIncrease={() => handleIncrease(item.id)}
                 onDecrease={() => handleDecrease(item.id)}
                 onRemove={() => handleRemove(item.id)}
+                onToggleSelect={() => handleToggleSelect(item.id)}
               />
             ))}
           </div>
@@ -144,7 +196,7 @@ const CartPage = ({ isLoggedIn, user }: CartPageProps) => {
         <div className='absolute bottom-10 left-0 right-0 bg-white rounded-t-3xl shadow-lg border border-gray-100 p-4 pb-19'>
           <button className='w-full bg-orange-500 text-white py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2 hover:bg-orange-600 transition-colors'>
             <ShoppingBag size={20} />
-            Checkout
+            Checkout {selectedItems.size > 0 && `(${selectedItems.size})`}
           </button>
         </div>
       )}

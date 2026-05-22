@@ -18,24 +18,37 @@ export type CartCardProps = {
   price: number
   quantity: number
   image: string
+  selected?: boolean
   onIncrease?: () => void
   onDecrease?: () => void
   onRemove?: () => void
+  onToggleSelect?: () => void
 }
 
 const CartCard: React.FC<CartCardProps> = ({
-  id,
+  id: _id,
   name,
   category,
   price,
   quantity,
   image,
+  selected = false,
   onIncrease,
   onDecrease,
   onRemove,
+  onToggleSelect,
 }) => {
   return (
-    <div className='bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex gap-3'>
+    <div className={`bg-white rounded-2xl p-3 shadow-sm border flex gap-3 ${selected ? 'border-orange-500' : 'border-gray-100'}`}>
+      <div className='flex items-center pl-1'>
+        <input
+          type='checkbox'
+          checked={selected}
+          onChange={onToggleSelect}
+          className='w-5 h-5 text-orange-500 rounded focus:ring-orange-500'
+          aria-label={`Select ${name}`}
+        />
+      </div>
       <div className='w-20 h-20 bg-gray-100 rounded-xl shrink-0 overflow-hidden'>
         <Image src={image} width={80} height={80} alt={name} className='w-full h-full object-cover' />
       </div>
