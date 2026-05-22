@@ -24,25 +24,20 @@ type ProductDetails = {
   }
 }
 
-const mockProduct: ProductDetails = {
-  id: 1,
-  productName: 'Professional Tool - Heavy Duty Hammer Drill Set with Case',
-  category: 'Tools',
-  price: 5500,
+const emptyProduct: ProductDetails = {
+  id: 0,
+  productName: '',
+  category: '',
+  price: 0,
   image_url: undefined,
-  rating: 4.8,
-  reviewCount: 124,
-  sold: 2340,
-  storeName: 'Hardware Pro Store',
-  storeRating: 4.9,
-  description: 'Professional-grade hammer drill with powerful motor and durable construction. Perfect for construction and home improvement projects.',
-  details: [
-    'Powerful 18V motor',
-    '18+1 clutch settings',
-    'LED work light',
-    'Includes carrying case',
-    '2-year warranty'
-  ]
+  rating: undefined,
+  reviewCount: undefined,
+  sold: undefined,
+  storeName: undefined,
+  storeRating: undefined,
+  description: undefined,
+  details: undefined,
+  sellerStore: undefined
 }
 
 
@@ -74,39 +69,39 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-   useEffect(() => {
-     const fetchProductDetails = async () => {
-       const itemId = searchParams.get('item')
-       if (!itemId) {
-         // If no item ID in URL, use the passed product prop or mock
-         setProductData(product || mockProduct)
-         setLoading(false)
-         return
-       }
+    useEffect(() => {
+      const fetchProductDetails = async () => {
+        const itemId = searchParams.get('item')
+        if (!itemId) {
+          // If no item ID in URL, use the passed product prop or mock
+          setProductData(product || emptyProduct)
+          setLoading(false)
+          return
+        }
 
-       setLoading(true)
-       setError(null)
-       try {
-         // Fetch product details from API
-         const response = await fetch(`/api/fetchProductById?id=${itemId}`)
-         const result = await response.json()
-         if (response.ok) {
-           setProductData(result.data || null)
-         } else {
-           setError(result.error || 'Failed to fetch product details')
-           setProductData(product || mockProduct) // Fallback to passed product or mock
-         }
-       } catch (err) {
-         console.error('Failed to fetch product details:', err)
-         setError('Failed to fetch product details')
-         setProductData(product || mockProduct) // Fallback to passed product or mock
-       } finally {
-         setLoading(false)
-       }
-     }
+        setLoading(true)
+        setError(null)
+        try {
+          // Fetch product details from API
+          const response = await fetch(`/api/fetchProductById?id=${itemId}`)
+          const result = await response.json()
+          if (response.ok) {
+            setProductData(result.data || null)
+          } else {
+            setError(result.error || 'Failed to fetch product details')
+            setProductData(product || emptyProduct) // Fallback to passed product or mock
+          }
+        } catch (err) {
+          console.error('Failed to fetch product details:', err)
+          setError('Failed to fetch product details')
+          setProductData(product || emptyProduct) // Fallback to passed product or mock
+        } finally {
+          setLoading(false)
+        }
+      }
 
-     fetchProductDetails()
-   }, [searchParams, product])
+      fetchProductDetails()
+    }, [searchParams, product])
 
    // Simulate loading delay for reviews
    useEffect(() => {
@@ -116,8 +111,8 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
      return () => clearTimeout(timer)
    }, [])
 
-  const displayProduct = productData || mockProduct
-  const storeName = displayProduct.sellerStore?.name || displayProduct.storeName || 'Store Name'
+   const displayProduct = productData || emptyProduct
+   const storeName = displayProduct.sellerStore?.name || displayProduct.storeName || 'Store Name'
 
   const handleRequireLogin = () => {
     if (!isLoggedIn) {
@@ -298,14 +293,14 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
              
              <div className='mt-4 border-t border-gray-100 pt-4'>
                <h2 className='text-base font-semibold text-gray-800 mb-2'>Product Details</h2>
-               <ul className='space-y-2'>
-                 {displayProduct.details?.map((detail, index) => (
-                   <li key={index} className='text-sm text-gray-600 flex items-center gap-2'>
-                     <span className='w-1.5 h-1.5 bg-orange-500 rounded-full'/>
-                     {detail}
-                   </li>
-                 ))}
-               </ul>
+                <ul className='space-y-2'>
+                  {displayProduct.details?.map((detail: string, index: number) => (
+                    <li key={index} className='text-sm text-gray-600 flex items-center gap-2'>
+                      <span className='w-1.5 h-1.5 bg-orange-500 rounded-full'/>
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
              </div>
              
              <div className='mt-4 border-t border-gray-100 pt-4'>
