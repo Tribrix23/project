@@ -1,6 +1,6 @@
 'use client'
 import IconBadge from '@/components/ui/IconBadge'
-import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw, X } from 'lucide-react'
+import { HeartIcon, StarIcon, ArrowLeft, ShoppingCart, MessageCircle, Store, Shield, Truck, RotateCcw, X, Minus, Plus, Check } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { BsHeart, BsHeartFill } from 'react-icons/bs'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -65,6 +65,8 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [showCartCounter, setShowCartCounter] = useState(false)
+  const [addingToCart, setAddingToCart] = useState(false)
   const [productData, setProductData] = useState<ProductDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -123,6 +125,24 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
       return false
     }
     return true
+  }
+
+  const handleAddToCart = async () => {
+    const productId = displayProduct.id
+    if (!productId) return
+    try {
+      setAddingToCart(true)
+      await fetch('/api/addToCart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: String(productId), quantity }),
+      })
+    } catch (err) {
+      console.error('addToCart error:', err)
+    } finally {
+      setAddingToCart(false)
+      setShowCartCounter(false)
+    }
   }
 
   return (
@@ -340,25 +360,64 @@ const Details = ({ goBack, isLoggedIn, user, product }: DetailsProps) => {
              View All Reviews
            </button>
           </div>
-        </div>
-        
+         </div>
+         
         <div className='absolute bottom-13 left-0 right-0 bg-white border-t border-gray-200 p-3 flex items-center gap-2'>
-          
           <button 
-            onClick={() => { if (handleRequireLogin()) { /* add to cart logic */ } }}
-            className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white font-semibold rounded-full hover:bg-gray-700 transition-colors'
+            onClick={() => { if (handleRequireLogin()) setShowCartCounter(true) }}
+            className='flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'
           >
             <ShoppingCart size={18}/>
-            Add Cart
+            Add to Cart
           </button>
           
           <button 
             onClick={() => { if (handleRequireLogin()) { /* buy now logic */ } }}
-            className='flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors'
+            className='flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 text-white font-semibold rounded-full hover:bg-gray-700 transition-colors'
           >
             Buy Now
           </button>
         </div>
+
+        {showCartCounter && (
+          <>
+            <style>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } } .animate-slideUp { animation: slideUp 0.25s ease-out forwards; }`}</style>
+            <div className='fixed inset-0 bg-black/40 z-40' onClick={() => setShowCartCounter(false)} />
+            <div className='fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl p-5 pb-8 animate-slideUp shadow-[0_-4px_20px_rgba(0,0,0,0.12)]'>
+              <div className='flex items-center justify-between mb-4'>
+                <p className='text-base font-semibold text-gray-800'>Quantity</p>
+                <button
+                  onClick={() => setShowCartCounter(false)}
+                  className='p-1.5 rounded-full hover:bg-gray-100 transition-colors'
+                >
+                  <X size={18} className='text-gray-500'/>
+                </button>
+              </div>
+              <div className='flex items-center gap-4'>
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className='flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 text-orange-600 font-bold active:scale-90 transition-transform'
+                >
+                  <Minus size={18} strokeWidth={2.5}/>
+                </button>
+                <span className='flex-1 text-center text-[22px] font-bold text-gray-800'>{quantity}</span>
+                <button
+                  onClick={() => setQuantity(q => q + 1)}
+                  className='flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 text-orange-600 font-bold active:scale-90 transition-transform'
+                >
+                  <Plus size={18} strokeWidth={2.5}/>
+                </button>
+              </div>
+              <button
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                className='w-full mt-4 py-3.5 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 active:scale-[0.98] transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed'
+              >
+                {addingToCart ? 'Adding...' : `Add ${quantity} item${quantity > 1 ? 's' : ''} to Cart`}
+              </button>
+            </div>
+          </>
+        )}
         
         {showLoginPrompt && (
           <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50' onClick={() => setShowLoginPrompt(false)}>
