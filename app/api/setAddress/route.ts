@@ -32,6 +32,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if user has any existing addresses
+    const { data: existingAddresses } = await supabase
+      .from("Adress")
+      .select("id")
+      .eq("user_id", user.id);
+
+    const isFirstAddress = !existingAddresses || existingAddresses.length === 0;
+
     // Insert address into database
     const { data, error } = await supabase
       .from("Adress")
@@ -43,6 +51,7 @@ export async function POST(req: Request) {
         street,
         lot: blkLot,
         zip: zipcode,
+        isMain: isFirstAddress, // First address is automatically main
       })
       .select()
       .single();

@@ -12,6 +12,7 @@ interface Address {
   street: string
   lot: string
   zip: string
+  isMain?: boolean
 }
 
 const ShowAddresses = () => {
@@ -19,6 +20,7 @@ const ShowAddresses = () => {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [deletePopup, setDeletePopup] = useState<{ addressId: string } | null>(null)
+  const [settingMain, setSettingMain] = useState(false)
 
   useEffect(() => {
     fetchAddresses()
@@ -33,27 +35,72 @@ const ShowAddresses = () => {
         throw new Error(data.error || 'Failed to fetch addresses')
       }
 
-      setAddresses(data.addresses || [])
-    } catch (err: any) {
+      const fetchedAddresses = data.addresses || []
+      setAddresses(fetchedAddresses)
+    } catch (err) {
       console.error('Error fetching addresses:', err)
     } finally {
       setLoading(false)
     }
   }
 
-   const handleAddAddress = () => {
-     router.push('?c=addr')
-   }
+  const setAddressAsMain = async (addressId: string, makeMain: boolean) => {
+    try {
+      const res = await fetch('/api/setMainAddr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addressId, isMain: makeMain }),
+      })
+      
+      if (!res.ok) {
+        throw new Error('Failed to update main address')
+      }
+      
+      return true
+    } catch (err) {
+      console.error('Error updating main address:', err)
+      return false
+    }
+  }
 
-   const handleBack = () => {
-     router.push('/?page=profile')
-   }
+  const handleSetMain = async (address: Address) => {
+    if (settingMain || address.isMain) return
+    
+    setSettingMain(true)
+    
+    // Set all addresses to not main
+    const prevMain = addresses.find(a => a.isMain)
+    
+    const updates = []
+    
+    // Unset previous main
+    if (prevMain) {
+      updates.push(setAddressAsMain(prevMain.id, false))
+    }
+    
+    // Set new main
+    updates.push(setAddressAsMain(address.id, true))
+    
+    await Promise.all(updates)
+    
+    // Update local state
+    setAddresses(prev => prev.map(a => ({
+      ...a,
+      isMain: a.id === address.id
+    })))
+    
+    setSettingMain(false)
+  }
 
-   const handleAddressClick = (address: Address) => {
-     console.log('Selected address:', address)
-   }
+const handleAddAddress = () => {
+      router.push('?c=addr')
+    }
 
-   const handleDeleteAddress = (addressId: string) => {
+    const handleBack = () => {
+      router.push('/?page=profile')
+    }
+
+    const handleDeleteAddress = (addressId: string) => {
      setDeletePopup({ addressId })
    }
 
@@ -72,10 +119,10 @@ const ShowAddresses = () => {
 
        // Remove the deleted address from the list
        setAddresses(addresses.filter(addr => addr.id !== deletePopup.addressId))
-     } catch (err: any) {
-       console.error('Error deleting address:', err)
-       alert(err.message || 'Failed to delete address')
-     } finally {
+} catch (err) {
+      console.error('Error deleting address:', err)
+      alert('Failed to delete address')
+    } finally {
        setDeletePopup(null)
      }
    }
@@ -95,48 +142,64 @@ const ShowAddresses = () => {
 
       {/* Address List */}
       <main className="flex-1 overflow-y-auto p-4">
-        {loading ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="w-full h-20 bg-white rounded-xl animate-pulse" />
-            ))}
-          </div>
-        ) : addresses.length > 0 ? (
-          <div className="space-y-3 mb-4">
-            {addresses.map((address) => (
-              <div
-                key={address.id}
-                onClick={() => handleAddressClick(address)}
-                className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-              >
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                <MapPin size={20} className="text-orange-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {address.street || 'Unnamed Address'}
-                </p>
-                <p className="text-xs text-gray-500 mt-1 wrap-break-word">
-                  {address.lot && `${address.lot}, `}
-                  {address.barangay}, {address.city}, {address.province}
-                  {address.zip && ` ${address.zip}`}
-                </p>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDeleteAddress(address.id)
-                }}
-                className="p-2 rounded-full hover:bg-red-50 transition-colors shrink-0"
-              >
-                <Trash2 size={18} className="text-red-500" />
-              </button>
-            </div>
-              </div>
-            ))}
-          </div>
-        ) : (
+{loading ? (
+           <div className="space-y-3">
+             {[...Array(3)].map((_, i) => (
+               <div key={i} className="w-full h-20 bg-white rounded-xl animate-pulse" />
+             ))}
+           </div>
+         ) : addresses.length > 0 ? (
+           <div className="space-y-3 mb-4">
+             {addresses.map((address) => {
+               const isOnly = addresses.length === 1
+               return (
+                 <div
+                   key={address.id}
+                   onClick={() => !isOnly && handleSetMain(address)}
+                   className={`w-full bg-white rounded-xl p-4 shadow-sm border transition-all ${
+                     address.isMain ? 'border-orange-500' : 'border-gray-100'
+                   } ${!isOnly && !address.isMain ? 'cursor-pointer hover:shadow-md' : ''}`}
+                 >
+               <div className="flex items-start gap-3">
+                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                   <MapPin size={20} className="text-orange-600" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                   <div className="flex items-center gap-2">
+                     <p className="text-sm font-medium text-gray-800 truncate">
+                       {address.street || 'Unnamed Address'}
+                     </p>
+                     {address.isMain && (
+                       <span className="px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full">
+                         Main Address
+                       </span>
+                     )}
+                   </div>
+                   <p className="text-xs text-gray-500 mt-1 wrap-break-word">
+                     {address.lot && `${address.lot}, `}
+                     {address.barangay}, {address.city}, {address.province}
+                     {address.zip && ` ${address.zip}`}
+                   </p>
+                 </div>
+                 {!isOnly && !address.isMain && (
+                   <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0">
+                   </div>
+                 )}
+                 <button
+                   onClick={(e) => {
+                     e.stopPropagation()
+                     handleDeleteAddress(address.id)
+                   }}
+                   className="p-2 rounded-full hover:bg-red-50 transition-colors shrink-0"
+                 >
+                   <Trash2 size={18} className="text-red-500" />
+                 </button>
+               </div>
+                 </div>
+               )
+             })}
+           </div>
+         ) : (
           <div className="text-center py-8">
             <p className="text-gray-400">No addresses saved yet</p>
           </div>
