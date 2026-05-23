@@ -9,6 +9,7 @@ export type CartItem = {
   price: number
   quantity: number
   image: string
+  count: number
 }
 
 export type CartCardProps = {
@@ -23,6 +24,7 @@ export type CartCardProps = {
   onDecrease?: () => void
   onRemove?: () => void
   onToggleSelect?: () => void
+  count: number
 }
 
 const CartCard: React.FC<CartCardProps> = ({
@@ -37,7 +39,18 @@ const CartCard: React.FC<CartCardProps> = ({
   onDecrease,
   onRemove,
   onToggleSelect,
+  count,
 }) => {
+  const handleDecrease = () => {
+    if (quantity <= 1) return;
+    onDecrease?.();
+  };
+
+  const handleIncrease = () => {
+    if (quantity >= count) return;
+    onIncrease?.();
+  };
+
   return (
     <div className={`bg-white rounded-2xl p-3 shadow-sm border flex gap-3 ${selected ? 'border-orange-500' : 'border-gray-100'}`}>
       <div className='flex items-center pl-1'>
@@ -61,15 +74,15 @@ const CartCard: React.FC<CartCardProps> = ({
           <p className='text-base font-bold text-orange-500'>₱{price.toLocaleString()}</p>
           <div className='flex items-center gap-2 bg-gray-100 rounded-full px-2 py-1'>
             <button 
-              onClick={onDecrease}
-              className='w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-gray-600 hover:bg-gray-50'
+              onClick={handleDecrease}
+              className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm text-gray-600 hover:bg-gray-50 ${quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Minus size={12} />
             </button>
             <span className='text-sm font-medium w-6 text-center'>{quantity}</span>
             <button 
-              onClick={onIncrease}
-              className='w-6 h-6 flex items-center justify-center bg-orange-500 rounded-full shadow-sm text-white hover:bg-orange-600'
+              onClick={handleIncrease}
+              className={`w-6 h-6 flex items-center justify-center bg-orange-500 rounded-full shadow-sm text-white hover:bg-orange-600 ${quantity >= count ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Plus size={12} />
             </button>
@@ -83,7 +96,7 @@ const CartCard: React.FC<CartCardProps> = ({
         <Trash2 size={18} />
       </button>
     </div>
-  )
+  );
 }
 
 export default CartCard

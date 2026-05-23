@@ -11,6 +11,7 @@ type CartItem = {
   price: number
   quantity: number
   image: string
+  count: number
 }
 
 type UserData = {
@@ -31,19 +32,41 @@ const CartPage = ({ isLoggedIn }: CartPageProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
-  const handleIncrease = (id: number) => {
-    setCartItems(items => items.map(item => 
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    ))
-  }
+   const handleIncrease = async (id: number) => {
+     try {
+       const res = await fetch('/api/action', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ item_id: id, type: 'increase' }),
+       })
+       if (res.ok) {
+         const result = await res.json()
+         setCartItems(items => items.map(item => 
+           item.id === id ? { ...item, quantity: result.cartItem.quantity } : item
+         ))
+       }
+     } catch (err) {
+       console.error('Failed to increase quantity:', err)
+     }
+   }
 
-  const handleDecrease = (id: number) => {
-    setCartItems(items => items.map(item => 
-      item.id === id && item.quantity > 1 
-        ? { ...item, quantity: item.quantity - 1 } 
-        : item
-    ))
-  }
+   const handleDecrease = async (id: number) => {
+     try {
+       const res = await fetch('/api/action', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ item_id: id, type: 'decrease' }),
+       })
+       if (res.ok) {
+         const result = await res.json()
+         setCartItems(items => items.map(item => 
+           item.id === id ? { ...item, quantity: result.cartItem.quantity } : item
+         ))
+       }
+     } catch (err) {
+       console.error('Failed to decrease quantity:', err)
+     }
+   }
 
   const handleRemove = async (id: number) => {
     try {
@@ -172,34 +195,51 @@ const CartPage = ({ isLoggedIn }: CartPageProps) => {
                 {selectedItems.size > 0 && `${selectedItems.size} selected`}
               </span>
             </div>
-            {cartItems.map((item) => (
-              <CartCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                category={item.category}
-                price={item.price}
-                quantity={item.quantity}
-                image={item.image}
-                selected={selectedItems.has(item.id)}
-                onIncrease={() => handleIncrease(item.id)}
-                onDecrease={() => handleDecrease(item.id)}
-                onRemove={() => handleRemove(item.id)}
-                onToggleSelect={() => handleToggleSelect(item.id)}
-              />
-            ))}
+             {cartItems.map((item) => (
+               <CartCard
+                 key={item.id}
+                 id={item.id}
+                 name={item.name}
+                 category={item.category}
+                 price={item.price}
+                 quantity={item.quantity}
+                 image={item.image}
+                 count={item.count}
+                 selected={selectedItems.has(item.id)}
+                 onIncrease={() => handleIncrease(item.id)}
+                 onDecrease={() => handleDecrease(item.id)}
+                 onRemove={() => handleRemove(item.id)}
+                 onToggleSelect={() => handleToggleSelect(item.id)}
+               />
+             ))}
           </div>
         )}
       </main>
 
-      {cartItems.length > 0 && (
-        <div className='absolute bottom-10 left-0 right-0 bg-white rounded-t-3xl shadow-lg border border-gray-100 p-4 pb-19'>
-          <button className='w-full bg-orange-500 text-white py-3 rounded-xl font-semibold text-base flex items-center justify-center gap-2 hover:bg-orange-600 transition-colors'>
-            <ShoppingBag size={20} />
-            Checkout {selectedItems.size > 0 && `(${selectedItems.size})`}
-          </button>
-        </div>
-      )}
+       {cartItems.length > 0 && (
+         <div className='absolute bottom-10 left-0 right-0 bg-white rounded-t-3xl shadow-lg border border-gray-100 p-4 pb-19'>
+           <button
+             disabled={selectedItems.size === 0}
+             className={`
+               w-full
+               ${selectedItems.size === 0 ? 'bg-orange-200 text-gray-400' : 'bg-orange-500 text-white'}
+               py-3
+               rounded-xl
+               font-semibold
+               text-base
+               flex
+               items-center
+               justify-center
+               gap-2
+               ${selectedItems.size > 0 ? 'hover:bg-orange-600' : ''}
+               transition-colors
+             `}
+           >
+             <ShoppingBag size={20} />
+             Checkout {selectedItems.size > 0 && `(${selectedItems.size})`}
+           </button>
+         </div>
+       )}
     </div>
   )
 }

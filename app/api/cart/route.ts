@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
     // 2. Extract item_ids and look up each product in storeProducts
     const itemIds = cartRows.map(row => row.item_id)
 
-    const { data: products, error: productsError } = await supabase
-      .from('storeProducts')
-      .select('id, productName, category, price, image_url')
-      .in('id', itemIds)
+     const { data: products, error: productsError } = await supabase
+       .from('storeProducts')
+       .select('id, productName, category, price, image_url, count')
+       .in('id', itemIds)
 
     if (productsError) {
       console.error('Products query error:', productsError)
@@ -41,17 +41,18 @@ export async function GET(request: NextRequest) {
     // 3. Map product data with cart quantity to return as CartItem[]
     const productMap = new Map(products?.map(p => [p.id, p]))
 
-    const cartItems = cartRows.map(cartRow => {
-      const product = productMap.get(cartRow.item_id)
-      return {
-        id: cartRow.item_id,
-        name: product?.productName ?? 'Unknown Product',
-        category: product?.category ?? '',
-        price: product?.price ?? 0,
-        quantity: cartRow.quantity,
-        image: product?.image_url ?? '',
-      }
-    })
+     const cartItems = cartRows.map(cartRow => {
+       const product = productMap.get(cartRow.item_id)
+       return {
+         id: cartRow.item_id,
+         name: product?.productName ?? 'Unknown Product',
+         category: product?.category ?? '',
+         price: product?.price ?? 0,
+         quantity: cartRow.quantity,
+         image: product?.image_url ?? '',
+         count: product?.count ?? 0,
+       }
+     })
 
     return NextResponse.json({ data: cartItems }, { status: 200 })
   } catch (err: any) {
