@@ -85,6 +85,39 @@ const PaymentTab = () => {
     setCouponError('')
   }
 
+  const handlePay = async () => {
+    if (selectedPayment === 'gcash') {
+      try {
+        const res = await fetch('/api/pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: cartItems.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              amount: item.price * item.quantity,
+            })),
+            amount: total,
+            currency: 'PHP',
+            name: selectedAddress?.name,
+            email: '',
+            phone: selectedAddress?.phone,
+          }),
+        })
+        const data = await res.json()
+        if (data.url) {
+          window.location.href = data.url
+          return
+        }
+        router.push('/payment?q=fd')
+      } catch {
+        router.push('/payment?q=fd')
+      }
+    } else {
+      router.push('/payment?q=cnf')
+    }
+  }
+
   const paymentMethods = [
     { id: 'gcash', icon: Smartphone, label: 'GCash', color: 'bg-gradient-to-br from-green-500 to-green-600', desc: 'Instant transfer' },
     { id: 'credit', icon: CreditCard, label: 'Card', color: 'bg-gradient-to-br from-blue-500 to-blue-600', desc: 'Visa/Mastercard' },
@@ -394,7 +427,7 @@ const PaymentTab = () => {
       )}
 
       <div className='absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 pb-6'>
-        <button className='w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-transform'>
+        <button onClick={handlePay} className='w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-transform'>
           <ShoppingBag size={20} />
           Pay ₱{total.toLocaleString()}
         </button>
