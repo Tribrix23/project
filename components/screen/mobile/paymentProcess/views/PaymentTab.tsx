@@ -1,7 +1,8 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { CreditCard, Smartphone, Wallet, ChevronRight, Check, ShoppingBag, Tag, X, Truck, FileText, Calculator, MapPin, ShieldCheck, Package } from 'lucide-react'
+import { CreditCard, Smartphone, Wallet, ChevronRight, Check, ShoppingBag, Tag, X, Truck, FileText, Calculator, MapPin, ShieldCheck, Package, ArrowLeft } from 'lucide-react'
 import { CiMoneyBill } from 'react-icons/ci'
+import { useRouter } from 'next/navigation'
 
 type CartItem = {
   id: number
@@ -13,37 +14,60 @@ type CartItem = {
   unit?: string
 }
 
-type DeliveryAddress = {
-  name: string
-  address: string
-  phone: string
+type Address = {
+  id: string
+  name?: string
+  phone?: string
+  province: string
+  city: string
+  barangay: string
+  street: string
+  lot: string
+  zip: string
+  isMain?: boolean
 }
 
 const PaymentTab = () => {
+  const router = useRouter()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
+  const [showAddressPopup, setShowAddressPopup] = useState(false)
+  const [selectedPayment, setSelectedPayment] = useState<string>('cod')
+  const [couponCode, setCouponCode] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
+  const [couponError, setCouponError] = useState('')
 
   useEffect(() => {
     const storedItems = sessionStorage.getItem('checkoutItems')
     if (storedItems) {
       setCartItems(JSON.parse(storedItems))
     }
+    fetchAddresses()
   }, [])
 
-  const [deliveryAddress] = useState<DeliveryAddress>({
-    name: 'Place Holder',
-    address: '123 Construction Ave, Makati City',
-    phone: '+63 912 345 6789'
-  })
+  const fetchAddresses = async () => {
+    try {
+      const res = await fetch('/api/showAddr')
+      const data = await res.json()
+      if (res.ok && data.addresses?.length > 0) {
+        setAddresses(data.addresses)
+        const mainAddr = data.addresses.find((a: Address) => a.isMain)
+        setSelectedAddress(mainAddr || data.addresses[0])
+      }
+    } catch (err) {
+      console.error('Error fetching addresses:', err)
+    }
+  }
 
-  const [selectedPayment, setSelectedPayment] = useState<string>('gcash')
-  const [couponCode, setCouponCode] = useState('')
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
-  const [couponError, setCouponError] = useState('')
+  const handleBack = () => {
+    router.back()
+  }
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = 350
-  const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0
-  const total = subtotal + shipping - discount
+  const handleSelectAddress = (address: Address) => {
+    setSelectedAddress(address)
+    setShowAddressPopup(false)
+  }
 
   const handleApplyCoupon = () => {
     if (couponCode.trim().toUpperCase() === 'BUILDER10') {
@@ -68,10 +92,22 @@ const PaymentTab = () => {
     { id: 'wallet', icon: Wallet, label: 'Wallet', color: 'bg-gradient-to-br from-purple-500 to-purple-600', desc: 'Shop balance' }
   ]
 
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const shipping = totalQuantity > 0 ? Math.min(80 * totalQuantity, 150) : 0
+  const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0
+  const total = subtotal + shipping - discount
+
   return (
     <div className='w-full h-full flex flex-col bg-[#F5F3EB]'>
       <header className='w-full h-14 bg-white flex items-center px-5 border-b border-gray-100'>
-        <div className='flex items-center gap-3'>
+        <button
+          onClick={handleBack}
+          className='p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors'
+        >
+          <ArrowLeft size={20} className='text-gray-600' />
+        </button>
+        <div className='flex items-center gap-3 ml-2'>
           <div className='w-9 h-9 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md shadow-orange-500/20'>
             <FileText size={18} className='text-white' />
           </div>
@@ -117,7 +153,6 @@ const PaymentTab = () => {
             </div>
             <div className='px-4 py-2 bg-gray-50 flex justify-between items-center'>
               <span className='text-xs text-gray-400'>{cartItems.reduce((s, i) => s + i.quantity, 0)} units</span>
-              <span className='text-xs text-gray-400'>~250kg</span>
             </div>
           </div>
         </section>
@@ -134,11 +169,33 @@ const PaymentTab = () => {
                   <MapPin size={16} className='text-orange-500' />
                 </div>
                 <div className='flex-1'>
-                  <p className='text-sm font-semibold text-gray-800'>{deliveryAddress.name}</p>
-                  <p className='text-xs text-gray-500 mt-0.5'>{deliveryAddress.address}</p>
-                  <p className='text-xs text-gray-400 mt-1'>{deliveryAddress.phone}</p>
+                  {selectedAddress ? (
+                    <>
+                      <div className='flex items-center gap-2'>
+                        <p className='text-sm font-semibold text-gray-800'>{selectedAddress.name || 'Address'}</p>
+                        {selectedAddress.isMain && (
+                          <span className='px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full'>
+                            Main Address
+                          </span>
+                        )}
+                      </div>
+                      <p className='text-xs text-gray-500 mt-0.5'>
+                        {selectedAddress.lot && `${selectedAddress.lot}, `}
+                        {selectedAddress.street && `${selectedAddress.street}, `}
+                        {selectedAddress.barangay}, {selectedAddress.city}
+                      </p>
+                      <p className='text-xs text-gray-400 mt-1'>{selectedAddress.phone || ''}</p>
+                    </>
+                  ) : (
+                    <p className='text-sm text-gray-400'>No address selected</p>
+                  )}
                 </div>
-                <button className='text-xs text-orange-500 font-medium'>Change</button>
+                <button 
+                  onClick={() => setShowAddressPopup(true)}
+                  className='text-xs text-orange-500 font-medium'
+                >
+                  Change
+                </button>
               </div>
             </div>
           </div>
@@ -276,6 +333,65 @@ const PaymentTab = () => {
           <span className='text-xs text-gray-400'>Secure checkout protected</span>
         </div>
       </main>
+
+      {/* Address Selection Popup */}
+      {showAddressPopup && (
+        <div className='fixed inset-0 bg-black/50 flex items-end justify-center z-50'>
+          <div className='w-full bg-white rounded-t-3xl max-h-[70vh] flex flex-col'>
+            <div className='p-4 border-b border-gray-100'>
+              <h3 className='text-base font-bold text-gray-800'>Select Address</h3>
+              <button
+                onClick={() => setShowAddressPopup(false)}
+                className='absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100'
+              >
+                <X size={20} className='text-gray-600' />
+              </button>
+            </div>
+            <div className='flex-1 overflow-y-auto p-4'>
+              <div className='space-y-3'>
+                {addresses.map((address) => (
+                  <div
+                    key={address.id}
+                    onClick={() => handleSelectAddress(address)}
+                    className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                      selectedAddress?.id === address.id
+                        ? 'border-orange-500 bg-orange-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className='flex items-start gap-3'>
+                      <div className='w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0'>
+                        <MapPin size={18} className='text-orange-600' />
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-center gap-2'>
+                          <p className='text-sm font-semibold text-gray-800'>{address.name || 'Address'}</p>
+                          {address.isMain && (
+                            <span className='px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full'>
+                              Main
+                            </span>
+                          )}
+                        </div>
+                        <p className='text-xs text-gray-500 mt-1'>
+                          {address.lot && `${address.lot}, `}
+                          {address.street && `${address.street}, `}
+                          {address.barangay}, {address.city}
+                        </p>
+                        <p className='text-xs text-gray-400 mt-1'>{address.phone || ''}</p>
+                      </div>
+                      {selectedAddress?.id === address.id && (
+                        <div className='w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center shrink-0'>
+                          <Check size={12} className='text-white' />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className='absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-4 pb-6'>
         <button className='w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-transform'>
