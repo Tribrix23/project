@@ -3,6 +3,7 @@ import CartCard from '@/components/ui/CartCard'
 import { ShoppingBag, LogIn } from 'lucide-react'
 import React, { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 type CartItem = {
   id: number
@@ -12,6 +13,16 @@ type CartItem = {
   quantity: number
   image: string
   count: number
+}
+
+type SelectedCartItem = {
+  id: number
+  name: string
+  category: string
+  price: number
+  quantity: number
+  image: string
+  unit?: string
 }
 
 type UserData = {
@@ -30,7 +41,9 @@ const CartPage = ({ isLoggedIn }: CartPageProps) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedCartData, setSelectedCartData] = useState<SelectedCartItem[]>([])
   const supabase = createClient()
+  const router = useRouter()
 
    const handleIncrease = async (id: number) => {
      try {
@@ -107,6 +120,20 @@ const CartPage = ({ isLoggedIn }: CartPageProps) => {
       setSelectedItems(new Set(cartItems.map(item => item.id)))
     }
   }
+
+  useEffect(() => {
+    const selectedData = cartItems
+      .filter(item => selectedItems.has(item.id))
+      .map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image
+      }))
+    setSelectedCartData(selectedData)
+  }, [selectedItems, cartItems])
 
   const fetchCartItems = useCallback(async () => {
     setIsLoading(true)
@@ -216,30 +243,34 @@ const CartPage = ({ isLoggedIn }: CartPageProps) => {
         )}
       </main>
 
-       {cartItems.length > 0 && (
-         <div className='absolute bottom-10 left-0 right-0 bg-white rounded-t-3xl shadow-lg border border-gray-100 p-4 pb-19'>
-           <button
-             disabled={selectedItems.size === 0}
-             className={`
-               w-full
-               ${selectedItems.size === 0 ? 'bg-orange-200 text-gray-400' : 'bg-orange-500 text-white'}
-               py-3
-               rounded-xl
-               font-semibold
-               text-base
-               flex
-               items-center
-               justify-center
-               gap-2
-               ${selectedItems.size > 0 ? 'hover:bg-orange-600' : ''}
-               transition-colors
-             `}
-           >
-             <ShoppingBag size={20} />
-             Checkout {selectedItems.size > 0 && `(${selectedItems.size})`}
-           </button>
-         </div>
-       )}
+{cartItems.length > 0 && (
+          <div className='absolute bottom-10 left-0 right-0 bg-white rounded-t-3xl shadow-lg border border-gray-100 p-4 pb-19'>
+            <button
+              onClick={() => {
+                sessionStorage.setItem('checkoutItems', JSON.stringify(selectedCartData))
+                router.push('/payment')
+              }}
+              disabled={selectedItems.size === 0}
+              className={`
+                w-full
+                ${selectedItems.size === 0 ? 'bg-orange-200 text-gray-400' : 'bg-orange-500 text-white'}
+                py-3
+                rounded-xl
+                font-semibold
+                text-base
+                flex
+                items-center
+                justify-center
+                gap-2
+                ${selectedItems.size > 0 ? 'hover:bg-orange-600' : ''}
+                transition-colors
+              `}
+            >
+              <ShoppingBag size={20} />
+              Checkout {selectedItems.size > 0 && `(${selectedItems.size})`}
+            </button>
+          </div>
+        )}
     </div>
   )
 }

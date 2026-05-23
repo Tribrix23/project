@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { CreditCard, Smartphone, Wallet, ChevronRight, Check, ShoppingBag, Tag, X, Truck, FileText, Calculator, MapPin, ShieldCheck, Package } from 'lucide-react'
 import { CiMoneyBill } from 'react-icons/ci'
 
@@ -20,44 +20,14 @@ type DeliveryAddress = {
 }
 
 const PaymentTab = () => {
-  const [cartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: 'Portland Cement',
-      category: 'Cement & Concrete',
-      price: 285,
-      quantity: 10,
-      unit: 'bags',
-      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200'
-    },
-    {
-      id: 2,
-      name: 'Steel Bar #4',
-      category: 'Steel Materials',
-      price: 450,
-      quantity: 20,
-      unit: 'pcs',
-      image: 'https://images.unsplash.com/photo-1504917594977-af2738926b08?w=200'
-    },
-    {
-      id: 3,
-      name: 'Gravel',
-      category: 'Aggregates',
-      price: 85,
-      quantity: 50,
-      unit: 'sacks',
-      image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=200'
-    },
-    {
-      id: 4,
-      name: 'Steel Wire #16',
-      category: 'Wire & Binding',
-      price: 120,
-      quantity: 5,
-      unit: 'rolls',
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200'
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+
+  useEffect(() => {
+    const storedItems = sessionStorage.getItem('checkoutItems')
+    if (storedItems) {
+      setCartItems(JSON.parse(storedItems))
     }
-  ])
+  }, [])
 
   const [deliveryAddress] = useState<DeliveryAddress>({
     name: 'Place Holder',
@@ -126,12 +96,18 @@ const PaymentTab = () => {
                   className={`flex items-center gap-3 px-4 py-2.5 ${index < cartItems.length - 1 ? 'border-b border-gray-50' : ''}`}
                 >
                   <div className='w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0'>
-                    <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className='w-full h-full object-cover' onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/48?text=No+Image'
+                      }} />
+                    ) : (
+                      <div className='w-full h-full flex items-center justify-center text-gray-400 text-[10px]'>No Image</div>
+                    )}
                   </div>
                   <div className='flex-1 min-w-0'>
                     <p className='text-[10px] text-orange-600 font-medium uppercase'>{item.category}</p>
                     <p className='text-sm font-medium text-gray-800 truncate'>{item.name}</p>
-                    <p className='text-xs text-gray-400'>₱{item.price} × {item.quantity} {item.unit}</p>
+                    <p className='text-xs text-gray-400'>₱{item.price} × {item.quantity}{item.unit ? ` ${item.unit}` : ''}</p>
                   </div>
                   <p className='text-sm font-bold text-gray-700'>
                     ₱{(item.price * item.quantity).toLocaleString()}
