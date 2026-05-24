@@ -1,24 +1,64 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { 
   ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown,
-  DollarSign, ShoppingBag, Package, Users, Eye, Heart,
-  MessageCircle, Star, Wallet, Calendar, ChevronRight,
-  MoreVertical, Bell, Download, Filter, Plus
+  ShoppingBag, Package, Wallet, ChevronRight,
+  Bell, Download, Filter
 } from 'lucide-react'
 
 type DashboardProps = {
   goBack?: () => void
 }
 
+type DashboardData = {
+  revenue: number
+  sold: number
+  orders: number
+  totalProducts: number
+  loading: boolean
+  error: string | null
+}
+
 const Dashboard = ({ goBack }: DashboardProps) => {
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    revenue: 0,
+    sold: 0,
+    orders: 0,
+    totalProducts: 0,
+    loading: true,
+    error: null
+  })
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await fetch('/api/dashboardSeller')
+        if (!res.ok) {
+          throw new Error('Failed to fetch dashboard data')
+        }
+        const data = await res.json()
+        setDashboardData({
+          revenue: data.revenue || 0,
+          sold: data.sold || 0,
+          orders: data.orders || 0,
+          totalProducts: data.totalProducts || 0,
+          loading: false,
+          error: null
+        })
+      } catch (err: any) {
+        console.error('Error fetching dashboard data:', err)
+        setDashboardData(prev => ({ ...prev, loading: false, error: err.message }))
+      }
+    }
+    fetchDashboardData()
+  }, [])
+
   const stats = [
-    { label: 'Total Products', value: '0', change: '+18.2%', trend: 'up', icon: Package, color: 'emerald' },
-    { label: 'Total Orders', value: '156', change: '+12.5%', trend: 'up', icon: ShoppingBag, color: 'orange' },
-    { label: 'Products Sold', value: '289', change: '+8.1%', trend: 'up', icon: Package, color: 'purple' },
-    { label: 'Store Visits', value: '4,521', change: '-2.3%', trend: 'down', icon: Eye, color: 'amber' },
+    { label: 'Total Products', value: dashboardData.totalProducts.toString(), change: '+5.2%', trend: 'up', icon: Package, color: 'emerald' },
+    { label: 'Total Orders', value: dashboardData.orders.toString(), change: '+2.5%', trend: 'up', icon: ShoppingBag, color: 'orange' },
+    { label: 'Products Sold', value: dashboardData.sold.toString(),  icon: Package, color: 'purple' },
   ]
 
   const topProducts = [
@@ -38,7 +78,6 @@ const Dashboard = ({ goBack }: DashboardProps) => {
       emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600', light: 'bg-emerald-50', gradient: 'bg-linear-to-br from-emerald-500 to-emerald-600', dark: 'text-emerald-700' },
       orange: { bg: 'bg-orange-100', text: 'text-orange-600', light: 'bg-orange-50', gradient: 'bg-linear-to-br from-orange-500 to-orange-600', dark: 'text-orange-700' },
       purple: { bg: 'bg-purple-100', text: 'text-purple-600', light: 'bg-purple-50', gradient: 'bg-linear-to-br from-purple-500 to-purple-600', dark: 'text-purple-700' },
-      amber: { bg: 'bg-amber-100', text: 'text-amber-600', light: 'bg-amber-50', gradient: 'bg-linear-to-br from-amber-500 to-amber-600', dark: 'text-amber-700' },
     }
     return colors[color] || colors.emerald
   }
@@ -52,94 +91,91 @@ const Dashboard = ({ goBack }: DashboardProps) => {
     return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
-   return (
-     <div className='w-full h-full flex flex-col relative overflow-hidden bg-gray-50'>
-       <div className='w-full shrink-0 bg-linear-to-br from-orange-600 via-orange-500 to-orange-600 z-20 relative'>
-         <div className='absolute inset-0 overflow-hidden'>
-           <div className='absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl'></div>
-           <div className='absolute -bottom-5 -left-10 w-24 h-24 bg-white/10 rounded-full blur-xl'></div>
-         </div>
-         <header className='w-full h-auto py-3 px-4 flex flex-row justify-between items-center relative z-10'>
-           <div className='flex items-center gap-3'>
-             <div className='flex flex-col'>
-               <h1 className='text-xl font-bold text-white tracking-wide'>Metrics</h1>
-               <div className='flex items-center gap-1'>
-                 <span className='text-[10px] text-orange-100 uppercase tracking-widest'>Performance Dashboard</span>
-               </div>
-             </div>
-           </div>
-           <div className='flex items-center gap-0.5'>
-             <button className='p-2.5 rounded-xl bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all'>
-               <Bell size={18} className='text-white' />
-             </button>
-             <button className='p-2.5 rounded-xl bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all'>
-               <Download size={18} className='text-white' />
-             </button>
-             <button className='p-2.5 rounded-xl bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all'>
-               <MoreVertical size={18} className='text-white' />
-             </button>
-           </div>
-         </header>
-       </div>
+  return (
+    <div className='w-full h-full flex flex-col relative overflow-hidden bg-gray-50'>
+      <div className='w-full shrink-0 bg-linear-to-br from-orange-600 via-orange-500 to-orange-600 z-20 relative'>
+        <div className='absolute inset-0 overflow-hidden'>
+          <div className='absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl'></div>
+          <div className='absolute -bottom-5 -left-10 w-24 h-24 bg-white/10 rounded-full blur-xl'></div>
+        </div>
+        <header className='w-full h-auto py-3 px-4 flex flex-row justify-between items-center relative z-10'>
+          <div className='flex items-center gap-3'>
+            <div className='flex flex-col'>
+              <h1 className='text-xl font-bold text-white tracking-wide'>Metrics</h1>
+              <div className='flex items-center gap-1'>
+                <span className='text-[10px] text-orange-100 uppercase tracking-widest'>Performance Dashboard</span>
+              </div>
+            </div>
+          </div>
+          <div className='flex items-center gap-0.5'>
+            <button className='p-2.5 rounded-xl bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all'>
+              <Bell size={18} className='text-white' />
+            </button>
+            <button className='p-2.5 rounded-xl bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all'>
+              <Download size={18} className='text-white' />
+            </button>
+          </div>
+        </header>
+      </div>
 
-       <div className='w-full bg-linear-to-br from-orange-600 via-orange-500 to-orange-600 relative overflow-hidden shrink-0'>
-         <div className='absolute inset-0 overflow-hidden'>
-           <div className='absolute top-10 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl'></div>
-           <div className='absolute bottom-10 right-1/4 w-24 h-24 bg-white/5 rounded-full blur-2xl'></div>
-         </div>
+      <div className='w-full bg-linear-to-br from-orange-600 via-orange-500 to-orange-600 relative overflow-hidden shrink-0'>
+        <div className='absolute inset-0 overflow-hidden'>
+          <div className='absolute top-10 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-3xl'></div>
+          <div className='absolute bottom-10 right-1/4 w-24 h-24 bg-white/5 rounded-full blur-2xl'></div>
+        </div>
 
-         <div className='w-full py-4 px-4 flex items-center justify-between relative z-10'>
-           <div className='flex items-center gap-4'>
-             <div className='w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center'>
-               <Wallet size={28} className='text-white' />
-             </div>
-             <div>
-               <p className='text-orange-100 text-xs'>Total Revenue</p>
-               <p className='text-3xl font-bold text-white'>₱45,230</p>
-               <div className='flex items-center gap-1 mt-1'>
-                 <TrendingUp size={14} className='text-green-300' />
-                 <span className='text-xs text-green-300 font-medium'>+18.2% from last month</span>
-               </div>
-             </div>
-           </div>
-           <button className='px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/20 text-white text-sm font-medium hover:bg-white/30 transition-all'>
-             <Filter size={16} className='inline mr-1' />
-             Filter
-           </button>
-         </div>
-       </div>
+        <div className='w-full py-4 px-4 flex items-center justify-between relative z-10'>
+          <div className='flex items-center gap-4'>
+            <div className='w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center'>
+              <Wallet size={28} className='text-white' />
+            </div>
+            <div>
+              <p className='text-orange-100 text-xs'>Total Revenue</p>
+              <p className='text-3xl font-bold text-white'>₱{dashboardData.revenue.toLocaleString()}</p>
+              <div className='flex items-center gap-1 mt-1'>
+                <TrendingUp size={14} className='text-green-300' />
+                <span className='text-xs text-green-300 font-medium'>+18.2% from last month</span>
+              </div>
+            </div>
+          </div>
+          <button className='px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/20 text-white text-sm font-medium hover:bg-white/30 transition-all'>
+            <Filter size={16} className='inline mr-1' />
+            Filter
+          </button>
+        </div>
+      </div>
 
       <div className='flex-1 overflow-scroll pb-20'>
         <div className='w-full px-4 pt-4'>
           <div className='grid grid-cols-2 gap-3'>
-             {stats.map((stat, index) => {
-               const colorStyles = getColorStyles(stat.color)
-               return (
-                 <div key={index} className='group relative bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer overflow-hidden'>
-                   <div className='relative z-10'>
-                     <div className={`w-12 h-12 ${colorStyles.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300`}>
-                       <stat.icon size={24} className={`${colorStyles.text} stroke-[2.5]`} />
-                     </div>
-                     <p className='text-xs font-medium text-gray-400 mb-1.5 tracking-wide uppercase'>{stat.label}</p>
-                     <p className='text-2xl font-bold text-gray-800 mb-2 leading-tight'>{stat.value}</p>
-                     <div className='flex items-center gap-1.5'>
-                       {stat.trend === 'up' ? (
-                         <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
-                           <TrendingUp size={12} className={colorStyles.text} />
-                         </div>
-                       ) : (
-                         <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
-                           <TrendingDown size={12} className={colorStyles.text} />
-                         </div>
-                       )}
-                       <span className={`text-xs font-semibold ${stat.trend === 'up' ? colorStyles.dark : 'text-red-600'}`}>
-                         {stat.change}
-                       </span>
-                     </div>
-                   </div>
-                 </div>
-               )
-             })}
+            {stats.map((stat, index) => {
+              const colorStyles = getColorStyles(stat.color)
+              return (
+                <div key={index} className='group relative bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer overflow-hidden'>
+                  <div className='relative z-10'>
+                    <div className={`w-12 h-12 ${colorStyles.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300`}>
+                      <stat.icon size={24} className={`${colorStyles.text} stroke-[2.5]`} />
+                    </div>
+                    <p className='text-xs font-medium text-gray-400 mb-1.5 tracking-wide uppercase'>{stat.label}</p>
+                    <p className='text-2xl font-bold text-gray-800 mb-2 leading-tight'>{stat.value}</p>
+                    <div className='flex items-center gap-1.5'>
+                      {stat.trend === 'up' ? (
+                        <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
+                          <TrendingUp size={12} className={colorStyles.text} />
+                        </div>
+                      ) : (
+                        <div className={`w-5 h-5 ${colorStyles.light} rounded-full flex items-center justify-center`}>
+                          <TrendingDown size={12} className={colorStyles.text} />
+                        </div>
+                      )}
+                      <span className={`text-xs font-semibold ${stat.trend === 'up' ? colorStyles.dark : 'text-red-600'}`}>
+                        {stat.change}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -163,7 +199,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             </div>
             <div className='h-32 bg-gray-50 rounded-xl flex items-end justify-between px-2 pb-2 gap-1'>
               {[40, 65, 45, 80, 55, 70, 90].map((height, i) => (
-                 <div key={i} className='flex-1 bg-orange-500 rounded-t-md relative group'>
+                <div key={i} className='flex-1 bg-orange-500 rounded-t-md relative group'>
                   <div className='absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity'>
                     ₱{(height * 100).toLocaleString()}
                   </div>
@@ -250,34 +286,6 @@ const Dashboard = ({ goBack }: DashboardProps) => {
             ))}
           </div>
         </div>
-
-        <div className='w-full px-4 mt-4 mb-4'>
-          <div className='grid grid-cols-3 gap-3'>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center'>
-              <div className='w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-2'>
-                <Star size={24} className='text-yellow-500' />
-              </div>
-              <p className='text-xl font-bold text-gray-800'>4.8</p>
-              <p className='text-xs text-gray-500'>Store Rating</p>
-            </div>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center'>
-              <div className='w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-2'>
-                <Heart size={24} className='text-pink-500' />
-              </div>
-              <p className='text-xl font-bold text-gray-800'>489</p>
-              <p className='text-xs text-gray-500'>Favorites</p>
-            </div>
-            <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center'>
-              <div className='w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-2'>
-                <Users size={24} className='text-green-600' />
-              </div>
-              <p className='text-xl font-bold text-gray-800'>128</p>
-              <p className='text-xs text-gray-500'>Customers</p>
-            </div>
-          </div>
-        </div>
-
-        
       </div>
     </div>
   )

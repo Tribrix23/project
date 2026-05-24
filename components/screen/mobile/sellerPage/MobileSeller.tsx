@@ -151,12 +151,11 @@ const MobileSeller = () => {
         <div className="w-[85%] h-full rounded-full bg-linear-to-b from-white/40 to-white/10 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden pointer-events-auto">
           <div className="absolute inset-0 bg-linear-to-t from-transparent via-white/20 to-white/40 opacity-40 flex flex-row items-center justify-evenly"/>
           <div
-            className="mx-1 absolute top-1/2 -translate-y-1/2 h-[80%] aspect-square rounded-full bg-white/60 backdrop-blur-md shadow-md transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-            style={{ left: `calc(${active * 25}% + 6px)` }}
+            className="hidden mx-1 absolute top-1/2 -translate-y-1/2 h-[80%] aspect-square rounded-full bg-white/60 backdrop-blur-md shadow-md transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            style={{ left: `calc(${active * 21}% + 10px)` }}
           />
-          <div className="w-full h-full flex items-center justify-evenly relative z-10">
+          <div className="w-full h-full flex items-center justify-evenly relative z-10 gap-7">
             <IconBadge icon={BarChart3} text='Metrics' textDesign={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'dashboard' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('dashboard')}/>
-            <IconBadge icon={MapPin} text='Track' textDesign={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'tracking' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('tracking')}/>
             <IconBadge icon={Store} text='Store' textDesign={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'home' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('home')}/>
             <IconBadge icon={UserIcon} text='Profile' textDesign={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} design={`${currentPage === 'profile' ? 'text-orange-500' : 'text-black'}`} oC={() => handleTabPress('profile')}/>
           </div>
