@@ -37,14 +37,7 @@ const PaymentTab = () => {
   const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
   const [couponError, setCouponError] = useState('')
-
-  useEffect(() => {
-    const storedItems = sessionStorage.getItem('checkoutItems')
-    if (storedItems) {
-      setCartItems(JSON.parse(storedItems))
-    }
-    fetchAddresses()
-  }, [])
+  const [buyer, setBuyer] = useState('')
 
   const fetchAddresses = async () => {
     try {
@@ -59,6 +52,27 @@ const PaymentTab = () => {
       console.error('Error fetching addresses:', err)
     }
   }
+
+  const fetchBuyerEmail = async () => {
+    try {
+      const res = await fetch('/api/userData')
+      const data = await res.json()
+      if (res.ok && data.profile?.email) {
+        setBuyer(data.profile.email)
+      }
+    } catch (err) {
+      console.error('Error fetching buyer email:', err)
+    }
+  }
+
+  useEffect(() => {
+    const storedItems = sessionStorage.getItem('checkoutItems')
+    if (storedItems) {
+      setCartItems(JSON.parse(storedItems))
+    }
+    fetchAddresses()
+    fetchBuyerEmail()
+  }, [])
 
   const handleBack = () => {
     router.back()
@@ -129,6 +143,7 @@ const PaymentTab = () => {
               }
             : null,
           total,
+          buyerEmail: buyer,
         }
         const res = await fetch('/api/setOrders', {
           method: 'POST',

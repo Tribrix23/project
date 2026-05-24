@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 
+async function sendEmailNotification(to: string, buyer: string, itemName: string, quantity: number) {
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: to,
+        subject: 'New Order Notification',
+        message: `${buyer} ordered ${itemName}, ${quantity}`
+      })
+    })
+  } catch (err) {
+    console.error('Email notification error:', err)
+  }
+}
+
 function generateTrackId(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   const segments = Array.from({ length: 3 }, () =>
@@ -12,7 +28,7 @@ function generateTrackId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { items, user_id, address, total } = body
+    const { items, user_id, address, total, buyerEmail } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Items are required' }, { status: 400 })
@@ -24,12 +40,22 @@ export async function POST(request: NextRequest) {
     const supabase = await supabaseServer()
 
     let userId = user_id
+    let buyer = buyerEmail
     if (!userId) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
       userId = user.id
+    }
+
+    if (!buyer && userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single()
+      buyer = profile?.email || ''
     }
 
     const trackId = generateTrackId()
@@ -72,6 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Decrement product counts in storeProducts and increment order counts in sellerStore
+    // Also send email notifications to sellers
     const productUpdates = items
       .filter(item => item.id)
       .map(async (item) => {
@@ -89,11 +116,25 @@ export async function POST(request: NextRequest) {
             .eq('id', item.id)
 
           const storeId = product.store_id
+
+          // Get the seller's email from sellerStore -> profiles
           const { data: store } = await supabase
             .from('sellerStore')
-            .select('orders')
+            .select('owner_id, orders')
             .eq('id', storeId)
             .single()
+
+          if (store?.owner_id && buyer) {
+            const { data: sellerProfile } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', store.owner_id)
+              .single()
+
+            if (sellerProfile?.email) {
+              await sendEmailNotification(sellerProfile.email, buyer, item.name, item.quantity)
+            }
+          }
 
           const newOrders = (store?.orders || 0) + item.quantity
           await supabase

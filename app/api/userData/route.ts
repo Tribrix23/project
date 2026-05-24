@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     // Fetch profile
     const { data: profile } = await Server
       .from("profiles")
-      .select("first_name, middle_name, last_name, sellerStatus")
+      .select("first_name, middle_name, last_name, sellerStatus, email")
       .eq("id", user.id)
       .single();
 
