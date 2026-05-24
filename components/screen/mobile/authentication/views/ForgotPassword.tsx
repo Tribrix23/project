@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Mail, Check } from 'lucide-react'
+import { supabase } from '@/lib/supabase/browser'
 
 type ForgotPasswordProps = {
   onGoBack?: () => void
@@ -11,6 +12,8 @@ const ForgotPassword = ({ onGoBack, onLogin }: ForgotPasswordProps) => {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [resetError, setResetError] = useState('')
   const emailRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -29,10 +32,22 @@ const ForgotPassword = ({ onGoBack, onLogin }: ForgotPasswordProps) => {
     return true
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validateEmail()) {
-      setIsSubmitted(true)
+      setIsLoading(true)
+      setResetError('')
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password'
+        })
+        if (error) throw error
+        setIsSubmitted(true)
+      } catch (err: any) {
+        setResetError(err.message || 'Failed to send reset link')
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -116,18 +131,25 @@ const ForgotPassword = ({ onGoBack, onLogin }: ForgotPasswordProps) => {
                     ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
                     : 'border-transparent focus:border-orange-500 focus:ring-4 focus:ring-orange-100 bg-gray-50'
                 }`}
+                disabled={isLoading}
               />
             </div>
             {emailError && (
               <p className='text-red-500 text-sm ml-1'>{emailError}</p>
             )}
+            {resetError && (
+              <p className='text-red-500 text-sm ml-1'>{resetError}</p>
+            )}
           </div>
 
           <button 
             type='submit'
-            className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98]'
+            disabled={isLoading}
+            className={`w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-[0.98] ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Send Reset Link
+            {isLoading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
       </div>

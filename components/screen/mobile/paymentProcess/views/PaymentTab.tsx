@@ -37,7 +37,7 @@ const PaymentTab = () => {
   const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
   const [couponError, setCouponError] = useState('')
-  const [buyer, setBuyer] = useState('')
+  const [buyerName, setBuyerName] = useState('')
 
   const fetchAddresses = async () => {
     try {
@@ -53,15 +53,17 @@ const PaymentTab = () => {
     }
   }
 
-  const fetchBuyerEmail = async () => {
+  const fetchBuyerName = async () => {
     try {
       const res = await fetch('/api/userData')
       const data = await res.json()
-      if (res.ok && data.profile?.email) {
-        setBuyer(data.profile.email)
+      if (res.ok && data.profile) {
+        const { first_name, middle_name, last_name } = data.profile
+        const fullName = [first_name, middle_name, last_name].filter(Boolean).join(' ')
+        setBuyerName(fullName)
       }
     } catch (err) {
-      console.error('Error fetching buyer email:', err)
+      console.error('Error fetching buyer name:', err)
     }
   }
 
@@ -71,7 +73,7 @@ const PaymentTab = () => {
       setCartItems(JSON.parse(storedItems))
     }
     fetchAddresses()
-    fetchBuyerEmail()
+    fetchBuyerName()
   }, [])
 
   const handleBack = () => {
@@ -142,9 +144,9 @@ const PaymentTab = () => {
                 zip: selectedAddress.zip,
               }
             : null,
-          total,
-          buyerEmail: buyer,
-        }
+total,
+           buyerName: buyerName,
+         }
         const res = await fetch('/api/setOrders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

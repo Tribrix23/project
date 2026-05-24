@@ -3,7 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server'
 
 async function sendEmailNotification(to: string, buyer: string, itemName: string, quantity: number) {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-email`, {
+    await fetch(`https://construco.devctr.com/api/send-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -28,7 +28,7 @@ function generateTrackId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { items, user_id, address, total, buyerEmail } = body
+    const { items, user_id, address, total, buyerName } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Items are required' }, { status: 400 })
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const supabase = await supabaseServer()
 
     let userId = user_id
-    let buyer = buyerEmail
+    let buyer = buyerName
     if (!userId) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -52,10 +52,11 @@ export async function POST(request: NextRequest) {
     if (!buyer && userId) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email')
+        .select('first_name, middle_name, last_name')
         .eq('id', userId)
         .single()
-      buyer = profile?.email || ''
+      const { first_name, middle_name, last_name } = profile || {}
+      buyer = [first_name, middle_name, last_name].filter(Boolean).join(' ')
     }
 
     const trackId = generateTrackId()
