@@ -124,6 +124,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     const message = body?.message
+    const rawName = body?.userName
+    // Sanitize name — strip HTML, limit length
+    const userName = typeof rawName === 'string'
+      ? rawName.replace(/[<>]/g, '').slice(0, 100)
+      : null
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -148,12 +153,17 @@ export async function POST(request: NextRequest) {
     // Scope gate: block out-of-scope queries before hitting the LLM
     if (isScopeViolation(message)) {
       return NextResponse.json({
-        reply: "I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!",
+        reply: `I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries.${userName ? ` Hey ${userName},` : ''} please ask me something within those topics!`,
       })
     }
 
-    const controller = new AbortController()
+    const personaBlock = userName
+      ? `\n- The user you are talking to is named **${userName}**. Always address them by their first name naturally and warmly, like a real messenger conversation.`
+      : ''
 
+    const dynamicSystemInstruction = `${SYSTEM_INSTRUCTION}\n## Personalization\n${userName ? `- You may address the user by their first name **${userName}** occasionally, in a warm and casual way, as if messaging a friend or customer service rep on a chat app. Do not overdo it — use their name naturally in your replies.` : '- Address the user casually and warmly as if messaging on a messenger app.'}\n- Keep the tone like a real chat — short, friendly sentences, briefly and directly answering the user's question.`
+
+    const controller = new AbortController()
     const timeout = setTimeout(() => {
       controller.abort()
     }, 20000)
@@ -188,7 +198,7 @@ export async function POST(request: NextRequest) {
           systemInstruction: {
             parts: [
               {
-                text: SYSTEM_INSTRUCTION,
+                text: dynamicSystemInstruction,
               },
             ],
           },

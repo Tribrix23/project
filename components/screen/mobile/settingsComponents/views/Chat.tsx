@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Send, Bot, User, ShoppingBag, Barcode, ShoppingCart, CircleDollarSign, Truck, RotateCcw } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import TypingText from '@/components/ui/TypingText'
@@ -22,7 +23,7 @@ const QUICK_REPLIES = [
 ]
 
 const Chat = () => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>(() => [
     {
       role: 'bot',
       content: 'Hi! I\'m Quant, your AI-powered construction support. How can I help you today? 👋',
@@ -33,20 +34,49 @@ const Chat = () => {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [showQuickReplies, setShowQuickReplies] = useState(true)
+  const [userName, setUserName] = useState<string | null>(null)
 
   const sendingRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Auto scroll
+  // Fetch user profile name on mount
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  // Auto focus
-  useEffect(() => {
-    inputRef.current?.focus()
+    let cancelled = false
+    const supabase = createClient()
+    ;(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (cancelled || !user) return
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single()
+        if (!cancelled && profile?.first_name) {
+          setUserName(profile.first_name)
+        }
+      } catch { /* ignore */ }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [])
+
+  // Prepend a personalised greeting once the name loads
+  useEffect(() => {
+    setMessages(prev => {
+      if (!userName) return prev
+      if (prev.length === 1 && prev[0].role === 'bot' && prev[0].content.includes('How can I help you')) {
+        return [{
+          role: 'bot',
+          content: `Hey ${userName}! I'm Quant, your AI construction support. How can I help you today? 👋`,
+          isTyping: true,
+        }]
+      }
+      return prev
+    })
+  }, [userName])
 
   const sendMessage = async (text?: string) => {
     const msg = text || input.trim()
@@ -76,7 +106,7 @@ const Chat = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: msg }),
+        body: JSON.stringify({ message: msg, userName }),
       })
 
       const data = await res.json()
@@ -243,7 +273,7 @@ const Chat = () => {
       )}
 
       {/* Input */}
-      <div className="border-t border-gray-100 bg-white px-3 pt-2 pb-5 shrink-0">
+      <div className="pb-20 border-t border-gray-100 bg-white px-3 pt-2 pb-5 shrink-0">
         <div className="flex items-center gap-2 bg-gray-100 rounded-2xl px-3 py-2">
           <input
             ref={inputRef}
