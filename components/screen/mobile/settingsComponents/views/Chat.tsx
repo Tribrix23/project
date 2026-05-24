@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Send, Bot, User } from 'lucide-react'
+import { ArrowLeft, Send, Bot, User, ShoppingBag, Barcode, ShoppingCart, CircleDollarSign, Truck, RotateCcw } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import TypingText from '@/components/ui/TypingText'
 
@@ -12,17 +12,27 @@ type Message = {
   isTyping?: boolean
 }
 
+const QUICK_REPLIES = [
+  { label: 'Products', icon: ShoppingBag, text: 'What products do you sell?' },
+  { label: 'How to order', icon: ShoppingCart, text: 'How do I place an order?' },
+  { label: 'Payment methods', icon: CircleDollarSign, text: 'What payment methods do you accept?' },
+  { label: 'Shipping', icon: Truck, text: 'How does delivery work?' },
+  { label: 'Return policy', icon: RotateCcw, text: 'What is the return policy?' },
+  { label: 'Tracking', icon: Barcode, text: 'How can I track my order?' },
+]
+
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      content: 'Hello! How can I help you today? 👋',
+      content: 'Hi! I\'m Quant, your AI-powered construction support. How can I help you today? 👋',
       isTyping: true,
     },
   ])
 
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [showQuickReplies, setShowQuickReplies] = useState(true)
 
   const sendingRef = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -38,16 +48,17 @@ const Chat = () => {
     inputRef.current?.focus()
   }, [])
 
-  const sendMessage = async () => {
-    const text = input.trim()
-    if (!text || sendingRef.current) return
+  const sendMessage = async (text?: string) => {
+    const msg = text || input.trim()
+    if (!msg || sendingRef.current) return
 
     sendingRef.current = true
     setSending(true)
+    setShowQuickReplies(false)
 
     const userMsg: Message = {
       role: 'user',
-      content: text,
+      content: msg,
     }
 
     const loadingMsg: Message = {
@@ -57,7 +68,7 @@ const Chat = () => {
     }
 
     setMessages(prev => [...prev, userMsg, loadingMsg])
-    setInput('')
+    if (!text) setInput('')
 
     try {
       const res = await fetch('/api/chat', {
@@ -65,7 +76,7 @@ const Chat = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: msg }),
       })
 
       const data = await res.json()
@@ -137,7 +148,7 @@ const Chat = () => {
 
           <div>
             <h1 className="text-sm font-bold text-gray-800">
-              AI Assistant
+              Quant
             </h1>
             <p className="text-[11px] text-green-500 font-medium">
               ● Online
@@ -206,6 +217,31 @@ const Chat = () => {
         <div ref={bottomRef} />
       </main>
 
+      {/* Quick Replies — pill bar, horizontally scrollable, above input */}
+      {showQuickReplies && (
+        <div className="shrink-0 px-4 py-2.5 bg-white border-t border-gray-100">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Suggested</p>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5 -mx-4 px-4">
+            {QUICK_REPLIES.map((q) => {
+              const Icon = q.icon
+              return (
+                <button
+                  key={q.label}
+                  onClick={() => sendMessage(q.text)}
+                  disabled={sending}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-50 border border-gray-200 rounded-full whitespace-nowrap hover:border-orange-300 hover:bg-orange-50 active:scale-95 transition-all text-left shrink-0 disabled:opacity-40"
+                >
+                  <Icon size={13} className="text-orange-500" />
+                  <span className="text-xs font-medium text-gray-600 leading-none">
+                    {q.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="border-t border-gray-100 bg-white px-3 pt-2 pb-5 shrink-0">
         <div className="flex items-center gap-2 bg-gray-100 rounded-2xl px-3 py-2">
@@ -215,13 +251,13 @@ const Chat = () => {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
+            placeholder="Ask Quant anything..."
             disabled={sending}
             className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder:text-gray-400"
           />
 
           <button
-            onClick={sendMessage}
+            onClick={() => sendMessage() }
             disabled={!input.trim() || sending}
             className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/20 transition active:scale-95 disabled:opacity-40 disabled:shadow-none"
           >

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin"
 
 export const runtime = 'edge'
-
-
 
 const MODEL = 'gemini-2.5-flash'
 
@@ -12,9 +11,103 @@ const GEMINI_URL =
 // Basic in-memory cooldown protection
 let lastRequestTime = 0
 
+function isScopeViolation(m: string): boolean {
+  const banned = [
+    /president/i,
+    /presidential/i,
+    /politics/i,
+    /trump/i,
+    /election/i,
+    /country\s+of\s+usa/i,
+    /usa\s+country/i,
+    /movie\s+review/i,
+    /recipe\s+for.*dinner/i,
+    /weather\s+forecast/i,
+    /\bUSA\b/,
+    /united\s+states/i,
+    /joke\s+about/i,
+    /tell\s+me\s+a\s+joke/i,
+    /what\s+is\s+usa/i,
+    /history\s+of\s+the\s+world/i,
+    /space\s+travel/i,
+    /how\s+to\s+make\s+a\b/i,
+    /my\s+favorite\s+color/i,
+    /\bchitchat\b/,
+  ]
+  return banned.some(p => p.test(m))
+}
+
+async function buildProductContext(): Promise<string> {
+  try {
+    const { data: products } = await Server
+      .from('storeProducts')
+      .select(`
+        name,
+        description,
+        category,
+        price,
+        unit,
+        sellerStore:store_id (
+          name
+        )
+      `)
+      .limit(50)
+
+    if (!products || products.length === 0) return ''
+
+    const lines: string[] = []
+    products.forEach((p: any) => {
+      lines.push(
+        `- ${p.name} | Category: ${p.category ?? 'Unknown'} | Price: ₱${Number(p.price).toFixed(2)} | Unit: ${p.unit ?? 'pc'} | Seller: ${p.sellerStore?.name ?? 'Unknown'}`
+      )
+    })
+    return `\n--- Available Products ---\n${lines.join('\n')}`
+  } catch {
+    return ''
+  }
+}
+
+// Build product context eagerly at module load (Edge runtime supports top-level await)
+let productContextEdges: string = ''
+try {
+  productContextEdges = await buildProductContext()
+} catch {
+  productContextEdges = ''
+}
+
+const SYSTEM_INSTRUCTION = `
+You are Quant — the official AI Customer Support chatbot for Constructo, a Philippines-based e-commerce platform for construction materials and industrial supplies.
+
+## Identity
+- Name: Quant
+- Role: AI-powered construction support
+- Platform: Constructo (www.construco.devctr.com)
+- Tone: Warm, helpful, professional, concise. Use clear formatting (bold, bullet points) to make answers easy to scan.
+
+## Core Responsibilities (STRICTLY within these topics only)
+1. **Products & inventory** — help buyers find construction materials by name, category, or use-case; compare items; suggest alternatives.
+2. **Orders & checkout** — explain how to place an order, manage cart, and complete checkout.
+3. **Payments** — describe all accepted payment methods, how payments work, and what to do if payment fails.
+4. **Delivery & shipping** — explain delivery timelines, logistics, PSGC-based address system, and how to track orders.
+5. **Returns & refunds** — explain the return and refund policy and the process for requesting a return.
+6. **Seller onboarding** — guide potential sellers through applying to become a seller, approval process, and dashboard basics.
+7. **Account & settings** — guide users through login, registration, address setup, and profile settings.
+8. **Platform navigation** — help users navigate the shop, browse categories, and find what they need.
+
+## Strict Constraints
+- ONLY answer questions directly related to the above responsibilities.
+- If a user asks about ANY topic outside the scope (politics, news, general world facts, entertainment, personal advice, weather, Wikipedia-style trivia, coding, USA or other countries, etc.), respond ONLY with:
+  "I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!"
+- Do NOT make up or hallucinate information about politics, countries, entertainment, or any topic unrelated to construction materials e-commerce.
+- Never disclose API keys, internal system details, or any sensitive data.
+
+## Product Catalog
+Use the product list below to answer product-specific questions. Cite the exact product name when available.
+${productContextEdges ? productContextEdges : 'Product list not currently available — inform the user politely if they ask about specific products.'}
+`.trim()
+
 export async function POST(request: NextRequest) {
   try {
-    // Simple anti-spam cooldown
     const now = Date.now()
 
     if (now - lastRequestTime < 1200) {
@@ -52,7 +145,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Timeout protection
+    // Scope gate: block out-of-scope queries before hitting the LLM
+    if (isScopeViolation(message)) {
+      return NextResponse.json({
+        reply: "I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!",
+      })
+    }
+
     const controller = new AbortController()
 
     const timeout = setTimeout(() => {
@@ -89,8 +188,7 @@ export async function POST(request: NextRequest) {
           systemInstruction: {
             parts: [
               {
-                text:
-                  'You are a helpful and friendly AI assistant.',
+                text: SYSTEM_INSTRUCTION,
               },
             ],
           },
@@ -99,7 +197,7 @@ export async function POST(request: NextRequest) {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 512,
+            maxOutputTokens: 1024,
           },
 
           safetySettings: [
@@ -141,7 +239,6 @@ export async function POST(request: NextRequest) {
       response.status
     )
 
-    // Handle API errors
     if (!response.ok) {
       console.error(
         '[Gemini Error]',
@@ -171,7 +268,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Extract reply safely
     const reply =
       data?.candidates?.[0]?.content?.parts
         ?.map(
@@ -179,10 +275,13 @@ export async function POST(request: NextRequest) {
             part?.text || ''
         )
         .join('') ||
-      'Sorry, I could not generate a response.'
+      'Sorry, I could not generate a response. Please try again.'
+
+    // Convert markdown bold "**text**" into <b>text</b> so the UI renders it
+    const cleaned = reply.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
 
     return NextResponse.json({
-      reply,
+      reply: cleaned,
     })
   } catch (error: any) {
     console.error(
