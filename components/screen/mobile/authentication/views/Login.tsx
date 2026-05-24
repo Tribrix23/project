@@ -23,6 +23,15 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
   const emailRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  }
+
   useEffect(() => {
     emailRef.current?.focus()
   }, [])
@@ -217,7 +226,9 @@ const Login = ({ onLogin, onGoBack, onForgotPassword, onRegister }: LoginProps) 
           <button className='flex-1 h-14 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-colors'>
             <FaFacebookF size={22} className='text-blue-600'/>
           </button>
-          <button className='flex-1 h-14 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-colors'>
+          <button 
+            onClick={signInWithGoogle}
+            className='flex-1 h-14 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-colors'>
             <FaGoogle size={22} className='text-red-500'/>
           </button>
         </div>
