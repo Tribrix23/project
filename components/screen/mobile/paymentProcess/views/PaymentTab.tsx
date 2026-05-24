@@ -139,12 +139,12 @@ const PaymentTab = () => {
           router.push('/payment?q=fd')
           return
         }
-        router.push('/payment?q=cnf')
+        router.push(`/payment?q=cnf&payment=${selectedPayment}`)
       } catch {
         router.push('/payment?q=fd')
       }
     } else {
-      router.push('/payment?q=cnf')
+      router.push(`/payment?q=cnf&payment=${selectedPayment}`)
     }
   }
 

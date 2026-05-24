@@ -1,7 +1,9 @@
 'use client'
-import React, { useState } from 'react'
-import { CheckCircle2, Home, ShoppingBag, ArrowRight, Share2, Download, Smartphone, CreditCard, Truck, Package } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { CheckCircle2, Home, ShoppingBag, Share2, Download, Smartphone, CreditCard, Truck, Package } from 'lucide-react'
 import { CiMoneyBill } from 'react-icons/ci'
+import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 type CartItem = {
   id: number
@@ -10,6 +12,7 @@ type CartItem = {
   price: number
   quantity: number
   image: string
+  unit?: string
 }
 
 type OrderDetails = {
@@ -19,50 +22,45 @@ type OrderDetails = {
   items: CartItem[]
   subtotal: number
   shipping: number
+  discount: number
   total: number
 }
 
 const ConfirmationTab = () => {
-  const [orderDetails] = useState<OrderDetails>({
-    orderId: 'ORD-2024-78432',
-    date: new Date().toLocaleDateString('en-PH', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }),
-    paymentMethod: 'gcash',
-    items: [
-      {
-        id: 1,
-        name: 'Portland Cement',
-        category: 'Cement & Concrete',
-        price: 285,
-        quantity: 10,
-        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200'
-      },
-      {
-        id: 2,
-        name: 'Steel Bar #4',
-        category: 'Steel Materials',
-        price: 450,
-        quantity: 20,
-        image: 'https://images.unsplash.com/photo-1504917594977-af2738926b08?w=200'
-      },
-      {
-        id: 3,
-        name: 'Gravel',
-        category: 'Aggregates',
-        price: 85,
-        quantity: 50,
-        image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=200'
-      }
-    ],
-    subtotal: 9250,
-    shipping: 350,
-    total: 9600
-  })
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
+
+  useEffect(() => {
+    const storedItems = sessionStorage.getItem('checkoutItems')
+    const paymentMethod = searchParams.get('payment') || 'cod'
+    
+    if (storedItems) {
+      const items: CartItem[] = JSON.parse(storedItems)
+      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
+      const shipping = totalQuantity > 0 ? Math.min(80 * totalQuantity, 150) : 0
+      const discount = 0
+      const total = subtotal + shipping - discount
+
+      setOrderDetails({
+        orderId: `ORD-${Date.now()}`,
+        date: new Date().toLocaleDateString('en-PH', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        paymentMethod,
+        items,
+        subtotal,
+        shipping,
+        discount,
+        total
+      })
+    }
+  }, [])
 
   const recommendations = [
     {
@@ -125,6 +123,18 @@ const ConfirmationTab = () => {
 
   const handleGoHome = () => {
     window.location.href = '/'
+  }
+
+  if (!orderDetails) {
+    return (
+      <div className='w-full h-full flex flex-col bg-[#F5F3EB]'>
+        <main className='flex-1 overflow-y-auto px-4 pb-6'>
+          <div className='py-8 text-center'>
+            <p className='text-gray-500'>Loading order details...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   const PaymentIcon = getPaymentIcon(orderDetails.paymentMethod)
