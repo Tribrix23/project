@@ -71,6 +71,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
+    // Decrement product counts in storeProducts (only after successful order creation)
+    const productUpdates = items
+      .filter(item => item.id)
+      .map(async (item) => {
+        const { data: product } = await supabase
+          .from('storeProducts')
+          .select('count')
+          .eq('id', item.id)
+          .single()
+        
+        if (product) {
+          const newCount = Math.max(0, (product.count || 0) - item.quantity)
+          await supabase
+            .from('storeProducts')
+            .update({ count: newCount })
+            .eq('id', item.id)
+        }
+      })
+    
+    await Promise.all(productUpdates)
+
+    // Delete cart items that were ordered (only after successful order creation)
+    const itemIds = items.map(item => item.id).filter(Boolean)
+    if (userId && itemIds.length > 0) {
+      await supabase
+        .from('cart')
+        .delete()
+        .eq('user_id', userId)
+        .in('item_id', itemIds)
+    }
+
     return NextResponse.json({ success: true, track_id: trackId }, { status: 201 })
   } catch (err: unknown) {
     console.error('setOrders error:', err)
