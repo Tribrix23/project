@@ -4,13 +4,14 @@ import { ArrowLeft, SearchIcon, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 type Product = {
   id: number
-  name: string
+  productName: string
   category: string
-  price: string
-  image?: string
+  price: number
+  image_url?: string
   rating?: number
   reviewCount?: number
   sold?: number,
@@ -21,29 +22,42 @@ type DisplayProductsProps = {
   setS?: () => void,
 }
 
-const mockProducts: Product[] = [
-  { id: 1, name: 'Professional Tool', category: 'Tools', price: '₱5,500', rating: 4.8, reviewCount: 124, sold: 2340 },
-  { id: 2, name: 'Power Drill', category: 'Tools', price: '₱3,200', rating: 4.5, reviewCount: 89, sold: 1560 },
-  { id: 3, name: 'Cement (50kg)', category: 'Materials', price: '₱280', rating: 4.2, reviewCount: 312, sold: 8930 },
-  { id: 4, name: 'Hammer', category: 'Tools', price: '₱450', rating: 4.7, reviewCount: 56, sold: 890 },
-  { id: 5, name: 'Safety Helmet', category: 'Safety', price: '₱350', rating: 4.9, reviewCount: 203, sold: 4520 },
-  { id: 6, name: 'Screwdriver Set', category: 'Tools', price: '₱800', rating: 4.3, reviewCount: 45, sold: 670 },
-  { id: 7, name: 'Wire Cutter', category: 'Tools', price: '₱520', rating: 4.6, reviewCount: 78, sold: 1230 },
-  { id: 8, name: 'Measuring Tape', category: 'Tools', price: '₱150', rating: 4.4, reviewCount: 167, sold: 3210 },
-]
-
 const DisplayProducts = ({ setS }: DisplayProductsProps) => {
   const [inputValue, setInputValue] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const searchParams = useSearchParams();
   const search = searchParams.get('q')
   const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     setInputValue(search ?? '')
     setSearchTerm(search ?? '')
   }, [search])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true)
+      try {
+        let query = supabase.from('storeProducts').select('*')
+        
+        if (searchTerm) {
+          query = query.ilike('productName', `%${searchTerm}%`)
+        }
+        
+        const { data } = await query
+        setProducts(data || [])
+      } catch (err) {
+        console.error('Error fetching products:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [searchTerm])
 
   const handleSearch = () => {
     setSearchTerm(inputValue)
@@ -58,11 +72,9 @@ const DisplayProducts = ({ setS }: DisplayProductsProps) => {
 
   const categories = ['All', 'Tools', 'Materials', 'Safety', 'Hardware', 'Electrical']
 
-  const filteredProducts = mockProducts.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
-    return matchesSearch && matchesCategory
+    return matchesCategory
   })
 
   return (
@@ -103,24 +115,28 @@ const DisplayProducts = ({ setS }: DisplayProductsProps) => {
         </div>
       </div>
 
-      <div className='flex-1 overflow-scroll pb-20 px-4'>
+<div className='flex-1 overflow-scroll pb-20 px-4'>
         <div className='grid grid-cols-2 gap-3'>
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+            <div className='col-span-2 flex flex-col items-center justify-center py-12'>
+              <p className='text-gray-500 text-sm'>Loading products...</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
 <ProductCard 
-                 key={product.id}
-                 category={product.category}
-                 name={product.name}
-                 price={product.price}
-                 image={product.image}
-                 rating={product.rating}
-                 reviewCount={product.reviewCount}
-                 sold={product.sold}
-                 count={product.count}
-                 showRating
-                 onC={setS}
-               />
-            ))
+                  key={product.id}
+                  category={product.category}
+                  name={product.productName}
+                  price={`₱${product.price?.toLocaleString() || '0'}`}
+                  image={product.image_url}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  sold={product.sold}
+                  count={product.count}
+                  showRating
+                  onC={setS}
+                />
+             ))
           ) : (
             <div className='col-span-2 flex flex-col items-center justify-center py-12'>
               <p className='text-gray-500 text-sm'>No products found</p>
