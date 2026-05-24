@@ -71,25 +71,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
 
-    // Decrement product counts in storeProducts (only after successful order creation)
+    // Decrement product counts in storeProducts and increment order counts in sellerStore
     const productUpdates = items
       .filter(item => item.id)
       .map(async (item) => {
         const { data: product } = await supabase
           .from('storeProducts')
-          .select('count')
+          .select('count, store_id')
           .eq('id', item.id)
           .single()
-        
-        if (product) {
+
+        if (product && product.store_id) {
           const newCount = Math.max(0, (product.count || 0) - item.quantity)
           await supabase
             .from('storeProducts')
             .update({ count: newCount })
             .eq('id', item.id)
+
+          const storeId = product.store_id
+          const { data: store } = await supabase
+            .from('sellerStore')
+            .select('orders')
+            .eq('id', storeId)
+            .single()
+
+          const newOrders = (store?.orders || 0) + item.quantity
+          await supabase
+            .from('sellerStore')
+            .update({ orders: newOrders })
+            .eq('id', storeId)
         }
       })
-    
+
     await Promise.all(productUpdates)
 
     // Delete cart items that were ordered (only after successful order creation)
