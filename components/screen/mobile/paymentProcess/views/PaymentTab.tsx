@@ -113,6 +113,36 @@ const PaymentTab = () => {
       } catch {
         router.push('/payment?q=fd')
       }
+    } else if (selectedPayment === 'cod') {
+      try {
+        const body: Record<string, unknown> = {
+          items: cartItems,
+          address: selectedAddress
+            ? {
+                name: selectedAddress.name,
+                phone: selectedAddress.phone,
+                lot: selectedAddress.lot,
+                street: selectedAddress.street,
+                barangay: selectedAddress.barangay,
+                city: selectedAddress.city,
+                zip: selectedAddress.zip,
+              }
+            : null,
+          total,
+        }
+        const res = await fetch('/api/setOrders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (!res.ok) {
+          router.push('/payment?q=fd')
+          return
+        }
+        router.push('/payment?q=cnf')
+      } catch {
+        router.push('/payment?q=fd')
+      }
     } else {
       router.push('/payment?q=cnf')
     }
