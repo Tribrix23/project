@@ -94,7 +94,7 @@ const Dashboard = ({ goBack }: DashboardProps) => {
         <div className="w-full px-4 pt-4">
           <div className="grid grid-cols-3 gap-2">
              {/* Total Users */}
-             <button onClick={() => router.push('/dash?page=users')} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
+             <button onClick={() => router.push('/dashboard?page=users')} className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-3 text-white shadow-lg text-left cursor-pointer hover:opacity-90 transition-opacity">
                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-2">
                  <Users size={16} className="text-white" />
                </div>

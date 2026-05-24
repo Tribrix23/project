@@ -131,7 +131,7 @@ const TotalUsers = () => {
            <p className="text-xs text-gray-500 font-medium">Sellers</p>
          </div>
          <div
-           onClick={() => router.push('/dash?page=users&f=pending')}
+           onClick={() => router.push('/dashboard?page=users&f=pending')}
            className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
          >
            <p className="text-xl font-bold text-yellow-600">{count?.pending}</p>

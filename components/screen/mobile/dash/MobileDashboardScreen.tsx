@@ -15,11 +15,11 @@ const MobileDashboardScreen = () => {
 
   const handleGoBack = () => {
     if (currentPage === 'users' && filter === 'pending') {
-      window.location.href = '/dash?page=users'
+      window.location.href = '/dashboard?page=users'
     } else if (currentPage === 'preview') {
-      window.location.href = '/dash?page=users&f=pending'
+      window.location.href = '/dashboard?page=users&f=pending'
     } else {
-      window.location.href = '/dash'
+      window.location.href = '/dashboard'
     }
   }
 
