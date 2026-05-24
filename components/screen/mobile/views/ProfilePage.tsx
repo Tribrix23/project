@@ -265,8 +265,6 @@ const ProfilePage = ({ isLoggedIn, user, onLogout, isLoading = false }: ProfileP
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Shopping</p>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={ShoppingBag} text='My Orders' borderDown={true} />
-            <OptionTabs icons={HeartIcon} text='Wishlist' borderDown={true} />
             <OptionTabs icons={Ticket} text='Coupons' borderDown={true} />
             <OptionTabs icons={Star} text='Reviews' borderDown={false} />
           </div>
@@ -276,7 +274,7 @@ const ProfilePage = ({ isLoggedIn, user, onLogout, isLoading = false }: ProfileP
         <div className='py-2 space-y-1'>
           <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Support</p>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={HelpCircle} text='Help Center' borderDown={true} />
+            <OptionTabs icons={HelpCircle} text='Help Center' borderDown={true} onClick={() => router.push("/settings?c=chat")}/>
             <OptionTabs icons={Shield} text='Privacy Policy' borderDown={true} />
             <OptionTabs icons={FileText} text='Terms & Conditions' borderDown={false} />
           </div>
