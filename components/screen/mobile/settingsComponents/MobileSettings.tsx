@@ -4,6 +4,7 @@ import SellerAplly from './views/SellerAplly'
 import Address from './views/Address'
 import { useSearchParams } from 'next/navigation'
 import ShowAddresses from './views/ShowAddresses'
+import Chat from './views/Chat'
 
 const MobileSettings = () => {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ const MobileSettings = () => {
       {settings === 'seller' && <SellerAplly />}
       {settings === 'addr' && <Address />}
       {settings === 'sddr' && <ShowAddresses/>}
+      {settings === 'chat' && <Chat/>}
     </div>
   )
 }
