@@ -1,10 +1,7 @@
 'use client'
 import React, { useState } from 'react'
-import Image from 'next/image'
 import { 
-  CheckCircle, Truck, Package, Clock, 
-  MapPin, Eye, RotateCcw, ChevronDown,
-  Search, X
+  MapPin, Eye, RotateCcw, ChevronDown
 } from 'lucide-react'
 
 export type OrderItem = {
@@ -31,13 +28,6 @@ export type OrderCardProps = {
   onReorder?: () => void
 }
 
-const statusConfig: Record<string, { bg: string; text: string; icon: any }> = {
-  Processing: { bg: 'bg-orange-100', text: 'text-orange-700', icon: Package },
-  Shipped: { bg: 'bg-blue-100', text: 'text-blue-700', icon: Truck },
-  Delivered: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle },
-  Cancelled: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock },
-}
-
 const OrderCard: React.FC<OrderCardProps> = ({
   id,
   date,
@@ -54,9 +44,38 @@ const OrderCard: React.FC<OrderCardProps> = ({
   onReorder,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const config = statusConfig[status] || statusConfig.Processing
-  const StatusIcon = config.icon
-  const showProgress = (status === 'Processing' || status === 'Shipped') && progress > 0
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
+  
+  const getProgress = () => {
+    if (status === 'Processing') return progress || 25
+    if (status === 'Shipped') return progress || 75
+    if (status === 'Delivered') return 100
+    return 0
+  }
+
+  const handleImgError = (key: string) => {
+    setImgErrors(prev => ({ ...prev, [key]: true }))
+  }
+
+  const OrderImage = ({ src, alt, imgKey }: { src: string; alt: string; imgKey: string }) => {
+    const hasError = imgErrors[imgKey]
+    return (
+      <div className='w-full h-full bg-gray-200 rounded-md overflow-hidden'>
+        {!src || hasError ? (
+          <div className='w-full h-full flex items-center justify-center text-gray-400 text-[10px]'>
+            No Image
+          </div>
+        ) : (
+          <img 
+            src={src} 
+            alt={alt} 
+            className='w-full h-full object-cover'
+            onError={() => handleImgError(imgKey)}
+          />
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
@@ -66,32 +85,30 @@ const OrderCard: React.FC<OrderCardProps> = ({
             <p className='text-xs text-gray-500'>{date}</p>
             <p className='text-sm font-bold text-gray-800'>{id}</p>
           </div>
-          <span className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${config.bg} ${config.text}`}>
-            <StatusIcon size={12} />
-            {status}
-          </span>
         </div>
         
-        {showProgress && (
-          <div className='mb-4 p-3 bg-gray-50 rounded-xl'>
-            <div className='flex justify-between text-xs text-gray-600 mb-2'>
-              <span className='font-medium'>Order Progress</span>
-              <span className='font-bold'>{progress}%</span>
-            </div>
-            <div className='h-2 bg-gray-200 rounded-full overflow-hidden'>
-              <div 
-                className={`h-full rounded-full transition-all duration-700 ${status === 'Shipped' ? 'bg-blue-500' : 'bg-orange-500'}`}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className='flex justify-between text-[10px] text-gray-400 mt-2'>
-              <span className={progress >= 10 ? 'text-orange-500' : ''}>Placed</span>
-              <span className={progress >= 40 ? 'text-orange-500' : ''}>Processing</span>
-              <span className={progress >= 70 ? 'text-blue-500' : ''}>Shipped</span>
-              <span className={progress >= 100 ? 'text-green-500' : ''}>Delivered</span>
-            </div>
+        <div className='mb-4 p-3 bg-gray-50 rounded-xl'>
+          <div className='flex justify-between text-xs text-gray-600 mb-2'>
+            <span className='font-medium'>Order Progress</span>
+            <span className='font-bold'>{getProgress()}%</span>
           </div>
-        )}
+          <div className='h-2 bg-gray-200 rounded-full overflow-hidden'>
+            <div 
+              className={`h-full rounded-full transition-all duration-700 ${
+                status === 'Shipped' ? 'bg-blue-500' : 
+                status === 'Delivered' ? 'bg-green-500' : 
+                'bg-orange-500'
+              }`}
+              style={{ width: `${getProgress()}%` }}
+            />
+          </div>
+          <div className='flex justify-between text-[10px] text-gray-400 mt-2'>
+            <span className={getProgress() >= 10 ? 'text-orange-500' : ''}>Placed</span>
+            <span className={getProgress() >= 40 ? 'text-orange-500' : ''}>Processing</span>
+            <span className={getProgress() >= 70 ? 'text-blue-500' : ''}>Shipped</span>
+            <span className={getProgress() >= 100 ? 'text-green-500' : ''}>Delivered</span>
+          </div>
+        </div>
 
         {status === 'Shipped' && trackingNumber && (
           <div className='mb-3 px-3 py-2 bg-blue-50 rounded-lg flex items-center justify-between'>
@@ -111,7 +128,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         <div className='flex gap-2 mb-3'>
           {items.slice(0, 3).map((item, idx) => (
             <div key={idx} className='relative w-14 h-14 bg-gray-100 rounded-lg overflow-hidden group'>
-              <Image src={item.image} width={56} height={56} alt={item.name} className='w-full h-full object-cover' />
+              <OrderImage src={item.image} alt={item.name} imgKey={`thumb-${idx}`} />
               <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
                 <p className='text-[10px] text-white font-medium text-center px-1'>{item.name.split(' ').slice(0,2).join(' ')}</p>
               </div>
@@ -152,18 +169,21 @@ const OrderCard: React.FC<OrderCardProps> = ({
               <p className='text-sm text-gray-700'>{shippingAddress}</p>
             </div>
             
-            <div className='grid grid-cols-2 gap-2'>
-              {items.map((item, idx) => (
-                <div key={idx} className='p-2 bg-gray-50 rounded-lg flex items-center gap-2'>
-                  <div className='w-10 h-10 bg-gray-200 rounded-md overflow-hidden'>
-                    <Image src={item.image} width={40} height={40} alt={item.name} className='w-full h-full object-cover' />
+            <div>
+              <p className='text-xs font-medium text-gray-500 mb-2'>Order Items</p>
+              <div className='grid grid-cols-2 gap-2'>
+                {items.map((item, idx) => (
+                  <div key={idx} className='p-2 bg-gray-50 rounded-lg flex items-center gap-2'>
+                    <div className='w-10 h-10'>
+                      <OrderImage src={item.image} alt={item.name} imgKey={`detail-${idx}`} />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-xs text-gray-500 truncate'>{item.name}</p>
+                      <p className='text-sm font-bold text-gray-800'>₱{item.price.toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className='flex-1 min-w-0'>
-                    <p className='text-xs text-gray-500 truncate'>{item.name}</p>
-                    <p className='text-sm font-bold text-gray-800'>₱{item.price.toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}

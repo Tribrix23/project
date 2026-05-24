@@ -3,7 +3,7 @@ import IconBadge from '@/components/ui/IconBadge'
 import OrderCard, { OrderItem } from '@/components/ui/OrderCard'
 import ReturnCard from '@/components/ui/ReturnCard'
 import { BellIcon, Package, Clock, Search, X, RotateCcw, LogIn } from 'lucide-react'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 type Order = {
   id: string
@@ -46,9 +46,49 @@ const OrdersPage = ({ isLoggedIn, user }: OrdersPageProps) => {
     const [isOrder, setIsOrder] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [activeFilter, setActiveFilter] = useState('All')
+    const [orders, setOrders] = useState<Order[]>([])
+    const [returns, setReturns] = useState<Return[]>([])
+    const [loading, setLoading] = useState(true)
     
-    const orders: Order[] = []
-    const returns: Return[] = []
+    useEffect(() => {
+      const fetchOrders = async () => {
+        if (!isLoggedIn) {
+          setLoading(false)
+          return
+        }
+        
+        try {
+          const res = await fetch('/api/orders')
+          if (res.ok) {
+            const data = await res.json()
+            const mappedOrders: Order[] = data.orders.map((o: any) => ({
+              id: o.track_id || o.id,
+              date: new Date(o.created_at || o.date).toLocaleDateString('en-PH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              status: o.status === 'Order Placed' ? 'Processing' : 
+                      o.status === 'Shipped' ? 'Shipped' : 
+                      o.status === 'Delivered' ? 'Delivered' : 'Cancelled',
+              total: o.total || 0,
+              items: o.items || [],
+              shippingAddress: o.shipping_address ? 
+                `${o.shipping_address.lot || ''} ${o.shipping_address.street || ''}, ${o.shipping_address.barangay}, ${o.shipping_address.city}`.trim() : '',
+              paymentMethod: o.payment || 'COD',
+              trackingNumber: o.track_id,
+            }))
+            setOrders(mappedOrders)
+          }
+        } catch (err) {
+          console.error('Error fetching orders:', err)
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      fetchOrders()
+    }, [isLoggedIn])
     
     const filteredOrders = orders.filter(o => {
       const matchesSearch = o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -121,6 +161,13 @@ const OrdersPage = ({ isLoggedIn, user }: OrdersPageProps) => {
             </div>
             <p className='text-gray-500 font-medium text-base'>Login to view your orders</p>
             <p className='text-gray-400 text-sm mt-1'>Please login first to order something</p>
+          </div>
+        ) : loading ? (
+          <div className='flex flex-col items-center justify-center py-16 text-center'>
+            <div className='w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
+              <Clock size={40} className='text-gray-300 animate-spin' />
+            </div>
+            <p className='text-gray-500 font-medium text-base'>Loading orders...</p>
           </div>
         ) : isOrder ? (
           <div className='space-y-3 pt-3'>
