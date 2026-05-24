@@ -3,10 +3,15 @@ import { supabaseServerAdmin as Server } from "@/lib/supabase/serverAdmin"
 
 export const runtime = 'edge'
 
-const MODEL = 'gemini-2.5-flash'
+const MODELS = [
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-flash-lite',
+  'gemini-3.1-flash-preview',
+  'gemini-3.1-flash',
+]
 
-const GEMINI_URL =
-  `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
+const GEMINI_BASE_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models'
 
 // Basic in-memory cooldown protection
 let lastRequestTime = 0
@@ -81,10 +86,12 @@ You are Quant — the official AI Customer Support chatbot for Constructo, a Phi
 ## Identity
 - Name: Quant
 - Role: AI-powered construction support
-- Platform: Constructo (www.construco.devctr.com)
+- Platform: Constructo (construco.devctr.com)
 - Tone: Warm, helpful, professional, concise. Use clear formatting (bold, bullet points) to make answers easy to scan.
 
+
 ## Core Responsibilities (STRICTLY within these topics only)
+0. **Greetings** — Can answer greetings and question like the user asking who he is or who are the group that created this which is John David L. Perez who is the Software Engineer (Developer) , Angelou Madamba which is the System Analyst, Trisha Mae Feliciano Which is the Documentation, Justine Factolerin whic is the UX/UI Designer , Raphael Salcedo which is the QA tester .
 1. **Products & inventory** — help buyers find construction materials by name, category, or use-case; compare items; suggest alternatives.
 2. **Orders & checkout** — explain how to place an order, manage cart, and complete checkout.
 3. **Payments** — describe all accepted payment methods, how payments work, and what to do if payment fails.
@@ -99,7 +106,7 @@ You are Quant — the official AI Customer Support chatbot for Constructo, a Phi
 - If a user asks about ANY topic outside the scope (politics, news, general world facts, entertainment, personal advice, weather, Wikipedia-style trivia, coding, USA or other countries, etc.), respond ONLY with:
   "I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!"
 - Do NOT make up or hallucinate information about politics, countries, entertainment, or any topic unrelated to construction materials e-commerce.
-- Never disclose API keys, internal system details, or any sensitive data.
+- Never disclose API keys, internal system details, or any sensitive data or try attack something.
 
 ## Product Catalog
 Use the product list below to answer product-specific questions. Cite the exact product name when available.
@@ -173,94 +180,120 @@ export async function POST(request: NextRequest) {
       new Date().toISOString()
     )
 
-    const response = await fetch(
-      `${GEMINI_URL}?key=${apiKey}`,
-      {
-        method: 'POST',
-        signal: controller.signal,
+    async function callGemini(model: string) {
+      return fetch(
+        `${GEMINI_BASE_URL}/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          signal: controller.signal,
 
-        headers: {
-          'Content-Type': 'application/json',
-        },
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  {
+                    text: message,
+                  },
+                ],
+              },
+            ],
+
+            systemInstruction: {
               parts: [
                 {
-                  text: message,
+                  text: dynamicSystemInstruction,
                 },
               ],
             },
-          ],
 
-          systemInstruction: {
-            parts: [
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
+            },
+
+            safetySettings: [
               {
-                text: dynamicSystemInstruction,
+                category:
+                  'HARM_CATEGORY_HARASSMENT',
+                threshold:
+                  'BLOCK_MEDIUM_AND_ABOVE',
+              },
+              {
+                category:
+                  'HARM_CATEGORY_HATE_SPEECH',
+                threshold:
+                  'BLOCK_MEDIUM_AND_ABOVE',
+              },
+              {
+                category:
+                  'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold:
+                  'BLOCK_MEDIUM_AND_ABOVE',
+              },
+              {
+                category:
+                  'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold:
+                  'BLOCK_MEDIUM_AND_ABOVE',
               },
             ],
-          },
+          }),
+        }
+      )
+    }
 
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          },
+    // Try each model in order until one succeeds
+    let response: Response | null = null
+    let data: any = null
+    let lastError: string | null = null
+    let triedModels: string[] = []
 
-          safetySettings: [
-            {
-              category:
-                'HARM_CATEGORY_HARASSMENT',
-              threshold:
-                'BLOCK_MEDIUM_AND_ABOVE',
-            },
-            {
-              category:
-                'HARM_CATEGORY_HATE_SPEECH',
-              threshold:
-                'BLOCK_MEDIUM_AND_ABOVE',
-            },
-            {
-              category:
-                'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-              threshold:
-                'BLOCK_MEDIUM_AND_ABOVE',
-            },
-            {
-              category:
-                'HARM_CATEGORY_DANGEROUS_CONTENT',
-              threshold:
-                'BLOCK_MEDIUM_AND_ABOVE',
-            },
-          ],
-        }),
+    for (const model of MODELS) {
+      triedModels.push(model)
+      console.log(
+        `[Gemini Attempt] model=${model}`
+      )
+
+      response = await callGemini(model)
+      data = await response.json()
+
+      console.log(
+        '[Gemini Response]',
+        `model=${model}`,
+        `status=${response.status}`
+      )
+
+      if (response.ok) {
+        break
       }
-    )
+
+      lastError =
+        data?.error?.message ||
+        `Model ${model} returned status ${response.status}`
+
+      console.error(
+        `[Gemini Error] model=${model} status=${response.status}`,
+        JSON.stringify(data, null, 2)
+      )
+    }
 
     clearTimeout(timeout)
 
-    const data = await response.json()
-
-    console.log(
-      '[Gemini Response]',
-      response.status
-    )
-
-    if (!response.ok) {
-      console.error(
-        '[Gemini Error]',
-        JSON.stringify(data, null, 2)
-      )
-
+    if (!response || !response.ok) {
       const errorMessage =
         data?.error?.message ||
+        lastError ||
         'Failed to generate response.'
 
       const isQuotaExceeded =
-        response.status === 429 ||
+        (response?.status === 429) ||
         /quota/i.test(errorMessage) ||
         /rate.?limit/i.test(errorMessage)
 
@@ -273,7 +306,7 @@ export async function POST(request: NextRequest) {
           isQuotaExceeded,
         },
         {
-          status: response.status,
+          status: response?.status || 500,
         }
       )
     }
