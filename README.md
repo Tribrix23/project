@@ -1,4 +1,4 @@
-# Constructo
+# construco
 
 [![Next.js 16](https://img.shields.io/badge/Next.js_16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
@@ -14,7 +14,7 @@
 
 ## Overview
 
-Constructo is a mobile-first e-commerce platform tailored for the Philippine market. It connects local sellers and buyers through a streamlined, real-time experience with strong emphasis on accessibility, performance, and regional accuracy.
+construco is a mobile-first e-commerce platform tailored for the Philippine market. It connects local sellers and buyers through a streamlined, real-time experience with strong emphasis on accessibility, performance, and regional accuracy.
 
 A key highlight is its integration with PSGC (Philippine Standard Geographic Code), enabling precise address handling and improving delivery workflows.
 

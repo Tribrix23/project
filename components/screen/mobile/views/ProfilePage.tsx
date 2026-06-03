@@ -1,9 +1,9 @@
 'use client'
 import OptionTabs from '@/components/ui/OptionTabs'
 import Image from 'next/image'
-import { 
-  Coins, LogOutIcon, MapPin, MessageSquareTextIcon, SettingsIcon, 
-  StoreIcon, Ticket, User, Wallet, BellIcon, HeartIcon, HelpCircle, 
+import {
+  Coins, LogOutIcon, MapPin, MessageSquareTextIcon, SettingsIcon,
+  StoreIcon, Ticket, User, Wallet, BellIcon, HeartIcon, HelpCircle,
   Shield, Star, Camera, ShoppingBag, FileText, LogIn, Clock, Store,
   CircleAlert
 } from 'lucide-react'
@@ -12,12 +12,12 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/browser'
 
 type UserData = {
-   name: string
-   email: string
-   memberSince: string
-   level: string
-   sellerStatus?: 'APPROVED' | 'PENDING' | 'REJECTED' | null
-   sellerStore?: { status: 'APPROVED' | 'PENDING' | 'REJECTED' } | null
+  name: string
+  email: string
+  memberSince: string
+  level: string
+  sellerStatus?: 'APPROVED' | 'PENDING' | 'REJECTED' | null
+  sellerStore?: { status: 'APPROVED' | 'PENDING' | 'REJECTED' } | null
 }
 
 type ProfilePageProps = {
@@ -28,124 +28,124 @@ type ProfilePageProps = {
 }
 
 const ProfilePage = ({ isLoggedIn, user, onLogout, isLoading = false }: ProfilePageProps) => {
-    const router = useRouter()
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
-    const [avatarLoading, setAvatarLoading] = React.useState(false);
-    const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const router = useRouter()
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+  const [avatarLoading, setAvatarLoading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
 
-    React.useEffect(() => {
-        const fetchAvatar = async () => {
-            if (!isLoggedIn) {
-                setAvatarUrl(null);
-                return;
-            }
-            setAvatarLoading(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            const token = session?.access_token;
-            const userId = session?.user?.id;
-            
-            if (!userId) {
-                setAvatarLoading(false);
-                return;
-            }
-            
-            try {
-                const res = await fetch(`/api/avatar?userId=${userId}`, {
-                    headers: token ? { "Authorization": `Bearer ${token}` } : {},
-                });
-                if (res.ok) {
-                    const blob = await res.blob();
-                    setAvatarUrl(URL.createObjectURL(blob));
-                } else {
-                    setAvatarUrl(null);
-                }
-            } catch (e) {
-                console.error("Failed to load avatar", e);
-                setAvatarUrl(null);
-            } finally {
-                setAvatarLoading(false);
-            }
-        };
-        fetchAvatar();
-    }, [isLoggedIn, supabase]);
-
-    const getFirstLetter = () => {
-        const name = user?.name || "";
-        return name.split(" ")[0]?.[0]?.toUpperCase() || "?";
-    };
-
-    const SkeletonProfileCard = () => (
-        <div className='py-4'>
-            <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-                <div className='flex items-center gap-4'>
-                    <div className='relative w-20 h-20 rounded-full bg-gray-200 animate-pulse'></div>
-                    <div className='flex-1'>
-                        <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-2 w-3/4'></div>
-                        <div className='h-4 bg-gray-200 rounded-md animate-pulse mb-2 w-1/2'></div>
-                        <div className='flex items-center gap-2 mt-2'>
-                            <div className='h-4 bg-gray-200 rounded-full animate-pulse w-20'></div>
-                            <div className='h-4 bg-gray-200 rounded-md animate-pulse w-16'></div>
-                        </div>
-                    </div>
-                </div>
-                <div className='mt-5 pt-4 border-t border-gray-100 flex gap-4'>
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
-                            <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-1 w-8 mx-auto'></div>
-                            <div className='h-3 bg-gray-200 rounded-md animate-pulse w-12 mx-auto'></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-
-    const SkeletonTabs = () => (
-        <div className='py-2 space-y-1'>
-            <div className='h-3 bg-gray-200 rounded-md animate-pulse mb-2 w-20 px-2'></div>
-            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-                {[1, 2, 3].map(i => (
-                    <div key={i} className='flex items-center gap-3 px-4 py-3'>
-                        <div className='w-9 h-9 bg-gray-200 rounded-full animate-pulse'></div>
-                        <div className='h-4 bg-gray-200 rounded-md animate-pulse flex-1'></div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
-    const handleUpload = async (file: File) => {
+  React.useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!isLoggedIn) {
+        setAvatarUrl(null);
+        return;
+      }
+      setAvatarLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
+      const userId = session?.user?.id;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      if (!userId) {
+        setAvatarLoading(false);
+        return;
+      }
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: token ? { "Authorization": `Bearer ${token}` } : {},
-        body: formData,
-      });
-
-      const data = await res.json();
-      console.log("uploaded:", data);
-
-      if (!res.ok) {
-        setUploadError(data.error || "Upload failed");
-        setTimeout(() => setUploadError(null), 5000);
-      } else {
-        const blob = URL.createObjectURL(file);
-        setAvatarUrl(blob);
+      try {
+        const res = await fetch(`/api/avatar?userId=${userId}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+          const blob = await res.blob();
+          setAvatarUrl(URL.createObjectURL(blob));
+        } else {
+          setAvatarUrl(null);
+        }
+      } catch (e) {
+        console.error("Failed to load avatar", e);
+        setAvatarUrl(null);
+      } finally {
+        setAvatarLoading(false);
       }
     };
+    fetchAvatar();
+  }, [isLoggedIn, supabase]);
 
+  const getFirstLetter = () => {
+    const name = user?.name || "";
+    return name.split(" ")[0]?.[0]?.toUpperCase() || "?";
+  };
 
-    const handleLogout = async () => {
-      await supabase.auth.signOut()
-      onLogout?.()
-      router.push('/')
+  const SkeletonProfileCard = () => (
+    <div className='py-4'>
+      <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+        <div className='flex items-center gap-4'>
+          <div className='relative w-20 h-20 rounded-full bg-gray-200 animate-pulse'></div>
+          <div className='flex-1'>
+            <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-2 w-3/4'></div>
+            <div className='h-4 bg-gray-200 rounded-md animate-pulse mb-2 w-1/2'></div>
+            <div className='flex items-center gap-2 mt-2'>
+              <div className='h-4 bg-gray-200 rounded-full animate-pulse w-20'></div>
+              <div className='h-4 bg-gray-200 rounded-md animate-pulse w-16'></div>
+            </div>
+          </div>
+        </div>
+        <div className='mt-5 pt-4 border-t border-gray-100 flex gap-4'>
+          {[1, 2, 3].map(i => (
+            <div key={i} className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
+              <div className='h-5 bg-gray-200 rounded-md animate-pulse mb-1 w-8 mx-auto'></div>
+              <div className='h-3 bg-gray-200 rounded-md animate-pulse w-12 mx-auto'></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const SkeletonTabs = () => (
+    <div className='py-2 space-y-1'>
+      <div className='h-3 bg-gray-200 rounded-md animate-pulse mb-2 w-20 px-2'></div>
+      <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+        {[1, 2, 3].map(i => (
+          <div key={i} className='flex items-center gap-3 px-4 py-3'>
+            <div className='w-9 h-9 bg-gray-200 rounded-full animate-pulse'></div>
+            <div className='h-4 bg-gray-200 rounded-md animate-pulse flex-1'></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const handleUpload = async (file: File) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    const data = await res.json();
+    console.log("uploaded:", data);
+
+    if (!res.ok) {
+      setUploadError(data.error || "Upload failed");
+      setTimeout(() => setUploadError(null), 5000);
+    } else {
+      const blob = URL.createObjectURL(file);
+      setAvatarUrl(blob);
     }
+  };
+
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    onLogout?.()
+    router.push('/')
+  }
 
   return (
     <div className='w-full h-full flex flex-col bg-gray-50'>
@@ -181,133 +181,133 @@ const ProfilePage = ({ isLoggedIn, user, onLogout, isLoading = false }: ProfileP
           </>
         ) : (
           <>
-        {uploadError && (
-          <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded-xl'>
-            <p className='text-sm text-red-600 text-center'>{uploadError}</p>
-          </div>
-        )}
-        <div className='py-4'>
-          <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-            <div className='flex items-center gap-4'>
-              <div className='relative'>
-                <div className='relative w-20 h-20 rounded-full overflow-hidden'>
-                  {avatarUrl ? (
-                      <Image
+            {uploadError && (
+              <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded-xl'>
+                <p className='text-sm text-red-600 text-center'>{uploadError}</p>
+              </div>
+            )}
+            <div className='py-4'>
+              <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+                <div className='flex items-center gap-4'>
+                  <div className='relative'>
+                    <div className='relative w-20 h-20 rounded-full overflow-hidden'>
+                      {avatarUrl ? (
+                        <Image
                           src={avatarUrl}
                           alt="avatar"
                           fill
                           className="object-cover"
-                      />
-                  ) : (
-                      <div className='w-full h-full rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center'>
+                        />
+                      ) : (
+                        <div className='w-full h-full rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center'>
                           <span className='text-white text-3xl font-bold'>
-                              {getFirstLetter()}
+                            {getFirstLetter()}
                           </span>
-                      </div>
+                        </div>
+                      )}
+                    </div>
+                    {isLoggedIn && (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className='absolute bottom-0 right-0 w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center border-2 border-white'
+                      >
+                        <Camera size={12} className='text-white' />
+                      </button>
+                    )}
+                  </div>
+                  <div className='flex-1'>
+                    <h2 className='text-lg font-bold text-gray-800'>{user.name}</h2>
+                    <p className='text-sm text-gray-500'>{user.email}</p>
+                    <div className='flex items-center gap-2 mt-2'>
+                      <span className='px-2 py-0.5 bg-orange-100 text-orange-600 text-xs font-medium rounded-full'>
+                        {user.level} Member
+                      </span>
+                      <span className='text-xs text-gray-400'>Since {user.memberSince}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='mt-5 pt-4 border-t border-gray-100 flex gap-4'>
+                  <div className='flex-1 bg-orange-50 rounded-xl p-3 text-center'>
+                    <div className='flex items-center justify-center gap-1 mb-1'>
+                      <Coins className='text-yellow-500' size={18} />
+                      <span className='text-xl font-bold text-gray-800'>0</span>
+                    </div>
+                    <p className='text-xs text-gray-500'>Coins</p>
+                  </div>
+                  <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
+                    <HeartIcon className='text-red-400 mx-auto mb-1' size={18} />
+                    <span className='text-xl font-bold text-gray-800'>0</span>
+                    <p className='text-xs text-gray-500'>Wishlist</p>
+                  </div>
+                  <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
+                    <Ticket className='text-purple-500 mx-auto mb-1' size={18} />
+                    <span className='text-xl font-bold text-gray-800'>0</span>
+                    <p className='text-xs text-gray-500'>Coupons</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {isLoggedIn && (
+              <div className='py-2 space-y-1'>
+                <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Account</p>
+                <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                  <OptionTabs icons={User} text='Edit Profile' borderDown={true} />
+                  <OptionTabs icons={Wallet} text='Payment Methods' borderDown={true} />
+                  <OptionTabs icons={MapPin} text='Addresses' borderDown={true} onClick={() => router.push("/settings?c=sddr")} />
+                  <OptionTabs icons={BellIcon} text='Notifications' borderDown={false} />
+                </div>
+              </div>
+            )}
+
+            {isLoggedIn && (
+              <div className='py-2 space-y-1'>
+                <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Shopping</p>
+                <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                  <OptionTabs icons={Ticket} text='Coupons' borderDown={true} />
+                </div>
+              </div>
+            )}
+
+            <div className='py-2 space-y-1'>
+              <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Support</p>
+              <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                <OptionTabs icons={HelpCircle} text='Help Center' borderDown={true} onClick={() => router.push("/settings?c=chat")} />
+                <OptionTabs icons={Shield} text='Privacy Policy' borderDown={true} />
+                <OptionTabs icons={FileText} text='Terms & Conditions' borderDown={false} />
+              </div>
+            </div>
+
+            {isLoggedIn && (
+              <div className='py-2 space-y-1'>
+                <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                  {user.sellerStore?.status === 'APPROVED' ? (
+                    <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/seller")} />
+                  ) : user.sellerStore?.status === 'PENDING' ? (
+                    <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} disabled={true} />
+                  ) : user.sellerStore?.status === 'REJECTED' ? (
+                    <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} disabled={true} />
+                  ) : (
+                    <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")} />
                   )}
-                </div>
-                {isLoggedIn && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className='absolute bottom-0 right-0 w-7 h-7 bg-gray-800 rounded-full flex items-center justify-center border-2 border-white'
-                  >
-                    <Camera size={12} className='text-white' />
-                  </button>
-                )}
-              </div>
-              <div className='flex-1'>
-                <h2 className='text-lg font-bold text-gray-800'>{user.name}</h2>
-                <p className='text-sm text-gray-500'>{user.email}</p>
-                <div className='flex items-center gap-2 mt-2'>
-                  <span className='px-2 py-0.5 bg-orange-100 text-orange-600 text-xs font-medium rounded-full'>
-                    {user.level} Member
-                  </span>
-                  <span className='text-xs text-gray-400'>Since {user.memberSince}</span>
+                  <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true} />
+                  <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
                 </div>
               </div>
-            </div>
-            
-            <div className='mt-5 pt-4 border-t border-gray-100 flex gap-4'>
-              <div className='flex-1 bg-orange-50 rounded-xl p-3 text-center'>
-                <div className='flex items-center justify-center gap-1 mb-1'>
-                  <Coins className='text-yellow-500' size={18} />
-                  <span className='text-xl font-bold text-gray-800'>0</span>
+            )}
+
+            {!isLoggedIn && (
+              <div className='py-2 space-y-1'>
+                <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
+                  <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} onClick={() => router.push('/auth')} />
                 </div>
-                <p className='text-xs text-gray-500'>Coins</p>
               </div>
-              <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
-                <HeartIcon className='text-red-400 mx-auto mb-1' size={18} />
-                <span className='text-xl font-bold text-gray-800'>0</span>
-                <p className='text-xs text-gray-500'>Wishlist</p>
-              </div>
-              <div className='flex-1 bg-gray-50 rounded-xl p-3 text-center'>
-                <Ticket className='text-purple-500 mx-auto mb-1' size={18} />
-                <span className='text-xl font-bold text-gray-800'>0</span>
-                <p className='text-xs text-gray-500'>Coupons</p>
-              </div>
+            )}
+
+            <div className='py-6 text-center'>
+              <p className='text-xs text-gray-400'>construco v1.0.0</p>
             </div>
-          </div>
-        </div>
-
-        {isLoggedIn && (
-        <div className='py-2 space-y-1'>
-          <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Account</p>
-          <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={User} text='Edit Profile' borderDown={true} />
-            <OptionTabs icons={Wallet} text='Payment Methods' borderDown={true} />
-            <OptionTabs icons={MapPin} text='Addresses' borderDown={true} onClick={() => router.push("/settings?c=sddr")}/>
-            <OptionTabs icons={BellIcon} text='Notifications' borderDown={false} />
-          </div>
-        </div>
-        )}
-
-        {isLoggedIn && (
-        <div className='py-2 space-y-1'>
-          <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Shopping</p>
-          <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={Ticket} text='Coupons' borderDown={true} />
-          </div>
-        </div>
-        )}
-
-        <div className='py-2 space-y-1'>
-          <p className='text-xs font-medium text-gray-400 px-2 uppercase tracking-wider mb-2'>Support</p>
-          <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-            <OptionTabs icons={HelpCircle} text='Help Center' borderDown={true} onClick={() => router.push("/settings?c=chat")}/>
-            <OptionTabs icons={Shield} text='Privacy Policy' borderDown={true} />
-            <OptionTabs icons={FileText} text='Terms & Conditions' borderDown={false} />
-          </div>
-        </div>
-
-        {isLoggedIn && (
-          <div className='py-2 space-y-1'>
-            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-              {user.sellerStore?.status === 'APPROVED' ? (
-                <OptionTabs icons={Store} text='Switch to Seller Mode' borderDown={true} onClick={() => router.push("/seller")} />
-              ) : user.sellerStore?.status === 'PENDING' ? (
-                <OptionTabs icons={Clock} design='text-blue-500' textDesign='text-blue-500' text='Under Review' borderDown={true} disabled={true} />
-              ) : user.sellerStore?.status === 'REJECTED' ? (
-                <OptionTabs icons={CircleAlert} design='text-red-500' textDesign='text-[1rem] text-red-500 mr-[2rem]' text='REJECTED please wait a few hours to try again' borderDown={true} disabled={true} />
-              ) : (
-                <OptionTabs icons={StoreIcon} text='Become a Seller' borderDown={true} onClick={() => router.push("/settings?c=seller")}/>
-              )}
-              <OptionTabs icons={MessageSquareTextIcon} text='Messages' borderDown={true}/>
-              <OptionTabs icons={LogOutIcon} text='Logout' textDesign='text-red-500' design='text-red-500' borderDown={false} onClick={handleLogout} />
-            </div>
-          </div>
-        )}
-
-        {!isLoggedIn && (
-          <div className='py-2 space-y-1'>
-            <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-              <OptionTabs icons={LogIn} text='Login' textDesign='text-green-600' design='text-green-600' borderDown={false} onClick={() => router.push('/auth')} />
-            </div>
-          </div>
-        )}
-
-        <div className='py-6 text-center'>
-          <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
-        </div>
           </>
         )}
       </main>

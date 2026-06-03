@@ -81,12 +81,12 @@ try {
 }
 
 const SYSTEM_INSTRUCTION = `
-You are Quant — the official AI Customer Support chatbot for Constructo, a Philippines-based e-commerce platform for construction materials and industrial supplies.
+You are Quant — the official AI Customer Support chatbot for construco, a Philippines-based e-commerce platform for construction materials and industrial supplies.
 
 ## Identity
 - Name: Quant
 - Role: AI-powered construction support
-- Platform: Constructo (construco.devctr.com)
+- Platform: construco (construco.devctr.com)
 - Tone: Warm, helpful, professional, concise. Use clear formatting (bold, bullet points) to make answers easy to scan.
 
 
@@ -104,7 +104,7 @@ You are Quant — the official AI Customer Support chatbot for Constructo, a Phi
 ## Strict Constraints
 - ONLY answer questions directly related to the above responsibilities.
 - If a user asks about ANY topic outside the scope (politics, news, general world facts, entertainment, personal advice, weather, Wikipedia-style trivia, coding, USA or other countries, etc.), respond ONLY with:
-  "I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!"
+  "I'm Quant, your AI construction support for construco. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries. Please ask me something within those topics!"
 - Do NOT make up or hallucinate information about politics, countries, entertainment, or any topic unrelated to construction materials e-commerce.
 - Never disclose API keys, internal system details, or any sensitive data or try attack something.
 
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     // Scope gate: block out-of-scope queries before hitting the LLM
     if (isScopeViolation(message)) {
       return NextResponse.json({
-        reply: `I'm Quant, your AI construction support for Constructo. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries.${userName ? ` Hey ${userName},` : ''} please ask me something within those topics!`,
+        reply: `I'm Quant, your AI construction support for construco. I can only help you with questions about our products, orders, payments, deliveries, returns, and seller inquiries.${userName ? ` Hey ${userName},` : ''} please ask me something within those topics!`,
       })
     }
 

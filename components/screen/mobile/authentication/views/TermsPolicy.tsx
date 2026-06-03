@@ -36,8 +36,8 @@ const TermsPolicy = ({ onAgree, onGoBack }: TermsPolicyProps) => {
   }, [])
 
   const toggleSection = (index: number) => {
-    setExpandedSections(prev => 
-      prev.includes(index) 
+    setExpandedSections(prev =>
+      prev.includes(index)
         ? prev.filter(i => i !== index)
         : [...prev, index]
     )
@@ -47,13 +47,13 @@ const TermsPolicy = ({ onAgree, onGoBack }: TermsPolicyProps) => {
     {
       title: 'Terms of Service',
       icon: FileText,
-      content: `Welcome to Constructo! By accessing and using our platform, you agree to be bound by these Terms of Service.
+      content: `Welcome to construco! By accessing and using our platform, you agree to be bound by these Terms of Service.
 
 1. ACCEPTANCE OF TERMS
-By accessing Constructo.ph, you confirm that you have read, understood, and agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, please do not use our service.
+By accessing construco.ph, you confirm that you have read, understood, and agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, please do not use our service.
 
 2. PLATFORM DESCRIPTION
-Constructo is an e-commerce platform connecting buyers with sellers of construction materials, tools, hardware, and building supplies in the Philippines. We act as a marketplace facilitator and do not sell products directly unless otherwise stated.
+construco is an e-commerce platform connecting buyers with sellers of construction materials, tools, hardware, and building supplies in the Philippines. We act as a marketplace facilitator and do not sell products directly unless otherwise stated.
 
 3. USER REGISTRATION
 • You must provide accurate and complete information
@@ -153,7 +153,7 @@ We retain your data:
     {
       title: 'Warranty & Returns',
       icon: Package,
-      content: `Warranty terms vary by seller. Constructo facilitates but does not guarantee warranties.
+      content: `Warranty terms vary by seller. construco facilitates but does not guarantee warranties.
 
 1. SELLER WARRANTIES
 Each seller provides their own warranty:
@@ -212,7 +212,7 @@ Warranty typically does NOT cover:
 • Hidden fees: None (except COD convenience fee)
 
 3. PRICE MATCHING
-Constructo does not guarantee price matching. Individual sellers set their own prices.
+construco does not guarantee price matching. Individual sellers set their own prices.
 
 4. REFUND PROCESSING
 • Original payment method: 5-15 business days
@@ -280,7 +280,7 @@ If you notice unauthorized charges:
     {
       title: 'Seller Responsibilities',
       icon: MapPin,
-      content: `Sellers on Constructo must comply with Philippine laws.
+      content: `Sellers on construco must comply with Philippine laws.
 
 1. SELLER REQUIREMENTS
 • Valid business registration (DTI/BIR)
@@ -326,10 +326,10 @@ Cannot sell:
     {
       title: 'Platform Liability',
       icon: AlertTriangle,
-      content: `Understanding Constructo's role and limitations.
+      content: `Understanding construco's role and limitations.
 
 1. MARKETPLACE ROLE
-Constructo operates as:
+construco operates as:
 • Platform host/for marketplace
 • Payment facilitator
 • Order tracking system
@@ -357,7 +357,7 @@ Step 4: Resolution or escalation
 
 4. INDEMNIFICATION
 You agree to:
-• Hold Constructo harmless in disputes
+• Hold construco harmless in disputes
 • Represent your own authority
 • Not falsely represent products
 • Use platform lawfully
@@ -371,9 +371,9 @@ Subject to Philippine Laws:
 • Consumer Code of the Philippines
 
 6. CONTACT US
-• Customer Support: support@constructo.ph
-• Business Inquiries: business@constructo.ph
-• Compliance: legal@constructo.ph
+• Customer Support: support@construco.ph
+• Business Inquiries: business@construco.ph
+• Compliance: legal@construco.ph
 • Phone: (02) 8-XXX-XXXX (Mon-Sat 9AM-6PM)`
     }
   ]
@@ -382,15 +382,15 @@ Subject to Philippine Laws:
     <div className='w-full h-full flex flex-col bg-white pb-13'>
       <div className='w-full px-4 py-4 flex items-center justify-between border-b border-gray-100'>
         <button onClick={onGoBack} className='p-2 hover:bg-gray-100 rounded-full transition-colors'>
-          <ArrowLeft size={24} className='text-gray-700'/>
+          <ArrowLeft size={24} className='text-gray-700' />
         </button>
         <h1 className='text-lg font-bold text-gray-800'>Terms & Policy</h1>
-        <div className='w-10'/>
+        <div className='w-10' />
       </div>
 
       <div ref={contentRef} className='flex-1 overflow-scroll px-4 py-2'>
         <div className='mb-4 pb-4 border-b border-gray-100'>
-          <h2 className='text-xl font-bold text-gray-900 mb-2'>Constructo Terms & Conditions</h2>
+          <h2 className='text-xl font-bold text-gray-900 mb-2'>construco Terms & Conditions</h2>
           <p className='text-gray-500 text-sm'>Please read carefully. These terms comply with Philippine laws including R.A. 7394 (Consumer Act), R.A. 10173 (Data Privacy Act), and R.A. 8792 (E-Commerce Act).</p>
         </div>
 
@@ -403,17 +403,17 @@ Subject to Philippine Laws:
               >
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center'>
-                    <section.icon size={20} className='text-orange-500'/>
+                    <section.icon size={20} className='text-orange-500' />
                   </div>
                   <span className='font-semibold text-gray-800'>{section.title}</span>
                 </div>
                 {expandedSections.includes(index) ? (
-                  <ChevronUp size={20} className='text-gray-400'/>
+                  <ChevronUp size={20} className='text-gray-400' />
                 ) : (
-                  <ChevronDown size={20} className='text-gray-400'/>
+                  <ChevronDown size={20} className='text-gray-400' />
                 )}
               </button>
-              
+
               {expandedSections.includes(index) && (
                 <div className='px-4 py-4 bg-white border-t border-gray-100'>
                   <pre className='whitespace-pre-wrap text-sm text-gray-600 font-sans leading-relaxed'>
@@ -433,17 +433,15 @@ Subject to Philippine Laws:
         </div>
       </div>
 
-      <div className={`absolute bottom-11 left-0 right-0 px-4 py-4 bg-white border-t border-gray-100 transition-transform duration-300 ${
-        showButton ? 'translate-y-0' : 'translate-y-full'
-      }`}>
+      <div className={`absolute bottom-11 left-0 right-0 px-4 py-4 bg-white border-t border-gray-100 transition-transform duration-300 ${showButton ? 'translate-y-0' : 'translate-y-full'
+        }`}>
         <button
           onClick={() => setAgreed(true)}
           disabled={!showButton}
-          className={`w-full h-14 rounded-2xl font-semibold text-base transition-all ${
-            showButton 
+          className={`w-full h-14 rounded-2xl font-semibold text-base transition-all ${showButton
               ? 'bg-linear-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-200 active:scale-[0.98]'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
+            }`}
         >
           I Agree
         </button>
@@ -453,7 +451,7 @@ Subject to Philippine Laws:
         <div className='absolute bottom-14 inset-0 bg-black/50 flex items-end justify-center z-50'>
           <div className='w-full bg-white rounded-t-3xl p-6 pb-8'>
             <h3 className='text-lg font-bold text-gray-800 mb-2 text-center'>Terms Accepted!</h3>
-            <p className='text-gray-500 text-center mb-4'>Thank you for reading our terms. You now have full access to Constructo.</p>
+            <p className='text-gray-500 text-center mb-4'>Thank you for reading our terms. You now have full access to construco.</p>
             <button
               onClick={() => onAgree?.()}
               className='w-full h-14 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold text-base hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-200'

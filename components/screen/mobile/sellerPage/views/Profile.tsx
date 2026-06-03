@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  User, Mail, Phone, MapPin, LogOut, 
+import {
+  User, Mail, Phone, MapPin, LogOut,
   AlertCircle, Store, ChevronRight
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -86,12 +86,12 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
       setError(null)
       try {
         const response = await fetch('/api/seller/profile')
-        
+
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.error || 'Failed to fetch profile data')
         }
-        
+
         const data: ApiResponse = await response.json()
         setProfile(data.profile)
         setStore(data.store)
@@ -153,7 +153,7 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
           </div>
         </main>
         <div className='py-4 text-center'>
-          <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
+          <p className='text-xs text-gray-400'>Construco v1.0.0</p>
         </div>
       </div>
     )
@@ -177,7 +177,7 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
                 <AlertCircle className='w-8 h-8 text-red-500' />
               </div>
               <p className='text-gray-600 font-medium'>{error}</p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className='mt-4 px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600'
               >
@@ -187,7 +187,7 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
           </div>
         </main>
         <div className='py-4 text-center'>
-          <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
+          <p className='text-xs text-gray-400'>Construco v1.0.0</p>
         </div>
       </div>
     )
@@ -212,7 +212,7 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
               </div>
               <p className='text-gray-500 text-lg'>Profile not set up</p>
               <p className='text-gray-400 mt-2'>Please complete your seller profile</p>
-              <button 
+              <button
                 onClick={() => router.push('/settings?c=seller')}
                 className='mt-4 px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600'
               >
@@ -222,133 +222,133 @@ const Profile = ({ goBack }: { goBack?: () => void }) => {
           </div>
         </main>
         <div className='py-4 text-center'>
-          <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
+          <p className='text-xs text-gray-400'>Construco v1.0.0</p>
         </div>
       </div>
     )
   }
 
   return (
-<div className='w-full h-full flex flex-col bg-gray-50'>
-       <header className='w-full h-16 bg-white flex items-center justify-between px-4 shadow-sm shrink-0'>
-         <h1 className='text-xl font-bold text-gray-800'>Seller Profile</h1>
-         {goBack && (
-           <button onClick={goBack} className='p-2 rounded-full hover:bg-gray-100'>
-             <ChevronRight size={20} className='text-gray-600' rotate={180} />
-           </button>
-         )}
-       </header>
-       <main className='flex-1 overflow-scroll px-4 pb-16'>
-         <div className='py-6'>
-           {/* Profile Header */}
-           <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-             <div className='flex items-center gap-4'>
-               <div className='relative'>
-                 <div className='w-16 h-16 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center'>
-                   <Store size={24} className='text-white' />
-                 </div>
-               </div>
-               <div className='flex-1'>
-                 <h2 className='text-lg font-bold text-gray-800 truncate'>
-                   {getFullName(profile)}
-                 </h2>
-                 <p className='text-sm text-gray-500'>{profile.email}</p>
-               </div>
-             </div>
-           </div>
+    <div className='w-full h-full flex flex-col bg-gray-50'>
+      <header className='w-full h-16 bg-white flex items-center justify-between px-4 shadow-sm shrink-0'>
+        <h1 className='text-xl font-bold text-gray-800'>Seller Profile</h1>
+        {goBack && (
+          <button onClick={goBack} className='p-2 rounded-full hover:bg-gray-100'>
+            <ChevronRight size={20} className='text-gray-600' rotate={180} />
+          </button>
+        )}
+      </header>
+      <main className='flex-1 overflow-scroll px-4 pb-16'>
+        <div className='py-6'>
+          {/* Profile Header */}
+          <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+            <div className='flex items-center gap-4'>
+              <div className='relative'>
+                <div className='w-16 h-16 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center'>
+                  <Store size={24} className='text-white' />
+                </div>
+              </div>
+              <div className='flex-1'>
+                <h2 className='text-lg font-bold text-gray-800 truncate'>
+                  {getFullName(profile)}
+                </h2>
+                <p className='text-sm text-gray-500'>{profile.email}</p>
+              </div>
+            </div>
+          </div>
 
-{/* Account Information */}
-           <div className='mt-6'>
-             <h2 className='text-lg font-bold text-gray-800 mb-3'>Account Information</h2>
-             <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-               <div className='space-y-4'>
-                 <div className='flex items-center gap-3 p-4'>
-                   <User size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Full Name</p>
-                     <p className='text-base font-semibold text-gray-800'>
-                       {getFullName(profile)}
-                     </p>
-                   </div>
-                 </div>
-                 <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
-                   <Mail size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Email Address</p>
-                     <p className='text-base font-semibold text-gray-800'>{profile.email}</p>
-                   </div>
-                 </div>
-                 <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
-                   <Phone size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Phone Number</p>
-                     <p className='text-base font-semibold text-gray-800'>
-                       {profile.phone || 'Not provided'}
-                     </p>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+          {/* Account Information */}
+          <div className='mt-6'>
+            <h2 className='text-lg font-bold text-gray-800 mb-3'>Account Information</h2>
+            <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+              <div className='space-y-4'>
+                <div className='flex items-center gap-3 p-4'>
+                  <User size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Full Name</p>
+                    <p className='text-base font-semibold text-gray-800'>
+                      {getFullName(profile)}
+                    </p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
+                  <Mail size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Email Address</p>
+                    <p className='text-base font-semibold text-gray-800'>{profile.email}</p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
+                  <Phone size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Phone Number</p>
+                    <p className='text-base font-semibold text-gray-800'>
+                      {profile.phone || 'Not provided'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-{/* Store Information */}
-           <div className='mt-6'>
-             <h2 className='text-lg font-bold text-gray-800 mb-3'>Store Information</h2>
-             <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
-               <div className='space-y-4'>
-                 <div className='flex items-center gap-3 p-4'>
-                   <Store size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Store Name</p>
-                     <p className='text-base font-semibold text-gray-800'>{store.name}</p>
-                   </div>
-                 </div>
-                 <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
-                   <MapPin size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Address</p>
-                     <p className='text-base font-semibold text-gray-800'>
-                       {[store.street, store.barangay, store.city, store.province, store.zipcode]
-                         .filter(Boolean)
-                         .join(', ') || 'Not provided'}
-                     </p>
-                   </div>
-                 </div>
-                 <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
-                   <AlertCircle size={18} className='text-orange-500' />
-                   <div className='flex-1'>
-                     <p className='text-sm font-medium text-gray-600'>Business Type</p>
-                     <p className='text-base font-semibold text-gray-800'>{store.business_type || 'Not specified'}</p>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+          {/* Store Information */}
+          <div className='mt-6'>
+            <h2 className='text-lg font-bold text-gray-800 mb-3'>Store Information</h2>
+            <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100'>
+              <div className='space-y-4'>
+                <div className='flex items-center gap-3 p-4'>
+                  <Store size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Store Name</p>
+                    <p className='text-base font-semibold text-gray-800'>{store.name}</p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
+                  <MapPin size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Address</p>
+                    <p className='text-base font-semibold text-gray-800'>
+                      {[store.street, store.barangay, store.city, store.province, store.zipcode]
+                        .filter(Boolean)
+                        .join(', ') || 'Not provided'}
+                    </p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 p-4 border-t border-gray-100'>
+                  <AlertCircle size={18} className='text-orange-500' />
+                  <div className='flex-1'>
+                    <p className='text-sm font-medium text-gray-600'>Business Type</p>
+                    <p className='text-base font-semibold text-gray-800'>{store.business_type || 'Not specified'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-{/* Action Buttons */}
-         <div className='px-4 pb-6'>
-           <div className='space-y-3'>
-             <button 
-               onClick={() => router.push('/')}
-               className='w-full flex items-center justify-center gap-2 py-3 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors'
-             >
-               <Store size={18} className='text-orange-500' />
-               Buyer Mode
-             </button>
-             <button 
-               onClick={handleLogout}
-               className='w-full flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 rounded-xl border border-red-200 text-sm font-medium hover:bg-red-100 transition-colors'
-             >
-               <LogOut size={18} className='text-red-500' />
-               Logout
-             </button>
-           </div>
-         </div>
+          {/* Action Buttons */}
+          <div className='px-4 pb-6'>
+            <div className='space-y-3'>
+              <button
+                onClick={() => router.push('/')}
+                className='w-full flex items-center justify-center gap-2 py-3 bg-white rounded-xl border border-gray-200 text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors'
+              >
+                <Store size={18} className='text-orange-500' />
+                Buyer Mode
+              </button>
+              <button
+                onClick={handleLogout}
+                className='w-full flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 rounded-xl border border-red-200 text-sm font-medium hover:bg-red-100 transition-colors'
+              >
+                <LogOut size={18} className='text-red-500' />
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </main>
 
       <div className='py-4 text-center'>
-        <p className='text-xs text-gray-400'>Constructo v1.0.0</p>
+        <p className='text-xs text-gray-400'>construco v1.0.0</p>
       </div>
     </div>
   )
